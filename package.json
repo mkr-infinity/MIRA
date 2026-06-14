@@ -1,0 +1,46 @@
+{
+  "name": "mira",
+  "version": "2.0.0",
+  "description": "MIRA — MKR Intelligent Responsive Assistant. Your personal AI desktop companion.",
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/make-source-icon.js && vite",
+    "build:clean": "rm -rf dist && tsc -b && vite build",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "tauri": "tauri",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "rm -rf dist && tauri build",
+    "icons:source": "node scripts/make-source-icon.js",
+    "icons": "node scripts/make-source-icon.js && npx tauri icon src-tauri/icons/icon.png"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2.1.1",
+    "@tauri-apps/plugin-dialog": "^2.0.1",
+    "@tauri-apps/plugin-fs": "^2.0.3",
+    "@tauri-apps/plugin-opener": "^2.0.0",
+    "@tauri-apps/plugin-shell": "^2.0.1",
+    "@tauri-apps/plugin-os": "^2.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.28.0",
+    "zustand": "^5.0.1",
+    "framer-motion": "^11.11.17",
+    "lucide-react": "^0.460.0",
+    "react-markdown": "^9.0.1",
+    "remark-gfm": "^4.0.0",
+    "highlight.js": "^11.10.0"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.1.0",
+    "@types/node": "^22.10.1",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.3",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.15",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11"
+  }
+}
