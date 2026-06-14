@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="mg" x1="-0.2" y1="0" x2="1.2" y2="1">
+      <stop offset="0%" stop-color="#00D4FF"/>
+      <stop offset="100%" stop-color="#0077FF"/>
+    </linearGradient>
+    <linearGradient id="mg2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#00D4FF" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#00D4FF" stop-opacity="0.2"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#00D4FF" stop-opacity="0.35"/>
+      <stop offset="70%" stop-color="#00D4FF" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#00D4FF" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <!-- Soft glow -->
+  <circle cx="32" cy="32" r="30" fill="url(#glow)"/>
+  <!-- Outer orbital ring -->
+  <circle cx="32" cy="32" r="28" stroke="url(#mg2)" stroke-width="1.2" fill="none"/>
+  <!-- Bold "M" monogram — three strokes forming a clean, heavy letter -->
+  <path d="M14 46V20l10 18 10-18v26" stroke="url(#mg)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <!-- Orbital trail arc on the right -->
+  <path d="M48 18A22 22 0 0 1 54 32A22 22 0 0 1 46 46" stroke="#00D4FF" stroke-width="1.8" stroke-opacity="0.45" fill="none" stroke-linecap="round"/>
+  <!-- Orbital dot indicating active listening -->
+  <circle cx="46" cy="46" r="2" fill="#00D4FF" fill-opacity="0.7"/>
+</svg>
