@@ -1,0 +1,387 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =========================================================
+   THEME TOKENS — MIRA
+   Two themes only:
+   - .dark   → Vercel-inspired true black & white
+   - .light  → Dribbble-inspired warm cream + terracotta
+
+   Class names: canonical `mira-*`, with `jarvis-*` kept as
+   deprecated aliases for backward-compat with existing localStorage
+   keys and any external themes/plugins.
+   ========================================================= */
+
+:root {
+  color-scheme: dark light;
+  --bg: #000000;
+  --surface: #0a0a0a;
+  --elevated: #141414;
+  --hover: #1a1a1a;
+  --border: #262626;
+  --text: #fafafa;
+  --muted: #888888;
+  --subtle: #525252;
+  --accent: #00d4ff;
+  --accent-faint: rgba(0, 212, 255, 0.06);
+  --accent-soft: rgba(0, 212, 255, 0.12);
+  --accent-ring: rgba(0, 212, 255, 0.4);
+  --danger: #ef4444;
+  --warning: #f59e0b;
+  --success: #10b981;
+}
+
+html.light {
+  --bg: #faf7f2;
+  --surface: #ffffff;
+  --elevated: #f4efe6;
+  --hover: #ede6d6;
+  --border: #e5ddcc;
+  --text: #1a1612;
+  --muted: #6b6256;
+  --subtle: #a89f8e;
+  --accent: #c2410c;
+  --accent-faint: rgba(194, 65, 12, 0.06);
+  --accent-soft: #fed7aa;
+  --accent-ring: rgba(194, 65, 12, 0.2);
+  --danger: #b91c1c;
+  --warning: #b45309;
+  --success: #047857;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: "Inter", system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  transition: background-color 200ms ease, color 200ms ease;
+}
+
+/* Backdrop dim layer used for modals — true dim, not fully opaque */
+.mira-backdrop,
+.jarvis-backdrop {
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+html.light .mira-backdrop,
+html.light .jarvis-backdrop {
+  background: rgba(26, 22, 18, 0.45);
+}
+
+/* Toggle switch — track + thumb with hard-bounded dimensions */
+.mira-toggle,
+.jarvis-toggle {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  border-radius: 999px;
+  background: var(--hover);
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: background-color 180ms ease, border-color 180ms ease;
+  padding: 0;
+  outline: none;
+}
+.mira-toggle:focus-visible,
+.jarvis-toggle:focus-visible {
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}
+.mira-toggle.on,
+.jarvis-toggle.on {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.mira-toggle .thumb,
+.jarvis-toggle .thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  transition: transform 180ms cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+.mira-toggle.on .thumb,
+.jarvis-toggle.on .thumb {
+  transform: translateX(16px);
+}
+
+/* =========================================================
+   COMPONENT UTILITIES — consume the CSS variables above
+   ========================================================= */
+
+@layer components {
+  .mira-bg          { background: var(--bg); }
+  .mira-surface     { background: var(--surface); }
+  .mira-elevated    { background: var(--elevated); }
+  .mira-hover       { background: var(--hover); }
+  .mira-border      { border-color: var(--border); }
+  .mira-text        { color: var(--text); }
+  .mira-muted       { color: var(--muted); }
+  .mira-subtle      { color: var(--subtle); }
+  .mira-accent      { color: var(--accent); }
+  .mira-accent-bg   { background: var(--accent); }
+  .mira-accent-soft { background: var(--accent-soft); }
+  .mira-danger      { color: var(--danger); }
+  .mira-warning     { color: var(--warning); }
+  .mira-success     { color: var(--success); }
+
+  /* Deprecated aliases — kept for backward compat with old themes */
+  .jarvis-bg        { background: var(--bg); }
+  .jarvis-surface   { background: var(--surface); }
+  .jarvis-elevated  { background: var(--elevated); }
+  .jarvis-hover     { background: var(--hover); }
+  .jarvis-border    { border-color: var(--border); }
+  .jarvis-text      { color: var(--text); }
+  .jarvis-muted     { color: var(--muted); }
+  .jarvis-subtle    { color: var(--subtle); }
+  .jarvis-accent    { color: var(--accent); }
+  .jarvis-accent-bg { background: var(--accent); }
+  .jarvis-accent-soft { background: var(--accent-soft); }
+  .jarvis-danger    { color: var(--danger); }
+  .jarvis-warning   { color: var(--warning); }
+  .jarvis-success   { color: var(--success); }
+}
+
+/* =========================================================
+   SCROLLBARS
+   ========================================================= */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--subtle);
+}
+
+/* =========================================================
+   GRID BACKDROP (subtle, decorative)
+   ========================================================= */
+.grid-bg {
+  background-color: var(--bg);
+  background-image:
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+html.light .grid-bg {
+  background-image:
+    linear-gradient(rgba(0,0,0,0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.035) 1px, transparent 1px);
+}
+
+/* =========================================================
+   ARC-REACTOR ORB
+   ========================================================= */
+.orb-glow {
+  background: radial-gradient(
+    circle at center,
+    rgba(0, 212, 255, 0.95) 0%,
+    rgba(0, 212, 255, 0.55) 35%,
+    rgba(0, 212, 255, 0.15) 65%,
+    transparent 100%
+  );
+}
+
+/* =========================================================
+   VOICE WAVEFORM BARS
+   ========================================================= */
+.voice-bar {
+  width: 3px;
+  background: var(--text);
+  border-radius: 2px;
+  transform-origin: center;
+  opacity: 0.85;
+}
+html:not(.light) .voice-bar { background: var(--text); box-shadow: 0 0 6px rgba(255,255,255,0.4); }
+html.light .voice-bar { background: var(--accent); }
+
+/* =========================================================
+   MARKDOWN
+   ========================================================= */
+.markdown { line-height: 1.7; }
+.markdown p { margin: 0 0 0.75em 0; }
+.markdown p:last-child { margin-bottom: 0; }
+.markdown code:not(pre code) {
+  background: var(--elevated);
+  color: var(--accent);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.88em;
+  font-family: "JetBrains Mono", monospace;
+  border: 1px solid var(--border);
+}
+.markdown pre {
+  background: rgba(0,0,0,0.6);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 0;
+  overflow: hidden;
+  margin: 8px 0;
+}
+.markdown pre code {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.83em;
+  background: transparent;
+  border: 0;
+  padding: 16px;
+  color: rgba(255,255,255,0.85);
+  display: block;
+  overflow-x: auto;
+}
+.markdown ul, .markdown ol { margin: 0.5em 0; padding-left: 1.5em; }
+.markdown li { margin: 0.25em 0; }
+.markdown a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+.markdown h1, .markdown h2, .markdown h3 {
+  font-weight: 600;
+  margin: 0.75em 0 0.4em;
+  color: var(--text);
+}
+.markdown h1 { font-size: 1.4em; }
+.markdown h2 { font-size: 1.2em; }
+.markdown h3 { font-size: 1.05em; }
+.markdown blockquote {
+  border-left: 3px solid var(--accent);
+  padding-left: 12px;
+  color: var(--muted);
+  margin: 0.5em 0;
+  font-style: italic;
+}
+.markdown table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.5em 0;
+  font-size: 0.9em;
+}
+.markdown th, .markdown td {
+  border: 1px solid var(--border);
+  padding: 6px 10px;
+  text-align: left;
+}
+.markdown th {
+  background: var(--elevated);
+  font-weight: 600;
+}
+.markdown tr:nth-child(even) td {
+  background: rgba(255,255,255,0.02);
+}
+
+/* =========================================================
+   FOCUS RINGS — soft, not gold/amber
+   ========================================================= */
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+::selection {
+  background: var(--accent-soft);
+  color: var(--text);
+}
+
+/* =========================================================
+   PARTICLE / ORB ANIMATIONS
+   ========================================================= */
+@keyframes particle-float {
+  0%   { transform: translateY(0) translateX(0); opacity: 0; }
+  10%  { opacity: 0.6; }
+  90%  { opacity: 0.6; }
+  100% { transform: translateY(-80px) translateX(20px); opacity: 0; }
+}
+.particle {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: var(--accent);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: particle-float 4s linear infinite;
+}
+
+/* Input field — clean, subtle border, no gold tint */
+.mira-input,
+.jarvis-input {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 14px;
+  width: 100%;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+.mira-input:focus,
+.jarvis-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-ring);
+  outline: none;
+}
+.mira-input::placeholder,
+.jarvis-input::placeholder { color: var(--subtle); }
+
+/* Theme-aware accent utilities — uses --accent (cyan in dark, terracotta in light) */
+.mira-accent { color: var(--accent); }
+.mira-accent-bg { background: var(--accent); }
+.mira-accent-border { border-color: var(--accent); }
+.mira-accent-ring { box-shadow: 0 0 0 3px var(--accent-ring); }
+.mira-accent-faint { color: var(--accent-faint); }
+
+/* Hover surface for clickable cards */
+.mira-hover-surface,
+.jarvis-hover-surface {
+  transition: background 150ms ease, border-color 150ms ease, transform 150ms ease;
+}
+.mira-hover-surface:hover,
+.jarvis-hover-surface:hover {
+  background: var(--hover);
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+/* Pill chip */
+.mira-chip,
+.jarvis-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, monospace);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+}
+
+/* Subtle elevation utility */
+.mira-shadow,
+.jarvis-shadow {
+  box-shadow: 0 4px 24px -8px rgba(0, 0, 0, 0.4);
+}
+.mira-shadow-strong,
+.jarvis-shadow-strong {
+  box-shadow: 0 12px 48px -12px rgba(0, 0, 0, 0.6),
+              0 0 0 1px var(--border);
+}
+
