@@ -40,5 +40,8 @@ src-tauri/icons/*.icns
 .env.local
 .env.*.local
 
+# Claude AI config
+.claude/
+
 # OS
 Thumbs.db
