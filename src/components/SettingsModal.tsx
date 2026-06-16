@@ -31,9 +31,11 @@ import {
   Loader2,
   ExternalLink,
   Languages,
+  Puzzle,
+  Globe as GlobeIcon,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import type { ProviderId, ProviderConfig, Skill, Project, ProjectFile } from "../types";
+import type { ProviderId, ProviderConfig, Skill, Project, ProjectFile, PluginConfig } from "../types";
 import { getAdapter } from "../lib/ai";
 import { findModelMeta, modelsForProvider, formatContextWindow, type ModelMeta } from "../lib/ai/models";
 import { detectAllLocalModels, type ProbeResult } from "../lib/localModels";
@@ -46,7 +48,7 @@ import { cx } from "../lib/theme";
 import { tts } from "../lib/voice/tts";
 import { THEMES, type ThemeId } from "../lib/theme";
 
-type Tab = "general" | "providers" | "voice" | "skills" | "memory" | "projects" | "logs" | "data" | "custom" | "about";
+type Tab = "general" | "providers" | "voice" | "skills" | "memory" | "projects" | "logs" | "data" | "custom" | "plugins" | "about";
 
 function formatNum(n: number): string {
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + "M";
@@ -133,6 +135,7 @@ function SettingsContent({
     { id: "projects", label: "Projects", icon: Folder, group: "Workspace" },
     { id: "data", label: "Data", icon: Folder, group: "System" },
     { id: "custom", label: "Custom CSS", icon: Code, group: "System" },
+    { id: "plugins", label: "Plugins", icon: Puzzle, group: "System" },
     { id: "logs", label: "Logs", icon: FileText, group: "System" },
     { id: "about", label: "About", icon: Coffee, group: "System" },
   ];
@@ -201,6 +204,7 @@ function SettingsContent({
             {tab === "logs" && <LogsTab />}
             {tab === "data" && <DataTab />}
             {tab === "custom" && <CustomCSSTab />}
+            {tab === "plugins" && <PluginsTab />}
             {tab === "about" && <AboutView />}
           </div>
         </div>
@@ -2122,6 +2126,126 @@ function ProjectEditor({
           </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+function PluginsTab() {
+  const { settings, updateSettings } = useStore();
+  const [editing, setEditing] = useState<PluginConfig | null>(null);
+  const plugins = settings.plugins || [];
+
+  function addPlugin() {
+    const newPlugin: PluginConfig = {
+      id: Math.random().toString(36).slice(2),
+      name: "",
+      enabled: true,
+      url: "",
+      description: "",
+      version: "1.0.0",
+    };
+    setEditing(newPlugin);
+  }
+
+  function savePlugin(p: PluginConfig) {
+    const exists = plugins.some((x) => x.id === p.id);
+    const updated = exists
+      ? plugins.map((x) => (x.id === p.id ? p : x))
+      : [...plugins, p];
+    updateSettings({ plugins: updated });
+    setEditing(null);
+  }
+
+  function removePlugin(id: string) {
+    if (confirm("Remove this plugin?")) {
+      updateSettings({ plugins: plugins.filter((p) => p.id !== id) });
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-end justify-between gap-3">
+        <div>
+          <h2 className="font-display text-2xl font-semibold mb-1">Plugins</h2>
+          <p className="text-sm mira-muted">
+            Load external JS modules to extend MIRA's capabilities.
+          </p>
+        </div>
+        <button
+          onClick={addPlugin}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-500/10 text-cyan-400 text-sm font-medium hover:bg-cyan-500/20 border border-cyan-500/30"
+        >
+          <Plus size={14} /> Add plugin
+        </button>
+      </div>
+
+      {plugins.length === 0 ? (
+        <div className="text-center py-10 text-sm mira-muted border border-dashed mira-border rounded-mira">
+          No plugins added yet. Click "Add plugin" to load a JS module from a URL.
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-3">
+          {plugins.map((p) => (
+            <div key={p.id} className="p-4 rounded-mira border mira-border mira-elevated">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-mira bg-cyan-500/10 flex items-center justify-center flex-shrink-0">
+                  <Puzzle size={18} className="text-cyan-400" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="font-medium mira-text">{p.name || "Untitled plugin"}</h3>
+                    <Badge>v{p.version}</Badge>
+                  </div>
+                  <p className="text-xs mira-muted mt-0.5">{p.description || "No description"}</p>
+                  <code className="block text-[10px] font-mono mira-muted mt-1 truncate">{p.url}</code>
+                </div>
+                <Toggle checked={p.enabled} onChange={(v) => savePlugin({ ...p, enabled: v })} />
+              </div>
+              <div className="flex items-center gap-2 mt-2">
+                <button onClick={() => setEditing(p)} className="text-xs mira-muted hover:text-cyan-400 px-2 py-1">Edit</button>
+                <button onClick={() => removePlugin(p.id)} className="text-xs mira-muted hover:text-red-400 px-2 py-1 ml-auto">Remove</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {editing && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm">
+          <div className="w-full max-w-lg p-6 rounded-2xl border mira-border mira-surface shadow-2xl">
+            <h2 className="font-display text-lg font-semibold mb-4">
+              {editing.name ? `Edit ${editing.name}` : "New plugin"}
+            </h2>
+            <div className="space-y-3">
+              <Field label="Name">
+                <input value={editing.name} onChange={(e) => setEditing({ ...editing, name: e.target.value })}
+                  className="w-full px-3 py-2 rounded-lg mira-elevated border mira-border mira-text focus:outline-none focus:border-cyan-500/50" />
+              </Field>
+              <Field label="JS module URL">
+                <input value={editing.url} onChange={(e) => setEditing({ ...editing, url: e.target.value })}
+                  placeholder="https://example.com/plugin.js"
+                  className="w-full px-3 py-2 rounded-lg mira-elevated border mira-border mira-text font-mono text-sm focus:outline-none focus:border-cyan-500/50" />
+                <Hint>The plugin must export <code className="font-mono">onMessage</code> or <code className="font-mono">onSettings</code>.</Hint>
+              </Field>
+              <Field label="Description">
+                <input value={editing.description} onChange={(e) => setEditing({ ...editing, description: e.target.value })}
+                  className="w-full px-3 py-2 rounded-lg mira-elevated border mira-border mira-text focus:outline-none focus:border-cyan-500/50" />
+              </Field>
+              <Field label="Version">
+                <input value={editing.version} onChange={(e) => setEditing({ ...editing, version: e.target.value })}
+                  className="w-full px-3 py-2 rounded-lg mira-elevated border mira-border mira-text font-mono text-sm focus:outline-none focus:border-cyan-500/50" />
+              </Field>
+            </div>
+            <div className="flex justify-end gap-2 mt-6">
+              <button onClick={() => setEditing(null)} className="px-4 py-2 rounded-lg text-sm mira-muted hover:mira-hover">Cancel</button>
+              <button onClick={() => savePlugin(editing)} disabled={!editing.name.trim() || !editing.url.trim()}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-cyan-500 text-white text-sm font-medium hover:bg-cyan-400 disabled:opacity-30">
+                <Save size={14} /> Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
