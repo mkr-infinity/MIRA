@@ -1,20 +1,16 @@
 <div align="center">
 
-<img src="assets/mira-logo.svg" width="140" />
-
-<br/>
+<img src="assets/mira-logo.svg" width="140" alt="MIRA Logo" />
 
 # MIRA
 
 <br/>
 
-![Midnight](https://img.shields.io/badge/Midnight-000000?style=for-the-badge&labelColor=000000&color=00D4FF)
-![Daylight](https://img.shields.io/badge/Daylight-FAF7F2?style=for-the-badge&labelColor=FAF7F2&color=C2410C&textColor=1A1612)
-![Cyberpunk](https://img.shields.io/badge/Cyberpunk-0A0014?style=for-the-badge&labelColor=0A0014&color=FF2D95)
-![Sakura](https://img.shields.io/badge/Sakura-1A0F1E?style=for-the-badge&labelColor=1A0F1E&color=FF6EB4)
-![Nordic](https://img.shields.io/badge/Nordic-0F1923?style=for-the-badge&labelColor=0F1923&color=88C0D0)
-![Neon](https://img.shields.io/badge/Neon-000000?style=for-the-badge&labelColor=000000&color=39FF14)
-![Earth](https://img.shields.io/badge/Earth-0F1208?style=for-the-badge&labelColor=0F1208&color=8BC34A)
+| | | |
+|---|---|---|
+| ![Midnight](https://img.shields.io/badge/Midnight-000000?style=for-the-badge&labelColor=000000&color=00D4FF) | ![Daylight](https://img.shields.io/badge/Daylight-FAF7F2?style=for-the-badge&labelColor=FAF7F2&color=C2410C) | ![Cyberpunk](https://img.shields.io/badge/Cyberpunk-0A0014?style=for-the-badge&labelColor=0A0014&color=FF2D95) |
+| ![Sakura](https://img.shields.io/badge/Sakura-1A0F1E?style=for-the-badge&labelColor=1A0F1E&color=FF6EB4) | ![Nordic](https://img.shields.io/badge/Nordic-0F1923?style=for-the-badge&labelColor=0F1923&color=88C0D0) | ![Neon](https://img.shields.io/badge/Neon-000000?style=for-the-badge&labelColor=000000&color=39FF14) |
+| ![Earth](https://img.shields.io/badge/Earth-0F1208?style=for-the-badge&labelColor=0F1208&color=8BC34A) | | |
 
 <br/>
 
@@ -22,29 +18,29 @@
 
 <br/>
 
-`Multi-provider` · `Voice-activated` · `Project-aware` · `Fully local`
-
-<br/>
-
-<a href="#-get-started">Get Started</a> · <a href="#-providers">Providers</a> · <a href="#-themes">Themes</a> · <a href="#-voice-mode">Voice</a> · <a href="#-keyboard-shortcuts">Shortcuts</a>
-
-<br/>
+[🚀 Get Started](#-get-started) · [🔌 Providers](#-providers) · [🎨 Themes](#-themes) · [🎙️ Voice](#%EF%B8%8F-voice-mode) · [⌨️ Shortcuts](#%EF%B8%8F-keyboard-shortcuts) · [📦 Build](#-build)
 
 </div>
 
 ---
 
-<br/>
+## 🌟 What is MIRA?
 
-## What is MIRA?
-
-<br/>
-
-MIRA is a beautiful, privacy-first AI desktop assistant. It connects to **any AI provider** you choose, responds to your **voice**, organizes your work into **projects**, and keeps **every byte of data** on your machine.
-
-No accounts. No telemetry. No cloud. Just you and your AI.
+<div align="center">
 
 <br/>
+
+**MIRA** is a beautiful, privacy-first AI desktop assistant.  
+It connects to **any AI provider**, responds to your **voice**,  
+organizes work into **projects**, and keeps **every byte of data** on your machine.
+
+<br/>
+
+> No accounts. No telemetry. No cloud. Just you and your AI.
+
+<br/>
+
+</div>
 
 <table>
 <tr>
@@ -54,7 +50,8 @@ No accounts. No telemetry. No cloud. Just you and your AI.
 
 **6 Providers**
 
-OpenAI · Anthropic · Gemini · Ollama · OpenRouter · Custom
+OpenAI · Anthropic · Gemini  
+Ollama · OpenRouter · Custom
 
 </td>
 <td align="center" width="34%">
@@ -63,16 +60,18 @@ OpenAI · Anthropic · Gemini · Ollama · OpenRouter · Custom
 
 **Voice Mode**
 
-Arc-reactor orb · STT/TTS · Push-to-talk · F11 to enter
+Arc-reactor orb · STT/TTS  
+F11 to enter · Wake word
 
 </td>
-<td align="center" width="33%>
+<td align="center" width="33%">
 
 ### 🖥️
 
 **Desktop Control**
 
-Open apps · Play music · Set volume · Lock · Notify
+Open apps · Play music  
+Set volume · Lock · Notify
 
 </td>
 </tr>
@@ -83,7 +82,9 @@ Open apps · Play music · Set volume · Lock · Notify
 
 **Projects**
 
-ChatGPT-style sidebar · Project memory · Custom instructions
+ChatGPT-style sidebar  
+Custom instructions  
+Attached files
 
 </td>
 <td align="center">
@@ -92,7 +93,8 @@ ChatGPT-style sidebar · Project memory · Custom instructions
 
 **7 Themes**
 
-Midnight · Daylight · Cyberpunk · Sakura · Nordic · Neon · Earth
+Midnight · Daylight · Cyberpunk  
+Sakura · Nordic · Neon · Earth
 
 </td>
 <td align="center">
@@ -101,23 +103,21 @@ Midnight · Daylight · Cyberpunk · Sakura · Nordic · Neon · Earth
 
 **Memory & Skills**
 
-Long-term facts · Import .md files · Searchable library
+Long-term facts  
+Import `.md` files  
+Searchable library
 
 </td>
 </tr>
 </table>
 
-<br/>
-
 ---
-
-<br/>
 
 ## 🚀 Get Started
 
 <br/>
 
-### Option 1: Browser (localhost)
+### 🌐 Option 1: Browser
 
 ```bash
 git clone https://github.com/mkr-infinity/MIRA
@@ -130,7 +130,7 @@ Open **http://localhost:5173** → Done 🎉
 
 <br/>
 
-### Option 2: Desktop App
+### 🖥️ Option 2: Desktop App
 
 ```bash
 npm install
@@ -140,29 +140,22 @@ npm run tauri:build     # production build
 
 <br/>
 
-### First Launch
-
-<br/>
+### 📋 First Launch
 
 ```
-┌─────────────────────────────────────────────────────┐
-│                                                     │
-│   1.  Onboarding wizard opens automatically         │
-│                                                     │
-│   2.  Pick a provider → paste your API key          │
-│                                                     │
-│   3.  Test the voice sample                         │
-│                                                     │
-│   4.  Start chatting → press F11 for voice mode     │
-│                                                     │
-└─────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────┐
+│                                                         │
+│   1️⃣  Onboarding wizard opens automatically            │
+│   2️⃣  Pick a provider → paste your API key             │
+│   3️⃣  Test the voice sample                            │
+│   4️⃣  Press F11 for voice mode · Start chatting        │
+│                                                         │
+└─────────────────────────────────────────────────────────┘
 ```
 
 <br/>
 
 ---
-
-<br/>
 
 ## 🔌 Providers
 
@@ -179,15 +172,17 @@ npm run tauri:build     # production build
 
 <br/>
 
-> **Auto-fallback** — if your active provider fails, MIRA silently rotates to the next enabled one.
+> 💡 **Auto-fallback** — if your active provider fails, MIRA silently rotates to the next enabled one.
 
 <br/>
 
 ---
 
+## 🎨 Themes
+
 <br/>
 
-## 🎨 Themes
+Every component — the orb, sidebar, messages, settings — dynamically adapts to your chosen theme.
 
 <br/>
 
@@ -207,48 +202,36 @@ npm run tauri:build     # production build
 
 </div>
 
-> Every component — orb, sidebar, messages, settings — dynamically adapts to your theme's accent color.
-
-<br/>
-
 ---
-
-<br/>
 
 ## 🎙️ Voice Mode
 
 <br/>
 
 ```
-┌──────────────────────────────────────────────────┐
-│                                                  │
-│              ╭──────────────────╮                │
-│              │                  │                │
-│              │    ◉ ARC REACTOR │                │
-│              │                  │                │
-│              ╰──────────────────╯                │
-│                                                  │
-│            ─── LISTENING ───                     │
-│                                                  │
-│    Press F11 to enter · Escape to exit           │
-│                                                  │
-└──────────────────────────────────────────────────┘
+         ╭──────────────────────╮
+         │                      │
+         │    ◉ MIRA ORB        │
+         │    (animated)        │
+         │                      │
+         ╰──────────────────────╯
+           ─── LISTENING ───
+
+    [F11] Enter · [Esc] Exit · Hold to speak
 ```
 
 <br/>
 
-- **Arc-reactor orb** — beautiful animated orb that breathes with your conversation
+- **Arc-reactor orb** — animated orb with rotating rings, pulsing core, orbiting dot
 - **Push-to-talk** — hold to speak, release to send
 - **Auto-speak** — MIRA replies by voice automatically
 - **Interrupt** — cut MIRA off mid-sentence
 - **Custom voice** — pick any OS voice, adjust rate & pitch
-- **Wake word** — say "Hey MIRA" to activate (configurable)
+- **Wake word** — say "Hey MIRA" to activate
 
 <br/>
 
 ---
-
-<br/>
 
 ## ⌨️ Keyboard Shortcuts
 
@@ -256,46 +239,38 @@ npm run tauri:build     # production build
 
 | Shortcut | Action |
 |----------|--------|
-| `F11` | 🎙️ Enter voice mode |
-| `Escape` | ❌ Close modal / exit voice |
-| `Ctrl + N` | 💬 New conversation |
-| `Ctrl + ,` | ⚙️ Open settings |
-| `Ctrl + /` | ✏️ Focus chat input |
+| `F11` | Enter voice mode |
+| `Escape` | Close modal / exit voice |
+| `Ctrl + N` | New conversation |
+| `Ctrl + ,` | Open settings |
+| `Ctrl + /` | Focus chat input |
 
 <br/>
 
 ---
 
-<br/>
-
 ## 📁 Projects
 
 <br/>
 
-Organize your conversations into projects, each with its own:
+Organize conversations into projects. Each project has:
 
-- **Memory scope** — project-only or shared with global
-- **Custom instructions** — injected into the system prompt
-- **Attached files** — text content appended to prompts
+- **Memory scope** — project-only or shared globally
+- **Custom instructions** — injected into every prompt
+- **Attached files** — text content appended automatically
 - **Color coding** — visual distinction in the sidebar
 
 <br/>
 
 ---
 
-<br/>
-
 ## 🧠 Memory & Skills
 
 <br/>
 
-### Memory
+**Memory:** Share facts that persist across sessions. Say *"Remember I prefer dark mode"* and MIRA recalls it forever.
 
-Facts you share with MIRA persist across sessions. Say *"Remember I prefer dark mode"* and MIRA will recall it forever.
-
-### Skills
-
-Import `.md` files as reusable prompt modules:
+**Skills:** Import `.md` files as reusable prompt modules:
 
 ```markdown
 ---
@@ -313,29 +288,25 @@ up-to-date information, prefer the web_search tool…
 
 ---
 
-<br/>
-
 ## 🔒 Privacy
 
 <br/>
 
 ```
-┌─────────────────────────────────────────┐
-│                                         │
-│   ✅  All data lives on YOUR machine    │
-│   ✅  No telemetry, no tracking        │
-│   ✅  No accounts, no signup           │
-│   ✅  Open source (MIT license)        │
-│   ✅  API keys never leave your device  │
-│                                         │
-└─────────────────────────────────────────┘
+┌─────────────────────────────────────────────┐
+│                                             │
+│   ✅  All data lives on YOUR machine        │
+│   ✅  No telemetry · No tracking            │
+│   ✅  No accounts · No signup               │
+│   ✅  Open source (MIT license)             │
+│   ✅  API keys never leave your device       │
+│                                             │
+└─────────────────────────────────────────────┘
 ```
 
 <br/>
 
 ---
-
-<br/>
 
 ## 📦 Storage
 
@@ -343,24 +314,22 @@ up-to-date information, prefer the web_search tool…
 
 | Platform | Location |
 |----------|----------|
-| 🌐 Browser | `localStorage` with `mira:` prefix |
-| 🖥️ Desktop | `~/Desktop/MIRA/` |
+| Browser | `localStorage` with `mira:` prefix |
+| Desktop | `~/Desktop/MIRA/` |
 
 ```
-settings.json          ⚙️  Configuration
-conversations.json     💬  Chat history
-memory.json            🧠  Long-term facts
-skills.json            🎯  Skill definitions
-projects.json          📁  Project data
-project_memory.json    🔗  Project memory
-custom_commands.json   ⚡  Custom commands
+settings.json          →  Configuration
+conversations.json     →  Chat history
+memory.json            →  Long-term facts
+skills.json            →  Skill definitions
+projects.json          →  Project data
+project_memory.json    →  Project memory
+custom_commands.json   →  Custom commands
 ```
 
 <br/>
 
 ---
-
-<br/>
 
 ## 🔧 Build
 
@@ -369,22 +338,20 @@ custom_commands.json   ⚡  Custom commands
 **Prerequisites:** Node 20+ · npm or pnpm · (Desktop: Rust 1.77+)
 
 ```bash
-# 🌐 Web
+# Web
 npm install
-npm run dev        # → localhost:5173
-npm run build      # production build
-npm run preview    # preview production build
+npm run dev         →  localhost:5173
+npm run build       →  production build
+npm run preview     →  preview production build
 
-# 🖥️ Desktop
-npm run tauri:dev      # hot-reload
-npm run tauri:build    # platform installers
+# Desktop
+npm run tauri:dev   →  hot-reload
+npm run tauri:build →  platform installers
 ```
 
 <br/>
 
 ---
-
-<br/>
 
 ## 📂 Project Structure
 
@@ -392,36 +359,34 @@ npm run tauri:build    # platform installers
 
 ```
 src/
-├── App.tsx                  🏠  Root layout
-├── main.tsx                 🚀  Boot
-├── index.css                🎨  CSS variables
-├── store/index.ts           🗄️  Zustand store
+├── App.tsx                    # Root layout
+├── main.tsx                   # Boot
+├── index.css                  # CSS variables
+├── store/index.ts             # Zustand store
 ├── lib/
-│   ├── ai/                  🤖  Provider adapters
-│   ├── voice/               🎙️  TTS / STT
-│   ├── desktop/             🖥️  Desktop control
-│   ├── storage/             💾  Persistence
-│   └── theme.ts             🎨  Theme helpers
+│   ├── ai/                    # Provider adapters
+│   ├── voice/                 # TTS / STT
+│   ├── desktop/               # Desktop control
+│   ├── storage/               # Persistence
+│   └── theme.ts               # Theme helpers
 ├── components/
-│   ├── Sidebar.tsx          📁  Chat list
-│   ├── ChatView.tsx         💬  Main chat
-│   ├── VoiceMode.tsx        🎙️  Voice mode
-│   ├── Orb.tsx              ✨  Arc-reactor
-│   ├── Onboarding.tsx       🚀  First-run
-│   ├── SettingsModal.tsx    ⚙️  Settings
-│   ├── MessageBubble.tsx    💬  Messages
-│   ├── ThinkingAnimation.tsx 🔮  Thinking
-│   ├── ActivityLog.tsx      📊  Activity
-│   ├── MiraLogo.tsx         🎯  Logo
-│   └── AboutView.tsx        ℹ️  About
-└── types/index.ts           📝  Types
+│   ├── Sidebar.tsx            # Chat list
+│   ├── ChatView.tsx           # Main chat
+│   ├── VoiceMode.tsx          # Voice mode
+│   ├── Orb.tsx                # Arc-reactor
+│   ├── Onboarding.tsx         # First-run wizard
+│   ├── SettingsModal.tsx      # Settings
+│   ├── MessageBubble.tsx      # Messages
+│   ├── MiraLogo.tsx           # Animated logo
+│   ├── ThinkingAnimation.tsx  # Thinking indicator
+│   ├── ActivityLog.tsx        # Activity
+│   └── AboutView.tsx          # About
+└── types/index.ts             # Types
 ```
 
 <br/>
 
 ---
-
-<br/>
 
 ## 📄 License
 
@@ -435,6 +400,6 @@ src/
 
 <div align="center">
 
-**[⬆ Back to top](#-mira)**
+**[⬆ Back to top](#mira)**
 
 </div>

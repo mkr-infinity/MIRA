@@ -13,19 +13,35 @@
     <filter id="blur">
       <feGaussianBlur stdDeviation="2"/>
     </filter>
+    <style>
+      @keyframes spin-slow { to { transform: rotate(360deg); } }
+      @keyframes spin-medium { to { transform: rotate(-360deg); } }
+      @keyframes pulse { 0%,100% { opacity: 0.85; r: 5; } 50% { opacity: 1; r: 6; } }
+      @keyframes glow-pulse { 0%,100% { opacity: 0.9; r: 14; } 50% { opacity: 0.6; r: 16; } }
+      @keyframes orbit { to { transform: rotate(360deg); } }
+      .ring-slow { transform-origin: 50px 50px; animation: spin-slow 12s linear infinite; }
+      .ring-medium { transform-origin: 50px 50px; animation: spin-medium 8s linear infinite; }
+      .core-pulse { animation: glow-pulse 2s ease-in-out infinite; }
+      .dot-pulse { animation: pulse 1.5s ease-in-out infinite; }
+      .orbit { transform-origin: 50px 50px; animation: orbit 4s linear infinite; }
+    </style>
   </defs>
 
   <!-- Background ambient glow -->
   <circle cx="50" cy="50" r="46" fill="url(#coreGlow)" opacity="0.4"/>
 
-  <!-- Outer arc reactor segmented ring -->
-  <circle cx="50" cy="50" r="44" stroke="url(#ringGrad)" stroke-width="1.5" stroke-dasharray="5 3.5" opacity="0.8"/>
+  <!-- Rotating outer ring -->
+  <g class="ring-slow">
+    <circle cx="50" cy="50" r="44" stroke="url(#ringGrad)" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.7"/>
+  </g>
 
-  <!-- Middle ring -->
-  <circle cx="50" cy="50" r="34" stroke="url(#ringGrad)" stroke-width="1" opacity="0.45"/>
+  <!-- Counter-rotating middle ring -->
+  <g class="ring-medium">
+    <circle cx="50" cy="50" r="34" stroke="url(#ringGrad)" stroke-width="1" opacity="0.35" stroke-dasharray="8 6"/>
+  </g>
 
-  <!-- Inner ring -->
-  <circle cx="50" cy="50" r="24" stroke="#00D4FF" stroke-width="1.8" opacity="0.35"/>
+  <!-- Inner ring (static) -->
+  <circle cx="50" cy="50" r="24" stroke="#00D4FF" stroke-width="1.8" opacity="0.3"/>
 
   <!-- Radiating energy lines -->
   <g opacity="0.35">
@@ -39,18 +55,20 @@
     <line x1="71.2" y1="71.2" x2="65.5" y2="65.5" stroke="url(#ringGrad)" stroke-width="1" stroke-linecap="round"/>
   </g>
 
-  <!-- Core glow circle -->
-  <circle cx="50" cy="50" r="14" fill="url(#coreGlow)" stroke="#00D4FF" stroke-width="1.5" opacity="0.9"/>
+  <!-- Core glow (pulsing) -->
+  <circle class="core-pulse" cx="50" cy="50" r="14" fill="url(#coreGlow)" stroke="#00D4FF" stroke-width="1.5" opacity="0.9"/>
 
-  <!-- Central bright core -->
-  <circle cx="50" cy="50" r="5" fill="#00FFFF" opacity="0.85"/>
+  <!-- Central bright core (pulsing) -->
+  <circle class="dot-pulse" cx="50" cy="50" r="5" fill="#00FFFF" opacity="0.85"/>
   <circle cx="50" cy="50" r="2.5" fill="#FFFFFF" opacity="0.95"/>
 
-  <!-- Orbital arc (right side) -->
+  <!-- Orbital arc -->
   <path d="M73.5 22.5 A38 38 0 0 1 84 50" stroke="url(#ringGrad)" stroke-width="2.5" stroke-opacity="0.6" stroke-linecap="round" filter="url(#blur)"/>
   <path d="M73.5 22.5 A38 38 0 0 1 84 50" stroke="#00D4FF" stroke-width="1.5" stroke-opacity="0.8" stroke-linecap="round"/>
 
-  <!-- Orbital dot -->
-  <circle cx="84" cy="50" r="3.5" fill="#00D4FF" fill-opacity="0.9"/>
-  <circle cx="84" cy="50" r="1.5" fill="#FFFFFF" fill-opacity="0.8"/>
+  <!-- Orbiting dot -->
+  <g class="orbit">
+    <circle cx="84" cy="50" r="3.5" fill="#00D4FF" fill-opacity="0.9"/>
+    <circle cx="84" cy="50" r="1.5" fill="#FFFFFF" fill-opacity="0.8"/>
+  </g>
 </svg>
