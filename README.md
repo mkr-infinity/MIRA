@@ -20,13 +20,12 @@ No telemetry. No accounts. No cloud. Just you and your AI.
 <br/>
 
 <p>
-  <a href="#-prerequisites">📋 Prerequisites</a> ·
   <a href="#-quick-start">🚀 Quick Start</a> ·
+  <a href="#-what-you-can-do">✨ What You Can Do</a> ·
+  <a href="#-beginner-guide">🎒 Beginner Guide</a> ·
   <a href="#-keyboard-shortcuts">⌨️ Shortcuts</a> ·
   <a href="#-build">🔧 Build</a> ·
-  <a href="#-documentation">📚 Docs</a> ·
-  <a href="#-contributing">🤝 Contributing</a> ·
-  <a href="#-license">📄 License</a>
+  <a href="#-contributing">🤝 Contributing</a>
 </p>
 
 <br/>
@@ -37,83 +36,90 @@ No telemetry. No accounts. No cloud. Just you and your AI.
 
 <br/>
 
-## 📋 Prerequisites
-
-Before running `npm install`, make sure you have these installed:
-
-| Tool  | Minimum | For             | Install                                    |
-|-------|---------|-----------------|--------------------------------------------|
-| Node  | `>=20`  | Runtime         | [nodejs.org](https://nodejs.org)           |
-| npm   | `>=10`  | Package manager | ships with Node                            |
-| Rust  | `>=1.77`| Desktop build   | [rustup.rs](https://rustup.rs)             |
-
-> **Rust is optional.** The web version at `http://localhost:5173` works without it.  
-> Rust + Tauri are only needed if you want to build the native desktop app.
-
-<br/>
-
 ## 🚀 Quick Start
 
-Get MIRA running in under a minute:
-
 ```bash
-# 1. Clone
+# 1. Clone the repo
 git clone https://github.com/mkr-infinity/MIRA
 cd MIRA
 
 # 2. Install dependencies
 npm install
 
-# 3. Start development server
+# 3. Start the dev server
 npm run dev
 ```
 
-Open **http://localhost:5173** in your browser.  
-The onboarding wizard will guide you through your first provider setup.
-
-> 💡 **First time?** The wizard walks you through picking a provider, pasting your API key, and testing voice — takes about 60 seconds.
+Open **http://localhost:5173** in your browser and follow the onboarding wizard — it walks you through picking an AI provider, pasting your API key, and testing voice in about 60 seconds.
 
 <br/>
 
-### What you can do next
+## ✨ What You Can Do
 
 | Action | How |
 |--------|-----|
-| 💬 **Chat** | Type a message and press `Enter` |
+| 💬 **Chat with AI** | Type a message and press `Enter` |
 | 🎙️ **Use voice** | Press `F11` or click the mic button |
 | 🖼️ **Attach images** | Drag & drop, paste, or click the camera icon |
-| 🔍 **Search** | Press `Ctrl+F` in any conversation |
-| ⚙️ **Configure** | Press `Ctrl+,` to open settings |
-| 📁 **Organise** | Create projects in the sidebar |
+| 🔍 **Search chats** | Press `Ctrl+F` in any conversation |
+| ⚙️ **Change settings** | Press `Ctrl+,` to open settings |
+| 📁 **Organise projects** | Create folders in the sidebar |
+| 🎨 **Pick a theme** | Choose from 8 themes in settings |
+| 🧠 **Add skills** | Teach MIRA custom abilities |
+
+<br/>
+
+## 🎒 Beginner Guide
+
+### First time?
+
+1. **Install Node.js** (version 20 or later) from [nodejs.org](https://nodejs.org)
+2. **Clone and install** — run the commands in Quick Start above
+3. **Pick a provider** — the onboarding wizard shows you options like OpenAI, Groq, or Ollama (local)
+4. **Get an API key** — sign up at your chosen provider, grab a free key, and paste it in
+5. **Start chatting** — type anything and press Enter
+
+> Rust is **optional**. You only need it if you want to build the desktop app. The web version works in any browser.
+
+### Need Rust for desktop build?
+
+| Tool | Version | Install |
+|------|---------|---------|
+| Node | `>=20` | [nodejs.org](https://nodejs.org) |
+| npm | `>=10` | ships with Node |
+| Rust | `>=1.77` | [rustup.rs](https://rustup.rs) |
+
+```bash
+# After installing Rust, build the desktop app
+npm run tauri:build
+```
 
 <br/>
 
 ## ⌨️ Keyboard Shortcuts
 
-| Shortcut      | Action                    |
-|---------------|---------------------------|
-| `F11`         | Enter / exit voice mode   |
-| `Escape`      | Close modal / exit voice  |
-| `Ctrl + N`    | New conversation          |
-| `Ctrl + ,`    | Open settings             |
-| `Ctrl + /`    | Focus the chat input      |
-| `Ctrl + F`    | Search within conversation|
+| Shortcut | Action |
+|----------|--------|
+| `F11` | Enter / exit voice mode |
+| `Escape` | Close modal / exit voice |
+| `Ctrl + N` | New conversation |
+| `Ctrl + ,` | Open settings |
+| `Ctrl + /` | Focus the chat input |
+| `Ctrl + F` | Search within conversation |
 
-> All shortcuts work in the web app and the desktop build.
+> All shortcuts work in both the web app and the desktop build.
 
 <br/>
 
 ## 🔧 Build
 
-Build MIRA for production or package it as a desktop app.
-
 ```bash
-# ── Web (browser) ─────────────────────────────
+# Web (browser)
 npm run dev              # Development server at localhost:5173
 npm run build            # Production build → dist/
 npm run preview          # Preview the production build
 
-# ── Desktop (requires Rust ≥1.77) ─────────────
+# Desktop (requires Rust ≥1.77)
 npm run tauri:dev        # Hot-reload desktop app
 npm run tauri:build      # Platform-specific installer
 ```
@@ -131,24 +137,20 @@ npm run tauri:build      # Platform-specific installer
 
 | File | What you'll find |
 |------|------------------|
-| [FEATURES.md](./FEATURES.md) | Complete feature list — providers, voice, themes, plugins, and more |
-| [CHANGELOG.md](./CHANGELOG.md) | Full version history from v1.0.0 to latest |
-| [CONTRIBUTING.md](./CONTRIBUTING.md) | Setup guide, project structure, coding guidelines, PR workflow |
+| [CHANGELOG.md](./CHANGELOG.md) | Full version history |
+| [CONTRIBUTING.md](./CONTRIBUTING.md) | How to contribute, code style, and project structure |
 
 <br/>
 
 ## 🤝 Contributing
 
-We'd love your help! Whether it's a bug fix, a new feature, or better docs — every contribution counts.
-
-**Quick steps:**
+Contributions are welcome! Whether it's fixing a bug, adding a feature, or improving docs — every bit helps.
 
 1. Fork the repo
-2. Create a feature branch (`git checkout -b feat/my-thing`)
+2. Create a branch (`git checkout -b feat/my-thing`)
 3. Make your changes
 4. Run `npx tsc --noEmit` and `npm run build` to verify
-5. Commit with [conventional commits](https://www.conventionalcommits.org) (`feat:`, `fix:`, `docs:`, etc.)
-6. Open a pull request
+5. Open a pull request
 
 > See [CONTRIBUTING.md](./CONTRIBUTING.md) for the full guide.
 
@@ -156,7 +158,7 @@ We'd love your help! Whether it's a bug fix, a new feature, or better docs — e
 
 ## 📄 License
 
-**MIT** — Free to use, modify, and distribute.  
+**MIT** — Free to use, modify, and distribute.
 Made with 💙 by [Mohammad Kaif Raja](https://mkr-infinity.github.io).
 
 <br/>
