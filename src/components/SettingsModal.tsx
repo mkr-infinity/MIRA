@@ -157,8 +157,8 @@ function SettingsContent({
           <X size={16} />
         </button>
       </header>
-      <div className="flex-1 flex min-h-0">
-        <nav aria-label="Settings" className="w-52 border-r mira-border p-3 space-y-4 flex-shrink-0 overflow-y-auto">
+      <div className="flex-1 flex min-h-0 flex-col sm:flex-row">
+        <nav aria-label="Settings" className="w-full sm:w-52 border-b sm:border-b-0 sm:border-r mira-border p-2 sm:p-3 flex-shrink-0 overflow-x-auto sm:overflow-y-auto flex sm:flex-col gap-1 sm:gap-0">
           {Object.entries(grouped).map(([group, items]) => (
             <div key={group}>
               <div className="text-[9px] font-mono uppercase tracking-[0.25em] mira-muted px-2 mb-1.5">
