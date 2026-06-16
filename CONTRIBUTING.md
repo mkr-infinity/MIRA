@@ -8,11 +8,11 @@ Thanks for your interest in MIRA! 🎉
 
 ## Prerequisites
 
-| Tool  | Version  | Installation                                    |
-|-------|----------|--------------------------------------------------|
-| Node  | `>=20`   | [nodejs.org](https://nodejs.org)                 |
-| npm   | `>=10`   | ships with Node                                  |
-| Rust  | `>=1.77` | [rustup.rs](https://rustup.rs) *(desktop only)*  |
+| Tool | Version | Installation |
+|------|---------|-------------|
+| Node | `>=20` | [nodejs.org](https://nodejs.org) |
+| npm | `>=10` | ships with Node |
+| Rust | `>=1.77` | [rustup.rs](https://rustup.rs) *(desktop only)* |
 
 <br/>
 
@@ -76,30 +76,19 @@ src/
 
 ## Guidelines
 
-1. **Code style** — Follow existing patterns. No emojis in code comments. Use descriptive variable names.
-2. **TypeScript** — Strict mode. Run `npx tsc --noEmit` before committing.
-3. **Commits** — Use conventional commits (`feat:`, `fix:`, `docs:`, `refactor:`, etc.). Keep them granular.
-4. **PRs** — One feature per PR. Include screenshots for UI changes.
-5. **Testing** — Verify with `npm run build` before submitting.
+1. **Code style** — Follow existing patterns. Descriptive variable names. No emojis in comments.
+2. **TypeScript** — Strict mode is on. Run `npx tsc --noEmit` before committing.
+3. **Commits** — Use conventional commits (`feat:`, `fix:`, `docs:`, `refactor:`).
+4. **PRs** — One feature per PR. Screenshots help for UI changes.
 
 <br/>
 
-## Feature Requests
+## Feature Requests & Bug Reports
 
-Open an issue with the `enhancement` label. For major features, please discuss first.
-
-<br/>
-
-## Reporting Bugs
-
-Open an issue with the `bug` label. Include:
-- MIRA version
-- Browser / platform
-- Steps to reproduce
-- Expected vs actual behaviour
+Open an issue on GitHub. Use the `enhancement` or `bug` label. For bugs, include your MIRA version, browser/platform, and steps to reproduce.
 
 <br/>
 
 ---
 
-> See [FEATURES.md](./FEATURES.md) for a full feature list and [CHANGELOG.md](./CHANGELOG.md) for version history.
+> See [CHANGELOG.md](./CHANGELOG.md) for version history.
