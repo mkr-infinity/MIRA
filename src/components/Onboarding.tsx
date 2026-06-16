@@ -262,12 +262,28 @@ export function Onboarding() {
       <MagneticGrid lineCount={20} repulsionRadius={180} maxDisplacement={50} />
       {/* Jarvis-style scan lines */}
       <div
-        className="fixed inset-0 pointer-events-none opacity-[0.03]"
+        className="fixed inset-0 pointer-events-none opacity-[0.025]"
         style={{
           backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,212,255,0.5) 2px, rgba(0,212,255,0.5) 4px)",
           backgroundSize: "100% 4px",
         }}
       />
+      {/* Floating particles */}
+      {[...Array(20)].map((_, i) => (
+        <div
+          key={i}
+          className="particle"
+          style={{
+            left: `${Math.random() * 100}%`,
+            top: `${Math.random() * 100}%`,
+            animationDelay: `${Math.random() * 5}s`,
+            animationDuration: `${4 + Math.random() * 4}s`,
+            width: `${1 + Math.random() * 2}px`,
+            height: `${1 + Math.random() * 2}px`,
+            opacity: 0.3 + Math.random() * 0.4,
+          }}
+        />
+      ))}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full opacity-10" style={{ background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)" }} />
         <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full opacity-5" style={{ background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)" }} />
@@ -275,12 +291,13 @@ export function Onboarding() {
 
       <div className="relative min-h-full flex flex-col">
         {/* Progress */}
-        <div className="w-full h-1 mira-elevated">
+        <div className="w-full h-1 mira-elevated relative overflow-hidden">
           <motion.div
-            className="h-full mira-accent-bg"
+            className="h-full mira-accent-bg relative"
             initial={{ width: 0 }}
             animate={{ width: `${((stepIdx + 1) / STEPS.length) * 100}%` }}
             transition={{ duration: 0.5, ease: "easeOut" }}
+            style={{ boxShadow: "0 0 12px var(--accent), 0 0 24px var(--accent-faint)" }}
           />
         </div>
 
@@ -559,7 +576,7 @@ function ProviderStep(props: {
                   ? "mira-elevated mira-text"
                   : "mira-elevated mira-muted hover:mira-hover border-transparent"
               )}
-              style={isSelected ? { borderColor: m.color, boxShadow: `0 0 20px ${m.color}15` } : undefined}
+              style={isSelected ? { borderColor: m.color, boxShadow: `0 0 20px ${m.color}20, 0 0 60px ${m.color}10` } : undefined}
             >
               <div className="flex items-center gap-2 mb-1.5">
                 <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: `${m.color}20` }}>
@@ -784,7 +801,33 @@ function VoiceStep({ onTest, testState }: { onTest: () => void; testState: "idle
 
 function DoneStep({ onEnter }: { onEnter: () => void }) {
   return (
-    <div className="text-center py-8 sm:py-12">
+    <div className="text-center py-8 sm:py-12 relative">
+      {/* Celebration particles */}
+      {[...Array(30)].map((_, i) => (
+        <motion.div
+          key={i}
+          className="absolute pointer-events-none"
+          style={{
+            width: 3, height: 3,
+            borderRadius: "50%",
+            background: i % 3 === 0 ? "#00D4FF" : i % 3 === 1 ? "#FF7EB3" : "#B388FF",
+            left: `${30 + Math.random() * 40}%`,
+            top: "50%",
+          }}
+          initial={{ opacity: 0, y: 0, x: 0 }}
+          animate={{
+            opacity: [0, 0.8, 0],
+            y: [-60 - Math.random() * 120],
+            x: [-40 + Math.random() * 80],
+          }}
+          transition={{
+            duration: 1.5 + Math.random() * 1.5,
+            delay: 0.3 + Math.random() * 0.5,
+            repeat: Infinity,
+            repeatDelay: Math.random() * 2,
+          }}
+        />
+      ))}
       <motion.div
         initial={{ scale: 0.3, opacity: 0, rotate: -180 }}
         animate={{ scale: 1, opacity: 1, rotate: 0 }}
@@ -799,6 +842,7 @@ function DoneStep({ onEnter }: { onEnter: () => void }) {
         transition={{ delay: 0.4, duration: 0.6 }}
       >
         <h2 className="font-display text-3xl sm:text-4xl font-bold mb-3 gradient-text">You're all set</h2>
+        <p className="text-xs font-mono text-emerald-400/60 mb-1">&gt; ALL SYSTEMS OPERATIONAL</p>
         <p className="text-sm sm:text-base max-w-md mx-auto mb-8" style={{ color: "var(--muted)" }}>
           MIRA is ready. Type a message or press F11 to start talking.
         </p>
