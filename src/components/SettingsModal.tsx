@@ -1437,6 +1437,51 @@ function VoiceTab() {
           </Field>
         </div>
       </Section>
+
+      {/* Speech profiles — emerald */}
+      <Section
+        icon={Save}
+        title="Speech profiles"
+        description="Save and restore voice configurations."
+        accent="brand"
+      >
+        <div className="space-y-2">
+          {(!settings.voiceProfiles || settings.voiceProfiles.length === 0) && (
+            <div className="text-xs mira-muted">No saved profiles.</div>
+          )}
+          {settings.voiceProfiles?.map((p) => (
+            <div key={p.id} className="flex items-center gap-2 p-2 rounded-lg mira-elevated">
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-medium mira-text">{p.name}</div>
+                <div className="text-[10px] font-mono mira-muted">{p.voiceName || "Default"} · {p.rate}x · {p.pitch}</div>
+              </div>
+              <button
+                onClick={() => updateSettings({ voiceName: p.voiceName, voiceRate: p.rate, voicePitch: p.pitch })}
+                className="px-2 py-1 rounded text-xs mira-accent hover:underline"
+              >
+                Load
+              </button>
+              <button
+                onClick={() => updateSettings({ voiceProfiles: (settings.voiceProfiles || []).filter((x) => x.id !== p.id) })}
+                className="p-1 rounded mira-muted hover:text-red-400"
+              >
+                <Trash2 size={12} />
+              </button>
+            </div>
+          ))}
+          <button
+            onClick={() => {
+              const name = prompt("Name this voice profile:");
+              if (!name?.trim()) return;
+              const profile = { id: Math.random().toString(36).slice(2), name: name.trim(), voiceName: settings.voiceName, rate: settings.voiceRate, pitch: settings.voicePitch };
+              updateSettings({ voiceProfiles: [...(settings.voiceProfiles || []), profile] });
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs mira-muted hover:mira-hover border border-dashed mira-border"
+          >
+            <Plus size={12} /> Save current as profile
+          </button>
+        </div>
+      </Section>
     </div>
   );
 }

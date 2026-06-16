@@ -214,6 +214,8 @@ export interface AppSettings {
   imageGenEnabled?: boolean;
   imageGenProvider?: ProviderId;
   imageGenModel?: string;
+  // Voice profiles
+  voiceProfiles?: Array<{ id: string; name: string; voiceName: string; rate: number; pitch: number }>;
 }
 
 export interface ChatRequest {

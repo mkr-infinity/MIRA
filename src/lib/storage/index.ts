@@ -240,6 +240,7 @@ export function defaultSettings(): AppSettings {
     imageGenEnabled: false,
     imageGenProvider: undefined,
     imageGenModel: undefined,
+    voiceProfiles: [],
   };
 }
 
