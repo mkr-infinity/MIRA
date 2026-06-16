@@ -52,6 +52,18 @@ export default function App() {
     } catch {}
   }, [sidebarCollapsed]);
 
+  // Auto-collapse sidebar on narrow viewports
+  useEffect(() => {
+    function handleResize() {
+      if (window.innerWidth < 768) {
+        setSidebarCollapsed(true);
+      }
+    }
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   // Global keyboard shortcuts
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {

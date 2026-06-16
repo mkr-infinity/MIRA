@@ -143,50 +143,55 @@ export function Sidebar({
     newConversation();
   }
 
-  // Collapsed: show only the icon rail
-  if (collapsed) {
-    return (
-      <aside className="w-[56px] h-full flex-shrink-0 flex flex-col items-center mira-surface border-r mira-border py-3 gap-1.5">
-        <button
-          onClick={onToggleCollapse}
-          className="w-9 h-9 flex items-center justify-center rounded-lg mira-elevated hover:mira-hover transition-colors"
-          title="Open sidebar (show MIRA sidebar)"
-        >
-          <PanelLeftOpen size={16} className="mira-accent" />
-        </button>
-        <button
-          onClick={handleNewChat}
-          className="w-9 h-9 flex items-center justify-center rounded-lg mira-elevated hover:mira-hover transition-colors"
-          title="New chat"
-        >
-          <Plus size={16} />
-        </button>
-        <button
-          onClick={onOpenVoiceMode}
-          className={cx(
-            "w-9 h-9 flex items-center justify-center rounded-lg transition-colors",
-            voiceMode ? "mira-elevated" : "mira-elevated hover:mira-hover"
-          )}
-          title="Voice mode (F11)"
-        >
-          <Volume2 size={16} />
-        </button>
-        <div className="flex-1" />
-        <button
-          onClick={() => onOpenSettings("general")}
-          className="w-9 h-9 flex items-center justify-center rounded-lg mira-elevated hover:mira-hover transition-colors"
-          title="Settings"
-        >
-          <Settings size={16} />
-        </button>
-      </aside>
-    );
-  }
-
   const newChatLabel = activeProject ? `New chat in ${activeProject.name}` : "New chat";
 
+  // Collapsed: show only the icon rail
   return (
-    <aside className="w-[260px] h-full flex-shrink-0 flex flex-col border-r mira-border mira-surface">
+    <aside
+      className="h-full flex-shrink-0 flex flex-col border-r mira-border mira-surface transition-all duration-300 ease-in-out"
+      style={{ width: collapsed ? 56 : 260 }}
+    >
+      {collapsed ? (
+        <>
+          <div className="h-14 flex items-center justify-center border-b mira-border">
+            <button
+              onClick={onToggleCollapse}
+              className="w-9 h-9 flex items-center justify-center rounded-lg mira-elevated hover:mira-hover transition-colors"
+              title="Open sidebar"
+            >
+              <PanelLeftOpen size={16} className="mira-accent" />
+            </button>
+          </div>
+          <div className="flex-1 flex flex-col items-center py-3 gap-1.5">
+            <button
+              onClick={handleNewChat}
+              className="w-9 h-9 flex items-center justify-center rounded-lg mira-elevated hover:mira-hover transition-colors"
+              title="New chat"
+            >
+              <Plus size={16} />
+            </button>
+            <button
+              onClick={onOpenVoiceMode}
+              className={cx(
+                "w-9 h-9 flex items-center justify-center rounded-lg transition-colors",
+                voiceMode ? "mira-elevated" : "mira-elevated hover:mira-hover"
+              )}
+              title="Voice mode (F11)"
+            >
+              <Volume2 size={16} />
+            </button>
+            <div className="flex-1" />
+            <button
+              onClick={() => onOpenSettings("general")}
+              className="w-9 h-9 flex items-center justify-center rounded-lg mira-elevated hover:mira-hover transition-colors"
+              title="Settings"
+            >
+              <Settings size={16} />
+            </button>
+          </div>
+        </>
+      ) : (
+        <>
       {/* Logo — glass header */}
       <div className="h-14 px-3 flex items-center gap-2.5 border-b mira-border">
         <button
@@ -528,6 +533,8 @@ export function Sidebar({
         editingId={projectModal.editingId}
         asNewChat={projectModal.asNewChat}
       />
+        </>
+      )}
     </aside>
   );
 }
