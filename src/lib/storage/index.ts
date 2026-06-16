@@ -241,6 +241,9 @@ export function defaultSettings(): AppSettings {
     imageGenProvider: undefined,
     imageGenModel: undefined,
     voiceProfiles: [],
+    syncEnabled: false,
+    syncEndpoint: "",
+    syncKey: "",
   };
 }
 

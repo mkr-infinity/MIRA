@@ -2356,7 +2356,7 @@ function CustomCSSTab() {
 }
 
 function DataTab() {
-  const { settings, conversations, memory, skills, projects, errors, clearError } = useStore();
+  const { settings, conversations, memory, skills, projects, errors, clearError, updateSettings } = useStore();
   const [dir, setDir] = useState("");
   useEffect(() => { storage.getDataDir().then(setDir); }, []);
 
@@ -2514,6 +2514,46 @@ function DataTab() {
           </button>
         </div>
         <Hint>Export as JSON. Import merges conversations, memory, and skills.</Hint>
+      </Card>
+
+      {/* E2E Sync — cyan */}
+      <Card>
+        <div className="flex items-center gap-3">
+          <GlobeIcon size={18} className="text-cyan-400" />
+          <div>
+            <h3 className="font-display text-base font-semibold">E2E sync</h3>
+            <p className="text-xs mira-muted">Sync your data across devices with end-to-end encryption.</p>
+          </div>
+        </div>
+        <ToggleRow
+          label="Enable sync"
+          description="Continuously sync conversations, memory, and settings."
+          checked={!!settings.syncEnabled}
+          onChange={(v) => updateSettings({ syncEnabled: v })}
+        />
+        {settings.syncEnabled && (
+          <div className="space-y-3">
+            <Field label="Sync endpoint">
+              <input
+                value={settings.syncEndpoint || ""}
+                onChange={(e) => updateSettings({ syncEndpoint: e.target.value })}
+                placeholder="https://sync.example.com"
+                className="w-full px-3 py-2 rounded-lg mira-elevated border mira-border mira-text font-mono text-sm focus:outline-none focus:border-cyan-500/50"
+              />
+              <Hint>Your own sync server URL. Leave empty to use the default relay.</Hint>
+            </Field>
+            <Field label="Encryption key">
+              <input
+                type="password"
+                value={settings.syncKey || ""}
+                onChange={(e) => updateSettings({ syncKey: e.target.value })}
+                placeholder="A secret passphrase known only to you"
+                className="w-full px-3 py-2 rounded-lg mira-elevated border mira-border mira-text font-mono text-sm focus:outline-none focus:border-cyan-500/50"
+              />
+              <Hint>Used to encrypt your data before syncing. Never shared.</Hint>
+            </Field>
+          </div>
+        )}
       </Card>
 
       {/* Beautiful stat grid */}

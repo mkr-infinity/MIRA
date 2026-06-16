@@ -216,6 +216,10 @@ export interface AppSettings {
   imageGenModel?: string;
   // Voice profiles
   voiceProfiles?: Array<{ id: string; name: string; voiceName: string; rate: number; pitch: number }>;
+  // E2E sync
+  syncEnabled?: boolean;
+  syncEndpoint?: string;
+  syncKey?: string;
 }
 
 export interface ChatRequest {
