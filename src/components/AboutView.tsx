@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useStore } from "../store";
+import changelogRaw from "../../CHANGELOG.md?raw";
 import {
   Github,
   Coffee,
@@ -18,7 +19,9 @@ import {
   Download,
   GitBranch,
   ChevronDown,
-  ChevronRight,
+  Terminal,
+  Database,
+  Activity,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MiraLogo } from "./MiraLogo";
@@ -75,47 +78,73 @@ export function AboutView() {
   const issues = repo?.open_issues_count ?? 0;
 
   return (
-    <div className="space-y-6">
-      {/* Hero */}
-      <div>
-        <h2 className="font-display text-2xl font-semibold mb-1 gradient-text">
-          About MIRA
-        </h2>
-        <p className="text-sm mira-muted">
-          <span className="font-mono">MIRA</span> ={" "}
-          <span className="font-mono">MKR Intelligent Responsive Assistant</span>.
-          An open-source personal AI desktop assistant, built with care.
-        </p>
+    <div className="space-y-5">
+      {/* Terminal-style header */}
+      <div className="rounded-mira border mira-border overflow-hidden">
+        <div className="flex items-center gap-2 px-4 py-2 mira-elevated border-b mira-border">
+          <div className="flex gap-1.5">
+            <div className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
+            <div className="w-2.5 h-2.5 rounded-full bg-amber-500/80" />
+            <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/80" />
+          </div>
+          <span className="text-[10px] font-mono mira-muted ml-2">about — zsh</span>
+        </div>
+        <div className="p-4 mira-surface/50 font-mono text-xs leading-relaxed">
+          <div className="text-emerald-400/70">
+            <span className="text-cyan-400">mkr-infinity</span>
+            <span className="mira-muted">@</span>
+            <span className="text-cyan-400">MIRA</span>
+            <span className="mira-muted"> ~ % </span>
+            <span className="mira-text">cat about.md</span>
+          </div>
+          <div className="mt-2 space-y-1">
+            <div>
+              <span className="text-cyan-400/60">name:</span>
+              <span className="mira-text ml-2">MIRA</span>
+            </div>
+            <div>
+              <span className="text-cyan-400/60">full_name:</span>
+              <span className="mira-text ml-2">MKR Intelligent Responsive Assistant</span>
+            </div>
+            <div>
+              <span className="text-cyan-400/60">type:</span>
+              <span className="text-emerald-400/80 ml-2">Open-source AI desktop assistant</span>
+            </div>
+            <div>
+              <span className="text-cyan-400/60">stack:</span>
+              <span className="mira-text ml-2">Tauri 2 + React 18 + Rust</span>
+            </div>
+            <div>
+              <span className="text-cyan-400/60">repo:</span>
+              <a href={REPO} target="_blank" rel="noreferrer" className="text-cyan-400 hover:underline ml-2 inline-flex items-center gap-1">
+                mkr-infinity/MIRA <ExternalLink size={10} />
+              </a>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Developer card */}
       <DeveloperCard profile={profile} loading={loading} />
 
-      {/* Repository card */}
-      <RepoCard
-        repo={repo}
-        star={star}
-        forks={forks}
-        issues={issues}
-        loading={loading}
-      />
-
-      {/* Action pills */}
       <ActionPills />
 
-      {/* Support card */}
-      <SupportCard />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <SupportCard />
+        <PrivacyCard />
+      </div>
 
-      {/* Social grid */}
       <SocialGrid />
 
-      {/* Privacy card */}
-      <PrivacyCard />
-
-      {/* Tech stack */}
       <TechCard />
 
-      {/* Version + Changelog — pinned to the end */}
+      <div className="flex items-center gap-2 text-[10px] font-mono mira-muted justify-center">
+        <Heart size={10} className="text-red-400 fill-red-400" />
+        <span>Made with love by </span>
+        <a href="https://github.com/mkr-infinity" target="_blank" rel="noreferrer" className="text-cyan-400 hover:underline">
+          MKR-Infinity
+        </a>
+      </div>
+
       <VersionChangelog version={settings.version || "2.0.0"} />
     </div>
   );
@@ -126,54 +155,68 @@ function DeveloperCard({ profile, loading }: { profile: GhProfile | null; loadin
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="relative overflow-hidden p-5 rounded-mira border mira-border mira-elevated"
+      className="relative overflow-hidden rounded-mira border mira-border mira-elevated"
     >
-      <div className="absolute -top-12 -right-12 w-40 h-40 rounded-full bg-cyan-500/10 blur-2xl" />
-      <div className="relative flex items-start gap-4">
-        <div className="relative w-20 h-20 rounded-2xl overflow-hidden border-2 border-cyan-500/30 flex-shrink-0 shadow-glow-sm">
-          {loading ? (
-            <div className="w-full h-full mira-elevated animate-pulse" />
-          ) : profile?.avatar_url ? (
-            <img
-              src={profile.avatar_url}
-              alt={profile.name || profile.login}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center text-white text-2xl font-semibold">
-              {(profile?.name || "M").slice(0, 1).toUpperCase()}
-            </div>
-          )}
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <h3 className="font-display text-xl font-semibold mira-text">
-              {profile?.name || "Mohammad Kaif Raja"}
-            </h3>
-            <a
-              href={profile?.html_url || "https://github.com/mkr-infinity"}
-              target="_blank"
-              rel="noreferrer"
-              className="mira-muted hover:text-cyan-400"
-            >
-              <Github size={14} />
-            </a>
+      <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full bg-cyan-500/8 blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-8 -left-8 w-32 h-32 rounded-full bg-blue-500/5 blur-3xl pointer-events-none" />
+      <div className="relative p-5">
+        <div className="flex items-start gap-4">
+          <div className="relative w-20 h-20 rounded-2xl overflow-hidden border-2 border-cyan-500/30 flex-shrink-0 shadow-glow-sm">
+            {loading ? (
+              <div className="w-full h-full mira-elevated animate-pulse" />
+            ) : profile?.avatar_url ? (
+              <img
+                src={profile.avatar_url}
+                alt={profile.name || profile.login}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center text-white text-2xl font-semibold">
+                {(profile?.name || "M").slice(0, 1).toUpperCase()}
+              </div>
+            )}
           </div>
-          <p className="text-sm mira-muted mt-0.5">
-            @{profile?.login || "mkr-infinity"} · MKR-Infinity
-          </p>
-          {profile?.bio && (
-            <p className="text-sm mira-text mt-2">{profile.bio}</p>
-          )}
-          {profile && (
-            <div className="flex gap-3 mt-3 text-xs font-mono mira-muted">
-              <span><b className="mira-text">{profile.followers}</b> followers</span>
-              <span><b className="mira-text">{profile.following}</b> following</span>
-              <span><b className="mira-text">{profile.public_repos}</b> repos</span>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <h3 className="font-display text-xl font-semibold mira-text">
+                {profile?.name || "Mohammad Kaif Raja"}
+              </h3>
+              <a
+                href={profile?.html_url || "https://github.com/mkr-infinity"}
+                target="_blank"
+                rel="noreferrer"
+                className="mira-muted hover:text-cyan-400"
+              >
+                <Github size={14} />
+              </a>
             </div>
-          )}
+            <p className="text-sm mira-muted mt-0.5">
+              @{profile?.login || "mkr-infinity"}
+            </p>
+            {profile?.bio && (
+              <p className="text-sm mira-text mt-2">{profile.bio}</p>
+            )}
+          </div>
         </div>
       </div>
+      {profile && (
+        <div className="border-t mira-border grid grid-cols-3 divide-x divide-[color:var(--border)]">
+          {[
+            { label: "followers", value: profile.followers },
+            { label: "following", value: profile.following },
+            { label: "repos", value: profile.public_repos },
+          ].map((s) => (
+            <div key={s.label} className="px-4 py-3 text-center">
+              <div className="text-lg font-semibold font-mono mira-text tabular-nums">
+                {loading ? "—" : s.value}
+              </div>
+              <div className="text-[10px] font-mono uppercase tracking-wider mira-muted">
+                {s.label}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </motion.div>
   );
 }
@@ -343,67 +386,70 @@ function PrivacyCard() {
 }
 
 function TechCard() {
+  const techs = [
+    { name: "Tauri 2", desc: "Native shell" },
+    { name: "React 18", desc: "UI framework" },
+    { name: "Rust", desc: "Backend" },
+    { name: "Tailwind", desc: "Styling" },
+    { name: "Framer Motion", desc: "Animation" },
+    { name: "Zustand", desc: "State" },
+    { name: "Web Speech", desc: "Voice" },
+    { name: "Lucide", desc: "Icons" },
+  ];
   return (
-    <div className="p-4 rounded-mira border mira-border mira-elevated">
-      <h3 className="text-[10px] font-mono uppercase tracking-wider mira-muted mb-3">
-        Built with
-      </h3>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-        {[
-          { name: "Tauri 2", desc: "Native shell" },
-          { name: "React 18", desc: "UI framework" },
-          { name: "Rust", desc: "Backend" },
-          { name: "Tailwind", desc: "Styling" },
-          { name: "Framer Motion", desc: "Animation" },
-          { name: "Zustand", desc: "State" },
-          { name: "Web Speech", desc: "Voice" },
-          { name: "Lucide", desc: "Icons" },
-        ].map((t) => (
-          <div key={t.name} className="p-2 rounded-md mira-elevated">
-            <div className="mira-text font-medium">{t.name}</div>
-            <div className="text-[10px] mira-muted font-mono">{t.desc}</div>
-          </div>
-        ))}
+    <div className="rounded-mira border mira-border overflow-hidden">
+      <div className="flex items-center gap-2 px-4 py-2 mira-elevated border-b mira-border">
+        <Database size={12} className="mira-accent" />
+        <span className="text-[10px] font-mono uppercase tracking-wider mira-muted">
+          Dependencies
+        </span>
       </div>
-      <div className="text-center text-[10px] font-mono mira-muted mt-4 flex items-center justify-center gap-1">
-        Made with <Heart size={10} className="text-red-400 fill-red-400" /> by MKR-Infinity
+      <div className="p-4 mira-surface/30 font-mono text-xs leading-relaxed">
+        <div className="mira-muted mb-2">$ npm list --depth=0 --json</div>
+        <div className="space-y-0.5">
+          {techs.map((t) => (
+            <div key={t.name} className="flex items-center">
+              <span className="text-cyan-400/60">├─</span>
+              <span className="mira-text ml-2">{t.name}</span>
+              <span className="mira-muted ml-2">→ {t.desc}</span>
+            </div>
+          ))}
+          <div className="flex items-center">
+            <span className="text-cyan-400/60">└─</span>
+            <span className="text-emerald-400/70 ml-2">❤️ MKR-Infinity</span>
+          </div>
+        </div>
       </div>
     </div>
   );
 }
 
-const CHANGELOG: Array<{ version: string; date: string; items: string[] }> = [
-  {
-    version: "2.0.0",
-    date: "Jun 2026",
-    items: [
-      "Full rebrand: JARVIS → MIRA (MKR Intelligent Responsive Assistant).",
-      "ChatGPT-style sidebar: project list, project-scoped chats, quick 'back to all chats' exit.",
-      "ChatView top bar rebrand with local machine info (OS, hostname, time, accent stripe).",
-      "Fixed duplicate sound buttons — consolidated into one clear voice toggle.",
-      "Improved Data tab: total prompts, total context, total completion, median latency, storage size, beautiful stat cards with sparklines, per-provider breakdown.",
-      "Improved Skills tab: search, category filters, inline edit drawer, quick add.",
-      "Custom wake word field in Voice settings with test button.",
-      "Custom personality / system prompt: presets (Concise, Friendly, Code Mentor, Therapist, Custom) + free textarea.",
-      "Settings → General → Restart onboarding button for the 4-step wizard.",
-      "Provider list cleaned — GitHub Copilot removed; Ollama setup only shows real /api/tags detections.",
-      "Always-visible ChatGPT-style sidebar show/hide button (chevron).",
-    ],
-  },
-  {
-    version: "1.x",
-    date: "Earlier",
-    items: [
-      "Voice mode with full-screen orb, push-to-talk and F11 hotkey.",
-      "Desktop control: open apps, URLs, set volume, lock, notify.",
-      "Memory, skills, projects and conversations stored under ~/Desktop/MIRA/.",
-      "5 default providers and curated local model list.",
-    ],
-  },
-];
+function parseChangelog(raw: string): Array<{ version: string; date: string; items: string[] }> {
+  const entries: Array<{ version: string; date: string; items: string[] }> = [];
+  const versionRegex = /^##\s+([\d.]+(?:x)?)\s*\(([^)]*)\)\s*$/gm;
+  const itemRegex = /^[-*]\s+(.+)$/gm;
+  let match: RegExpExecArray | null;
+  const sections = raw.split(/(?=^##\s)/m);
+  for (const section of sections) {
+    const vm = versionRegex.exec(section);
+    if (!vm) continue;
+    const version = vm[1];
+    const date = vm[2];
+    const items: string[] = [];
+    let im: RegExpExecArray | null;
+    while ((im = itemRegex.exec(section)) !== null) {
+      const text = im[1].trim();
+      if (text.length > 0) items.push(text);
+    }
+    if (items.length > 0) entries.push({ version, date, items });
+  }
+  return entries.slice(0, 10);
+}
 
 function VersionChangelog({ version }: { version: string }) {
   const [open, setOpen] = useState(false);
+  const entries = useMemo(() => parseChangelog(changelogRaw), []);
+  const latest = entries[0];
   return (
     <div className="mira-elevated rounded-mira border mira-border overflow-hidden">
       <button
@@ -416,12 +462,11 @@ function VersionChangelog({ version }: { version: string }) {
           <span className="text-sm font-medium">Changelog</span>
         </div>
         <div className="flex items-center gap-2">
-          <span
-            className="px-2 py-0.5 rounded-pill text-[10px] font-mono uppercase tracking-wider mira-accent-soft mira-accent border"
-            style={{ borderColor: "var(--accent)" }}
-          >
-            v{version}
-          </span>
+          {latest && (
+            <span className="px-2 py-0.5 rounded-pill text-[10px] font-mono uppercase tracking-wider mira-accent-soft mira-accent border" style={{ borderColor: "var(--accent)" }}>
+              v{latest.version}
+            </span>
+          )}
           <motion.span
             animate={{ rotate: open ? 180 : 0 }}
             transition={{ duration: 0.2 }}
@@ -441,27 +486,31 @@ function VersionChangelog({ version }: { version: string }) {
             transition={{ duration: 0.2, ease: "easeOut" }}
             className="overflow-hidden border-t mira-border"
           >
-            <div className="p-4 space-y-5">
-              {CHANGELOG.map((rel, i) => (
-                <div key={rel.version}>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span
-                      className={`px-1.5 py-0.5 rounded-pill text-[10px] font-mono uppercase tracking-wider border ${
-                        i === 0 ? "mira-accent-soft mira-accent" : "mira-elevated mira-muted"
-                      }`}
-                      style={i === 0 ? { borderColor: "var(--accent)" } : undefined}
-                    >
-                      v{rel.version}
-                    </span>
-                    <span className="text-[10px] font-mono mira-muted">{rel.date}</span>
+            <div className="p-4 space-y-5 max-h-[50vh] overflow-y-auto">
+              {entries.length === 0 ? (
+                <div className="text-xs mira-muted">No changelog entries found.</div>
+              ) : (
+                entries.map((rel, i) => (
+                  <div key={rel.version}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span
+                        className={`px-1.5 py-0.5 rounded-pill text-[10px] font-mono uppercase tracking-wider border ${
+                          i === 0 ? "mira-accent-soft mira-accent" : "mira-elevated mira-muted"
+                        }`}
+                        style={i === 0 ? { borderColor: "var(--accent)" } : undefined}
+                      >
+                        v{rel.version}
+                      </span>
+                      <span className="text-[10px] font-mono mira-muted">{rel.date}</span>
+                    </div>
+                    <ul className="text-xs mira-muted space-y-1.5 list-disc pl-5">
+                      {rel.items.map((it) => (
+                        <li key={it}>{it}</li>
+                      ))}
+                    </ul>
                   </div>
-                  <ul className="text-xs mira-muted space-y-1.5 list-disc pl-5">
-                    {rel.items.map((it) => (
-                      <li key={it}>{it}</li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </motion.div>
         )}
