@@ -88,12 +88,12 @@ export const THEMES: ThemeMeta[] = [
   {
     id: "anime",
     name: "Anime",
-    description: "Pastel pink, lavender and neon cyan — anime dreamscape",
+    description: "Warm cream, cherry pink and lavender — anime dreamscape",
     accent: "#ff7eb3",
-    bg: "#0f0a1a",
-    surface: "#1a1228",
+    bg: "#1a1410",
+    surface: "#241e1a",
     font: "Nunito",
-    preview: ["#0f0a1a", "#1a1228", "#ff7eb3", "#f0e6ff"],
+    preview: ["#1a1410", "#241e1a", "#ff7eb3", "#fce8f0"],
   },
 ];
 

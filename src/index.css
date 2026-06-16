@@ -156,21 +156,21 @@ html[data-theme="earth"] {
 }
 
 html[data-theme="anime"] {
-  --bg: #0f0a1a;
-  --surface: #1a1228;
-  --elevated: #241a35;
-  --hover: #2e2242;
-  --border: #3f2d55;
-  --text: #f0e6ff;
-  --muted: #c4a8e0;
-  --subtle: #7a5a9a;
+  --bg: #1a1410;
+  --surface: #241e1a;
+  --elevated: #2e2824;
+  --hover: #3a322e;
+  --border: #4a3f3a;
+  --text: #fce8f0;
+  --muted: #d4a8b8;
+  --subtle: #8a6a7a;
   --accent: #ff7eb3;
   --accent-faint: rgba(255, 126, 179, 0.08);
   --accent-soft: rgba(255, 126, 179, 0.15);
   --accent-ring: rgba(255, 126, 179, 0.4);
-  --danger: #ff4081;
-  --warning: #ffd740;
-  --success: #69f0ae;
+  --danger: #ff6b8a;
+  --warning: #ffb86c;
+  --success: #6bcfa0;
   --font-sans: "Nunito", "Inter", system-ui, sans-serif;
   --font-display: "Space Grotesk", system-ui, sans-serif;
 }
@@ -245,7 +245,7 @@ html[data-theme="neon"] .jarvis-backdrop {
 }
 html[data-theme="anime"] .mira-backdrop,
 html[data-theme="anime"] .jarvis-backdrop {
-  background: rgba(15, 10, 26, 0.6);
+  background: rgba(26, 20, 16, 0.55);
 }
 
 /* Toggle switch — track + thumb with hard-bounded dimensions */
@@ -592,8 +592,8 @@ html[data-theme="neon"] .glass {
   border-color: rgba(57, 255, 20, 0.1);
 }
 html[data-theme="anime"] .glass {
-  background: rgba(15, 10, 26, 0.65);
-  border-color: rgba(255, 126, 179, 0.1);
+  background: rgba(26, 20, 16, 0.65);
+  border-color: rgba(255, 126, 179, 0.12);
 }
 
 .glass-strong {
@@ -627,8 +627,8 @@ html[data-theme="neon"] .glass-strong {
   border-color: rgba(57, 255, 20, 0.12);
 }
 html[data-theme="anime"] .glass-strong {
-  background: rgba(15, 10, 26, 0.85);
-  border-color: rgba(255, 126, 179, 0.12);
+  background: rgba(26, 20, 16, 0.85);
+  border-color: rgba(255, 126, 179, 0.14);
 }
 
 .gradient-text {
@@ -674,7 +674,7 @@ html[data-theme="earth"] .gradient-text {
   background-clip: text;
 }
 html[data-theme="anime"] .gradient-text {
-  background: linear-gradient(135deg, #ff7eb3, #b388ff, #00e5ff);
+  background: linear-gradient(135deg, #ff7eb3, #ffb86c, #d4a8b8);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
