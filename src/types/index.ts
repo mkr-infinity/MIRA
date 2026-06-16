@@ -161,7 +161,7 @@ export interface PluginConfig {
 }
 
 export interface AppSettings {
-  theme: "dark" | "light" | "cyberpunk" | "sakura" | "nordic" | "neon" | "earth";
+  theme: "dark" | "light" | "cyberpunk" | "sakura" | "nordic" | "neon" | "earth" | "anime";
   voiceEnabled: boolean;
   voiceAutoSpeak: boolean;
   voiceWakeWord: boolean;
