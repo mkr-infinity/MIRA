@@ -42,8 +42,8 @@ async function ensureDir(path: string) {
     if (!(await exists(path))) {
       await mkdir(path, { recursive: true });
     }
-  } catch {
-    // ignore
+  } catch (e) {
+    console.warn("[MIRA] ensureDir failed:", e);
   }
 }
 
@@ -63,7 +63,8 @@ async function readJSON<T>(file: string, fallback: T): Promise<T> {
         localStorage.getItem(`jarvis:${file}`);
       return raw ? (JSON.parse(raw) as T) : fallback;
     }
-  } catch {
+  } catch (e) {
+    console.warn(`[MIRA] readJSON failed for ${file}, using defaults:`, e);
     return fallback;
   }
 }
@@ -78,7 +79,7 @@ async function writeJSON(file: string, data: unknown): Promise<void> {
       localStorage.setItem(`mira:${file}`, JSON.stringify(data));
     }
   } catch (e) {
-    console.error("writeJSON failed", e);
+    console.error(`[MIRA] writeJSON failed for ${file}:`, e);
   }
 }
 
