@@ -154,8 +154,8 @@ export function MagneticGrid({
   return (
     <canvas
       ref={canvasRef}
-      className={`fixed inset-0 pointer-events-none z-0 ${className}`}
-      style={{ opacity: 0.6 }}
+      className={`fixed inset-0 pointer-events-none -z-10 ${className}`}
+      style={{ opacity: 0.5 }}
     />
   );
 }
