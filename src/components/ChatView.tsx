@@ -8,7 +8,6 @@ import {
   Square,
   Plus,
   Sun,
-  Moon,
   Volume2,
   StopCircle,
   Settings,

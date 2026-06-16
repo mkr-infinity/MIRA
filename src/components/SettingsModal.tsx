@@ -6,8 +6,6 @@ import {
   Sparkles,
   Volume2,
   Folder,
-  Sun,
-  Moon,
   Eye,
   EyeOff,
   RefreshCw,
@@ -30,14 +28,8 @@ import {
   Camera,
   Github,
   Coffee,
-  Instagram,
-  Send,
-  Globe2,
-  Star,
   Loader2,
   ExternalLink,
-  Server,
-  Pencil,
   Languages,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";

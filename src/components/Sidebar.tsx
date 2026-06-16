@@ -10,7 +10,6 @@ import {
   Bot,
   Volume2,
   Settings,
-  User,
   Sun,
   Moon,
   Info,
@@ -22,8 +21,6 @@ import {
   ChevronLeft,
   PanelLeftClose,
   PanelLeftOpen,
-  Camera,
-  MessageSquarePlus,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cx, THEMES, type ThemeId } from "../lib/theme";

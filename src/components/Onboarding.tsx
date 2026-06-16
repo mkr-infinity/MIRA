@@ -13,8 +13,6 @@ import {
   Loader2,
   Mic,
   Volume2,
-  Sun,
-  Moon,
   Eye,
   EyeOff,
   RefreshCw,
