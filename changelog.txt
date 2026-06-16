@@ -1,0 +1,48 @@
+MIRA Changelog
+==============
+
+v2.0.0 - 2024
+--------------
+Initial release of MIRA v2.
+
+Features:
+- 6 AI providers: OpenAI, Anthropic, Gemini, Ollama, OpenRouter, Custom
+- Voice mode with arc-reactor orb, STT/TTS, push-to-talk
+- Desktop control: open apps, URLs, play music, search, volume, lock
+- ChatGPT-style sidebar with projects
+- 7 themes: Midnight, Daylight, Cyberpunk, Sakura, Nordic, Neon, Earth
+- Memory system for long-term facts
+- Skills system with .md file import
+- Activity logs per message
+- Auto-fallback across providers
+- Personality presets (Default, Concise, Friendly, Code Mentor, Therapist)
+- Custom system prompt support
+- Keyboard shortcuts (F11, Escape, Ctrl+N, Ctrl+,, Ctrl+/)
+- Responsive layout with auto-collapsing sidebar
+- Animated sidebar collapse/expand
+
+v2.0.1 - 2024
+--------------
+Fixes:
+- Fixed isTauri() call in SettingsModal (was missing parentheses)
+- Fixed setTheme parameter type (string -> ThemeId)
+- Improved error handling in storage layer (log errors instead of swallowing)
+- Added null checks for #root element in main.tsx
+- Replaced non-null assertions with safe fallbacks in store
+- Added .catch() to fire-and-forget storage saves
+- Fixed scheduleSave using stale closure reference
+- Added clipboard error handling in MessageBubble
+
+Improvements:
+- Made Orb and ThinkingAnimation theme-aware (use accent color from CSS)
+- Replaced hardcoded cyan colors with CSS variables across all components
+- Added complete theme overrides for neon and nordic themes
+- Updated orb-glow to use CSS variables
+- Removed 14 unused icon imports across 4 components
+- Removed dead ThinkingDots and ThemeButton functions
+- Added global keyboard shortcuts (Ctrl+N, Ctrl+,, Escape, Ctrl+/)
+- Added ARIA attributes to SettingsModal, Onboarding, ChatView
+- Added responsive sidebar auto-collapse on narrow viewports
+- Animated sidebar collapse/expand with CSS transitions
+- Fixed legacy 'jarvis' localStorage key to 'mira'
+- Updated README with clear project description and usage instructions
