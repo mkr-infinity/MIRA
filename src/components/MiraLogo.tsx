@@ -18,6 +18,7 @@ export function MiraLogo({ size = 36, glow = true, className, animated = true }:
       className={`relative flex items-center justify-center ${className || ""}`}
       style={{ width: size, height: size }}
     >
+      {/* Glow effect */}
       {glow && (
         <motion.div
           className="absolute inset-0 rounded-full pointer-events-none"
@@ -25,100 +26,96 @@ export function MiraLogo({ size = 36, glow = true, className, animated = true }:
             background: `radial-gradient(circle, rgba(0,212,255,0.3) 0%, rgba(0,119,255,0.1) 40%, transparent 70%)`,
             filter: "blur(6px)",
           }}
-          animate={animated ? { scale: [1, 1.1, 1], opacity: [0.6, 1, 0.6] } : undefined}
-          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+          animate={animated ? { scale: [1, 1.12, 1], opacity: [0.5, 1, 0.5] } : undefined}
+          transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
         />
       )}
+
+      {/* Rotating ring wrapper */}
+      <motion.div
+        className="absolute inset-0"
+        animate={animated ? { rotate: 360 } : undefined}
+        transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
+      >
+        <svg viewBox="0 0 100 100" className="w-full h-full" fill="none">
+          <defs>
+            <linearGradient id={gradId} x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#00D4FF" />
+              <stop offset="50%" stopColor="#00AAFF" />
+              <stop offset="100%" stopColor="#0077FF" />
+            </linearGradient>
+            <radialGradient id={glowId} cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="#00FFFF" stopOpacity={0.9} />
+              <stop offset="40%" stopColor="#00D4FF" stopOpacity={0.4} />
+              <stop offset="100%" stopColor="#0077FF" stopOpacity={0} />
+            </radialGradient>
+          </defs>
+          {/* Outer segmented ring */}
+          <circle cx="50" cy="50" r="44" stroke={`url(#${gradId})`} strokeWidth="1.5" strokeDasharray="4 4" opacity={0.7} />
+        </svg>
+      </motion.div>
+
+      {/* Counter-rotating middle ring */}
+      <motion.div
+        className="absolute inset-0"
+        animate={animated ? { rotate: -360 } : undefined}
+        transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+      >
+        <svg viewBox="0 0 100 100" className="w-full h-full" fill="none">
+          <circle cx="50" cy="50" r="34" stroke={`url(#${gradId})`} strokeWidth="1" opacity={0.35} strokeDasharray="8 6" />
+        </svg>
+      </motion.div>
+
+      {/* Inner ring */}
       <svg
         viewBox="0 0 100 100"
         style={{ width: size, height: size }}
         className="relative z-10"
         fill="none"
       >
-        <defs>
-          <linearGradient id={gradId} x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#00D4FF" />
-            <stop offset="50%" stopColor="#00AAFF" />
-            <stop offset="100%" stopColor="#0077FF" />
-          </linearGradient>
-          <radialGradient id={glowId} cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#00FFFF" stopOpacity={0.9} />
-            <stop offset="40%" stopColor="#00D4FF" stopOpacity={0.4} />
-            <stop offset="100%" stopColor="#0077FF" stopOpacity={0} />
-          </radialGradient>
-          <filter id={`mira-blur-${id}`}>
-            <feGaussianBlur stdDeviation="2" />
-          </filter>
-        </defs>
+        <circle cx="50" cy="50" r="24" stroke="#00D4FF" strokeWidth="1.8" opacity={0.3} />
 
-        {/* Background ambient glow */}
-        <circle cx="50" cy="50" r="46" fill={`url(#${glowId})`} opacity={0.4} />
-
-        {/* Outer arc reactor segmented ring */}
-        <circle
-          cx="50" cy="50" r="44"
-          stroke={`url(#${gradId})`}
-          strokeWidth="1.5"
-          strokeDasharray="5 3.5"
-          opacity={0.8}
-        />
-
-        {/* Middle ring */}
-        <circle
-          cx="50" cy="50" r="34"
-          stroke={`url(#${gradId})`}
-          strokeWidth="1"
-          opacity={0.45}
-        />
-
-        {/* Inner ring */}
-        <circle
-          cx="50" cy="50" r="24"
+        {/* Core glow */}
+        <motion.circle
+          cx="50" cy="50" r="14"
+          fill={`url(#${glowId})`}
           stroke="#00D4FF"
-          strokeWidth="1.8"
-          opacity={0.35}
+          strokeWidth="1.5"
+          opacity={0.9}
+          animate={animated ? { r: [14, 16, 14], opacity: [0.9, 0.6, 0.9] } : undefined}
+          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
         />
-
-        {/* Radiating energy lines (8 directions) */}
-        <g opacity={0.35}>
-          <line x1="50" y1="20" x2="50" y2="28" stroke={`url(#${gradId})`} strokeWidth="1.2" strokeLinecap="round" />
-          <line x1="50" y1="72" x2="50" y2="80" stroke={`url(#${gradId})`} strokeWidth="1.2" strokeLinecap="round" />
-          <line x1="20" y1="50" x2="28" y2="50" stroke={`url(#${gradId})`} strokeWidth="1.2" strokeLinecap="round" />
-          <line x1="72" y1="50" x2="80" y2="50" stroke={`url(#${gradId})`} strokeWidth="1.2" strokeLinecap="round" />
-          <line x1="28.8" y1="28.8" x2="34.5" y2="34.5" stroke={`url(#${gradId})`} strokeWidth="1" strokeLinecap="round" />
-          <line x1="71.2" y1="28.8" x2="65.5" y2="34.5" stroke={`url(#${gradId})`} strokeWidth="1" strokeLinecap="round" />
-          <line x1="28.8" y1="71.2" x2="34.5" y2="65.5" stroke={`url(#${gradId})`} strokeWidth="1" strokeLinecap="round" />
-          <line x1="71.2" y1="71.2" x2="65.5" y2="65.5" stroke={`url(#${gradId})`} strokeWidth="1" strokeLinecap="round" />
-        </g>
-
-        {/* Core glow circle */}
-        <circle cx="50" cy="50" r="14" fill={`url(#${glowId})`} stroke="#00D4FF" strokeWidth="1.5" opacity={0.9} />
 
         {/* Central bright core */}
-        <circle cx="50" cy="50" r="5" fill="#00FFFF" opacity={0.85} />
+        <motion.circle
+          cx="50" cy="50" r="5" fill="#00FFFF" opacity={0.85}
+          animate={animated ? { r: [5, 6, 5], opacity: [0.85, 1, 0.85] } : undefined}
+          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+        />
         <circle cx="50" cy="50" r="2.5" fill="#FFFFFF" opacity={0.95} />
-
-        {/* Orbital arc (right side) */}
-        <path
-          d="M73.5 22.5 A38 38 0 0 1 84 50"
-          stroke={`url(#${gradId})`}
-          strokeWidth="2.5"
-          strokeOpacity={0.6}
-          strokeLinecap="round"
-          filter={`url(#mira-blur-${id})`}
-        />
-        <path
-          d="M73.5 22.5 A38 38 0 0 1 84 50"
-          stroke="#00D4FF"
-          strokeWidth="1.5"
-          strokeOpacity={0.8}
-          strokeLinecap="round"
-        />
-
-        {/* Orbital dot */}
-        <circle cx="84" cy="50" r="3.5" fill="#00D4FF" fillOpacity={0.9} />
-        <circle cx="84" cy="50" r="1.5" fill="#FFFFFF" fillOpacity={0.8} />
       </svg>
+
+      {/* Orbiting dot */}
+      <motion.div
+        className="absolute z-10"
+        style={{ width: size, height: size }}
+        animate={animated ? { rotate: 360 } : undefined}
+        transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+      >
+        <div
+          className="absolute"
+          style={{
+            top: 0,
+            left: "50%",
+            width: 7,
+            height: 7,
+            borderRadius: "50%",
+            background: "#00D4FF",
+            boxShadow: "0 0 8px rgba(0,212,255,0.8)",
+            transform: "translateX(-50%)",
+          }}
+        />
+      </motion.div>
     </div>
   );
 }
