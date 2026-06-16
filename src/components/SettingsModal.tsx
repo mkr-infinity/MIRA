@@ -1023,7 +1023,6 @@ function LogsTab() {
   const { logs, clearLogs, settings, updateSettings } = useStore();
   const [filter, setFilter] = useState<"all" | "info" | "warn" | "error" | "debug">("all");
   const [source, setSource] = useState<string>("all");
-  const [autoScroll, setAutoScroll] = useState(true);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
@@ -1047,10 +1046,10 @@ function LogsTab() {
   }, [logs, filter, source]);
 
   useEffect(() => {
-    if (autoScroll && containerRef.current) {
+    if (containerRef.current) {
       containerRef.current.scrollTop = 0;
     }
-  }, [logs.length, autoScroll]);
+  }, [logs.length]);
 
   const levelColor: Record<string, string> = {
     debug: "mira-muted",
@@ -1059,11 +1058,11 @@ function LogsTab() {
     error: "mira-danger",
   };
 
-  const levelIcon: Record<string, string> = {
-    debug: "·",
-    info: "→",
-    warn: "!",
-    error: "×",
+  const levelBadge: Record<string, string> = {
+    debug: "bg-gray-500/20 text-gray-400",
+    info: "bg-blue-500/20 text-blue-300",
+    warn: "bg-amber-500/20 text-amber-300",
+    error: "bg-red-500/20 text-red-300",
   };
 
   function exportLogs() {
@@ -1109,15 +1108,15 @@ function LogsTab() {
     <div className="space-y-4">
       <div className="flex items-end justify-between gap-3">
         <div>
-          <h2 className="font-display text-2xl font-semibold mb-1">Logs</h2>
-          <p className="text-sm mira-muted">
-            Live dev log of every action, network call, and provider request. Capped at the most recent 1,000 events.
+          <h2 className="font-display text-2xl font-semibold mb-1">&gt;_ dev.log</h2>
+          <p className="text-sm mira-muted font-mono">
+            <span className="text-emerald-400">$</span> tail -f every action, network call, and provider request
           </p>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
-          <span className="mira-chip">
-            <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-            <span>live</span>
+          <span className="mira-chip text-[10px]">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="font-mono">PID {Math.floor(Math.random() * 9000 + 1000)}</span>
           </span>
           <span className="text-xs mira-muted font-mono">
             {searched.length} / {logs.length}
@@ -1128,7 +1127,7 @@ function LogsTab() {
       <div className="rounded-mira border mira-border overflow-hidden">
         <div className="flex items-center gap-2 px-4 py-2 mira-elevated border-b mira-border">
           <Bug size={12} className="mira-accent" />
-          <span className="text-[10px] font-mono uppercase tracking-wider mira-muted">Log capture</span>
+          <span className="text-[10px] font-mono uppercase tracking-wider mira-muted">// log capture config</span>
         </div>
         <div className="p-4 space-y-3">
           <ToggleRow
@@ -1138,25 +1137,25 @@ function LogsTab() {
             onChange={(v) => updateSettings({ logsEnabled: v })}
           />
           <div className="pt-3 border-t mira-border">
-            <div className="text-[10px] font-mono uppercase tracking-wider mira-muted mb-2">Sources</div>
-            <div className="flex flex-wrap gap-1.5 text-[11px]">
+            <div className="text-[10px] font-mono uppercase tracking-wider mira-muted mb-2">watchers</div>
+            <div className="flex flex-wrap gap-1.5 text-[11px] font-mono">
               {[
-                { src: "boot", desc: "App startup" },
-                { src: "init", desc: "Store hydration" },
-                { src: "settings", desc: "Settings changes" },
-                { src: "providers", desc: "Provider swap/config" },
-                { src: "sendMessage", desc: "Chat turns" },
-                { src: "ai", desc: "AI requests + tokens" },
-                { src: "network", desc: "Every network call" },
-                { src: "voice", desc: "STT/TTS events" },
+                { src: "boot", desc: "app startup" },
+                { src: "init", desc: "store hydration" },
+                { src: "settings", desc: "settings changes" },
+                { src: "providers", desc: "provider config" },
+                { src: "sendMessage", desc: "chat turns" },
+                { src: "ai", desc: "AI requests" },
+                { src: "network", desc: "network calls" },
+                { src: "voice", desc: "STT/TTS" },
                 { src: "desktop", desc: "OS commands" },
-                { src: "data", desc: "CRUD actions" },
-                { src: "console", desc: "console.* output" },
-                { src: "errors", desc: "Provider + runtime" },
+                { src: "data", desc: "CRUD ops" },
+                { src: "console", desc: "console.*" },
+                { src: "errors", desc: "runtime errors" },
               ].map((t) => (
                 <span
                   key={t.src}
-                  className="px-2 py-1 rounded-pill text-[10px] font-mono border mira-border mira-elevated"
+                  className="px-2 py-1 rounded-pill text-[10px] border mira-border mira-elevated"
                 >
                   {t.desc}
                 </span>
@@ -1172,7 +1171,7 @@ function LogsTab() {
           <input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search logs…"
+            placeholder="grep logs…"
             className="mira-input pl-8 text-xs h-9 font-mono"
           />
           {searchQuery && (
@@ -1187,26 +1186,19 @@ function LogsTab() {
         <div className="flex items-center gap-1 flex-wrap">
           {(["all", "info", "warn", "error", "debug"] as const).map((f) => {
             const count = f === "all" ? logs.length : logs.filter((l) => l.level === f).length;
-            const colors: Record<string, string> = {
-              all: "border-cyan-500/30 text-cyan-300",
-              info: "border-blue-500/30 text-blue-300",
-              warn: "border-amber-500/30 text-amber-300",
-              error: "border-red-500/30 text-red-300",
-              debug: "border-gray-500/30 text-gray-300",
-            };
             return (
               <button
                 key={f}
                 onClick={() => setFilter(f)}
                 className={cx(
-                  "px-2.5 py-1.5 rounded-pill text-[10px] font-mono uppercase tracking-wider border transition-all",
+                  "px-2.5 py-1 rounded-pill text-[10px] font-mono uppercase tracking-wider border transition-all",
                   filter === f
-                    ? `${colors[f]} mira-elevated`
-                    : "mira-muted hover:mira-text border-transparent"
+                    ? `${levelBadge[f]} border-transparent`
+                    : "mira-muted hover:mira-text border-mira-border"
                 )}
               >
                 {f}
-                <span className="ml-1 opacity-60">{count}</span>
+                <span className="ml-1 opacity-50">{count}</span>
               </button>
             );
           })}
@@ -1217,10 +1209,10 @@ function LogsTab() {
             onChange={(e) => setSource(e.target.value)}
             className="px-2 py-1.5 rounded-mira text-[10px] font-mono mira-elevated border mira-border mira-text focus:outline-none h-9"
           >
-            <option value="all">all sources</option>
+            <option value="all">$ --source=*</option>
             {sources.map((s) => (
               <option key={s} value={s}>
-                {s}
+                $ --source={s}
               </option>
             ))}
           </select>
@@ -1231,64 +1223,64 @@ function LogsTab() {
             className="px-2.5 py-1.5 rounded-pill mira-elevated mira-text border mira-border hover:mira-hover text-[10px] font-mono"
             title="Copy filtered logs to clipboard"
           >
-            Copy
+            cp
           </button>
           <button
             onClick={exportLogs}
             className="px-2.5 py-1.5 rounded-pill mira-elevated mira-text border mira-border hover:mira-hover text-[10px] font-mono"
             title="Download all logs as .log"
           >
-            Export
+            export
           </button>
           <button
             onClick={clearLogs}
-            className="px-2.5 py-1.5 rounded-pill mira-elevated mira-text border mira-border hover:mira-hover text-[10px] font-mono"
+            className="px-2.5 py-1.5 rounded-pill mira-elevated text-red-300 border mira-border hover:mira-hover text-[10px] font-mono"
             title="Clear log buffer"
           >
-            Clear
+            clear
           </button>
         </div>
       </div>
 
       <div
         ref={containerRef}
-        className="mira-bg mira-border border rounded-mira overflow-hidden font-mono text-[11px] leading-relaxed"
+        className="mira-bg mira-border border rounded-mira overflow-hidden font-mono text-[12px] leading-relaxed"
       >
         {searched.length === 0 ? (
-          <div className="h-[400px] flex flex-col items-center justify-center mira-muted text-sm gap-2">
+          <div className="h-[400px] flex flex-col items-center justify-center mira-muted gap-2">
             <Code size={24} className="mira-muted" />
-            <div>No log entries match the current filters.</div>
+            <div className="text-sm">&gt; no matches</div>
             <div className="text-[10px] font-mono">
-              {logs.length === 0 ? "Waiting for activity… send a message to see logs flow." : "Try clearing the filter."}
+              {logs.length === 0 ? "waiting for activity…" : "try a different filter"}
             </div>
           </div>
         ) : (
-          <div className="h-[400px] overflow-y-auto">
-            {searched.map((l) => {
+          <div className="h-[400px] overflow-y-auto scroll-smooth">
+            {searched.map((l, idx) => {
               const expanded = expandedIds.has(l.id);
               const hasMeta = l.meta && Object.keys(l.meta).length > 0;
               return (
                 <motion.div
                   key={l.id}
-                  initial={{ opacity: 0, x: -4 }}
-                  animate={{ opacity: 1, x: 0 }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
                   className={cx(
                     "border-b mira-border last:border-b-0 transition-colors",
-                    expanded ? "mira-elevated" : "hover:mira-hover"
+                    expanded ? "mira-elevated" : "hover:bg-white/[0.015]"
                   )}
                 >
                   <button
                     onClick={() => hasMeta && toggleExpand(l.id)}
                     className="w-full text-left flex items-start gap-2 px-3 py-1.5"
                   >
-                    <span className="mira-muted flex-shrink-0 tabular-nums pt-0.5">
+                    <span className="mira-muted flex-shrink-0 tabular-nums pt-0.5 text-[10px] w-[72px]">
                       {new Date(l.timestamp).toLocaleTimeString([], { hour12: false })}
                     </span>
-                    <span className={cx("flex-shrink-0 font-bold tabular-nums text-[10px] uppercase pt-0.5", levelColor[l.level])}>
-                      {levelIcon[l.level]}
+                    <span className={cx("flex-shrink-0 text-[9px] font-bold px-1 rounded pt-[3px]", levelBadge[l.level])}>
+                      {l.level.toUpperCase()}
                     </span>
-                    <span className="mira-muted flex-shrink-0 font-semibold text-[10px] pt-0.5">[{l.source}]</span>
-                    <span className="mira-text break-all flex-1 text-[11px] leading-snug">{l.message}</span>
+                    <span className="mira-muted flex-shrink-0 text-[10px] pt-0.5 font-mono">[{l.source}]</span>
+                    <span className="mira-text break-all flex-1 text-[12px] leading-snug">{l.message}</span>
                     {hasMeta && (
                       <ChevronDown
                         size={10}
@@ -1305,7 +1297,7 @@ function LogsTab() {
                       animate={{ height: "auto", opacity: 1 }}
                       className="overflow-hidden"
                     >
-                      <pre className="ml-[140px] mr-3 mb-2 p-2 rounded mira-elevated text-[10px] mira-muted overflow-x-auto">
+                      <pre className="ml-[170px] mr-3 mb-2 p-2 rounded mira-elevated text-[10px] mira-muted overflow-x-auto">
                         {JSON.stringify(l.meta, null, 2)}
                       </pre>
                     </motion.div>
