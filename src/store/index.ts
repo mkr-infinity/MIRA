@@ -116,6 +116,10 @@ interface Actions {
   clearLogs: () => void;
   clearError: (id: string) => void;
   patchMessage: (convId: string, msgId: string, patch: Partial<Message>) => void;
+  searchMessageQuery: string;
+  searchMessageResults: string[];
+  setSearchMessageQuery: (q: string) => void;
+  searchInConversation: () => void;
 }
 
 const abortControllers = new Map<string, AbortController>();
@@ -138,6 +142,8 @@ export const useStore = create<State & Actions>((set, get) => ({
   voiceTranscript: "",
   voiceMode: false,
   errors: [],
+  searchMessageQuery: "",
+  searchMessageResults: [],
 
   async init() {
     const [settings, conversations, memory, skills, projects, projectMemory, customCommands] = await Promise.all([
@@ -944,6 +950,35 @@ export const useStore = create<State & Actions>((set, get) => ({
   },
   clearLogs() {
     set({ logs: [] });
+  },
+
+  setSearchMessageQuery(q) {
+    set({ searchMessageQuery: q });
+    if (!q.trim()) {
+      set({ searchMessageResults: [] });
+      return;
+    }
+    get().searchInConversation();
+  },
+
+  searchInConversation() {
+    const { activeId, conversations, searchMessageQuery } = get();
+    const q = searchMessageQuery.toLowerCase().trim();
+    if (!q || !activeId) {
+      set({ searchMessageResults: [] });
+      return;
+    }
+    const conv = conversations.find((c) => c.id === activeId);
+    if (!conv) {
+      set({ searchMessageResults: [] });
+      return;
+    }
+    const results = conv.messages
+      .map((m, i) => ({ idx: i, id: m.id, content: m.content, role: m.role }))
+      .filter((m) => m.content.toLowerCase().includes(q))
+      .map((m) => m.id);
+    set({ searchMessageResults: results });
+    devlog("search", `In-conversation search "${searchMessageQuery}": ${results.length} hits`);
   },
 
   patchMessage(convId, msgId, patch) {

@@ -19,6 +19,10 @@ import {
   PanelLeftClose,
   ArrowLeft,
   FolderOpen,
+  Search,
+  ChevronUp,
+  ChevronDown,
+  X,
 } from "lucide-react";
 import { stt } from "../lib/voice/stt";
 import { tts } from "../lib/voice/tts";
@@ -58,11 +62,17 @@ export function ChatView({
     setActiveProject,
     activeProjectId,
     projects,
+    searchMessageQuery,
+    searchMessageResults,
+    setSearchMessageQuery,
   } = useStore();
   const [input, setInput] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchIdx, setSearchIdx] = useState(0);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const conv = conversations.find((c) => c.id === activeId);
   const activeProvider = settings.providers.find(
@@ -146,17 +156,26 @@ export function ChatView({
     return () => clearInterval(id);
   }, [isSpeaking, setSpeaking]);
 
-  // F11 to open voice mode
+  // F11 to open voice mode, Ctrl+F to search
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === "F11") {
         e.preventDefault();
         onOpenVoiceMode();
       }
+      if ((e.ctrlKey || e.metaKey) && e.key === "f") {
+        e.preventDefault();
+        setSearchOpen(true);
+        setTimeout(() => searchInputRef.current?.focus(), 50);
+      }
+      if (e.key === "Escape" && searchOpen) {
+        setSearchOpen(false);
+        setSearchMessageQuery("");
+      }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [onOpenVoiceMode]);
+  }, [onOpenVoiceMode, searchOpen]);
 
   function handleSend(text?: string) {
     const msg = (text ?? input).trim();
@@ -293,6 +312,63 @@ export function ChatView({
           </button>
         </div>
       </header>
+
+      {/* Message search bar */}
+      <AnimatePresence>
+        {searchOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="flex-shrink-0 border-b mira-border overflow-hidden"
+          >
+            <div className="flex items-center gap-2 px-4 py-2">
+              <Search size={14} className="mira-muted flex-shrink-0" />
+              <input
+                ref={searchInputRef}
+                type="text"
+                value={searchMessageQuery}
+                onChange={(e) => { setSearchMessageQuery(e.target.value); setSearchIdx(0); }}
+                placeholder="Search in conversation…"
+                className="flex-1 bg-transparent border-0 focus:ring-0 text-sm mira-text placeholder:mira-muted outline-none"
+              />
+              {searchMessageResults.length > 0 && (
+                <span className="text-xs font-mono mira-muted tabular-nums">
+                  {searchIdx + 1}/{searchMessageResults.length}
+                </span>
+              )}
+              <button
+                onClick={() => {
+                  setSearchIdx((i) => Math.max(0, i - 1));
+                  const id = searchMessageResults[Math.max(0, searchIdx - 1)];
+                  if (id) document.getElementById(`msg-${id}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+                }}
+                disabled={searchMessageResults.length === 0}
+                className="p-1 rounded mira-muted hover:mira-text disabled:opacity-30"
+              >
+                <ChevronUp size={14} />
+              </button>
+              <button
+                onClick={() => {
+                  setSearchIdx((i) => Math.min(searchMessageResults.length - 1, i + 1));
+                  const id = searchMessageResults[Math.min(searchMessageResults.length - 1, searchIdx + 1)];
+                  if (id) document.getElementById(`msg-${id}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+                }}
+                disabled={searchMessageResults.length === 0}
+                className="p-1 rounded mira-muted hover:mira-text disabled:opacity-30"
+              >
+                <ChevronDown size={14} />
+              </button>
+              <button
+                onClick={() => { setSearchOpen(false); setSearchMessageQuery(""); }}
+                className="p-1 rounded mira-muted hover:mira-text"
+              >
+                <X size={14} />
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Messages */}
       <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto grid-bg">

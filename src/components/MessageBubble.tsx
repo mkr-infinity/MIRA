@@ -86,7 +86,7 @@ export function MessageBubble({ message }: { message: Message }) {
   const accent = settings.accentColor || "#00D4FF";
 
   return (
-    <div className={`flex gap-3 ${isUser ? "justify-end" : "justify-start"} group`}>
+    <div id={`msg-${message.id}`} className={`flex gap-3 ${isUser ? "justify-end" : "justify-start"} group`}>
       {!isUser && (
         <div className="flex-shrink-0 mt-1">
           <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden glass-strong">
