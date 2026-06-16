@@ -25,6 +25,7 @@ import {
   X,
   Image as ImageIcon,
   Paperclip,
+  Camera,
 } from "lucide-react";
 import { stt } from "../lib/voice/stt";
 import { tts } from "../lib/voice/tts";
@@ -77,6 +78,32 @@ export function ChatView({
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
   const [pendingImages, setPendingImages] = useState<Array<{ name: string; type: string; size: number; content: string }>>([]);
+
+  const captureCamera = useCallback(async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      const video = document.createElement("video");
+      video.srcObject = stream;
+      video.play();
+      // Wait a frame for the camera to warm up
+      await new Promise((r) => requestAnimationFrame(r));
+      const canvas = document.createElement("canvas");
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      canvas.getContext("2d")!.drawImage(video, 0, 0);
+      stream.getTracks().forEach((t) => t.stop());
+      canvas.toBlob((blob) => {
+        if (!blob) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          setPendingImages((prev) => [...prev, { name: "Camera capture", type: "image/png", size: blob.size, content: reader.result as string }]);
+        };
+        reader.readAsDataURL(blob);
+      }, "image/png");
+    } catch (e: any) {
+      useStore.getState().log("error", "camera", `Camera access failed: ${e?.message || e}`);
+    }
+  }, []);
 
   const handleFiles = useCallback((files: FileList) => {
     const images: typeof pendingImages = [];
@@ -510,6 +537,13 @@ export function ChatView({
                 <ImageIcon size={18} />
               </button>
             )}
+            <button
+              onClick={captureCamera}
+              className="p-2.5 rounded-xl hover:mira-hover mira-muted hover:mira-text transition-colors"
+              title="Capture from camera"
+            >
+              <Camera size={18} />
+            </button>
             <textarea
               data-chat-input
               aria-label="Message MIRA"
