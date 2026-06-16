@@ -402,6 +402,17 @@ function GeneralTab() {
         accent="brand"
       >
         <ToggleRow
+          label="Desktop notifications"
+          description="Show a desktop notification when MIRA replies."
+          checked={!!settings.notificationsEnabled}
+          onChange={(v) => {
+            updateSettings({ notificationsEnabled: v });
+            if (v && typeof Notification !== "undefined" && Notification.permission === "default") {
+              Notification.requestPermission();
+            }
+          }}
+        />
+        <ToggleRow
           label="Desktop control"
           description="Let MIRA open apps, set volume, play music, etc."
           checked={settings.desktopControlEnabled}

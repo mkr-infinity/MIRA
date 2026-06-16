@@ -197,6 +197,8 @@ export interface AppSettings {
   providerModels?: Partial<Record<ProviderId, string[]>>;
   // Custom CSS injected via <style> tag
   customCSS?: string;
+  // Desktop notifications on AI response
+  notificationsEnabled?: boolean;
 }
 
 export interface ChatRequest {

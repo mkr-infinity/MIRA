@@ -648,6 +648,16 @@ export const useStore = create<State & Actions>((set, get) => ({
       }
     }
 
+    // Desktop notification on response
+    if (settings.notificationsEnabled && finalContent && typeof Notification !== "undefined" && Notification.permission === "granted") {
+      try {
+        new Notification("MIRA replied", {
+          body: stripMarkdown(finalContent).slice(0, 120),
+          icon: "/favicon.ico",
+        });
+      } catch {}
+    }
+
     clearTimeout(timeoutId);
     abortControllers.delete(conv.id);
     set({ isProcessing: false });

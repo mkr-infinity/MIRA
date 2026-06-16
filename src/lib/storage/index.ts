@@ -235,6 +235,7 @@ export function defaultSettings(): AppSettings {
     personality: "default",
     customSystemPrompt: "",
     customCSS: "",
+    notificationsEnabled: true,
   };
 }
 
