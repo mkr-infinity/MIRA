@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
+import { getAccentColor, hexToRgba } from "../lib/theme";
 
 const statuses = [
   "Thinking…",
@@ -11,6 +12,7 @@ const statuses = [
 
 export function ThinkingAnimation() {
   const [index, setIndex] = useState(0);
+  const accent = getAccentColor();
 
   useEffect(() => {
     const t = setInterval(() => setIndex((i) => (i + 1) % statuses.length), 2000);
@@ -23,7 +25,7 @@ export function ThinkingAnimation() {
         <motion.div
           className="absolute inset-0 rounded-full"
           style={{
-            background: 'linear-gradient(135deg, #00D4FF, #0077FF)',
+            background: `linear-gradient(135deg, ${accent}, ${accent}aa)`,
             opacity: 0.2,
           }}
           animate={{ scale: [1, 1.4, 1] }}
@@ -32,7 +34,7 @@ export function ThinkingAnimation() {
         <motion.div
           className="absolute w-3 h-3 rounded-full"
           style={{
-            background: 'linear-gradient(135deg, #00D4FF, #0077FF)',
+            background: `linear-gradient(135deg, ${accent}, ${accent}cc)`,
           }}
           animate={{ scale: [1, 1.2, 1], opacity: [0.7, 1, 0.7] }}
           transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}

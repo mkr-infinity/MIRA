@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { getAccentColor, hexToRgba } from "../lib/theme";
 
 interface Props {
   state: "idle" | "listening" | "thinking" | "speaking" | "denied" | "unsupported";
@@ -10,7 +11,7 @@ export { MiraOrb as JarvisOrb };
 
 export function MiraOrb({ state, size = 180 }: Props) {
   const isActive = state !== "idle";
-  const colorClass = state === "speaking" ? "from-amber-400 to-amber-600" : "from-cyan-300 to-cyan-500";
+  const accent = getAccentColor();
   const ringSpeed = state === "listening" ? 4 : state === "speaking" ? 2 : 16;
 
   // Generate particles
@@ -46,8 +47,8 @@ export function MiraOrb({ state, size = 180 }: Props) {
           width: size * 1.5,
           height: size * 1.5,
           background: `radial-gradient(circle, ${
-            state === "speaking" ? "rgba(245,158,11,0.2)" : "rgba(0,212,255,0.15)"
-          } 0%, rgba(0,119,255,0.05) 40%, transparent 70%)`,
+            state === "speaking" ? "rgba(245,158,11,0.2)" : hexToRgba(accent, 0.15)
+          } 0%, ${hexToRgba(accent, 0.05)} 40%, transparent 70%)`,
         }}
         animate={
           isActive
@@ -63,9 +64,9 @@ export function MiraOrb({ state, size = 180 }: Props) {
         style={{
           width: size * 1.15,
           height: size * 1.15,
-          border: `2px solid ${state === "speaking" ? "rgba(245,158,11,0.4)" : "rgba(0,212,255,0.3)"}`,
+          border: `2px solid ${state === "speaking" ? "rgba(245,158,11,0.4)" : hexToRgba(accent, 0.3)}`,
           borderTopColor: "transparent",
-          borderRightColor: state === "speaking" ? "rgba(245,158,11,0.8)" : "rgba(0,212,255,0.7)",
+          borderRightColor: state === "speaking" ? "rgba(245,158,11,0.8)" : hexToRgba(accent, 0.7),
         }}
         animate={{ rotate: 360 }}
         transition={{ duration: ringSpeed, repeat: Infinity, ease: "linear" }}
@@ -77,9 +78,9 @@ export function MiraOrb({ state, size = 180 }: Props) {
         style={{
           width: size * 0.82,
           height: size * 0.82,
-          border: `1.5px solid ${state === "speaking" ? "rgba(245,158,11,0.25)" : "rgba(0,212,255,0.2)"}`,
+          border: `1.5px solid ${state === "speaking" ? "rgba(245,158,11,0.25)" : hexToRgba(accent, 0.2)}`,
           borderBottomColor: "transparent",
-          borderLeftColor: state === "speaking" ? "rgba(245,158,11,0.6)" : "rgba(0,212,255,0.6)",
+          borderLeftColor: state === "speaking" ? "rgba(245,158,11,0.6)" : hexToRgba(accent, 0.6),
         }}
         animate={{ rotate: -360 }}
         transition={{ duration: ringSpeed * 1.5, repeat: Infinity, ease: "linear" }}
@@ -91,7 +92,7 @@ export function MiraOrb({ state, size = 180 }: Props) {
         style={{
           width: size * 0.98,
           height: size * 0.98,
-          border: `1px dashed ${state === "speaking" ? "rgba(245,158,11,0.15)" : "rgba(0,212,255,0.12)"}`,
+          border: `1px dashed ${state === "speaking" ? "rgba(245,158,11,0.15)" : hexToRgba(accent, 0.12)}`,
         }}
         animate={{ rotate: isActive ? 360 : 0 }}
         transition={{ duration: ringSpeed * 2, repeat: Infinity, ease: "linear" }}
@@ -105,11 +106,11 @@ export function MiraOrb({ state, size = 180 }: Props) {
           height: size * 0.5,
           background: state === "speaking"
             ? 'linear-gradient(135deg, #F59E0B, #D97706)'
-            : 'linear-gradient(135deg, #00D4FF, #0077FF)',
+            : `linear-gradient(135deg, ${accent}, ${accent}cc)`,
           boxShadow:
             state === "speaking"
               ? "0 0 80px rgba(245,158,11,0.6), inset 0 0 30px rgba(255,255,255,0.3)"
-              : "0 0 80px rgba(0,212,255,0.5), inset 0 0 30px rgba(255,255,255,0.3)",
+              : `0 0 80px ${hexToRgba(accent, 0.5)}, inset 0 0 30px rgba(255,255,255,0.3)`,
         }}
         animate={
           isActive
@@ -125,7 +126,10 @@ export function MiraOrb({ state, size = 180 }: Props) {
 
       {/* Status text */}
       {isActive && (
-        <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 font-mono text-xs uppercase tracking-[0.3em] text-cyan-400/80">
+        <div
+          className="absolute -bottom-10 left-1/2 -translate-x-1/2 font-mono text-xs uppercase tracking-[0.3em]"
+          style={{ color: hexToRgba(accent, 0.8) }}
+        >
           {state === "listening" ? "listening" : state === "speaking" ? "speaking" : "thinking"}
         </div>
       )}
