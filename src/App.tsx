@@ -42,7 +42,7 @@ export default function App() {
     const t = settings.theme || "dark";
     root.setAttribute("data-theme", t);
     // Backward compat: also toggle dark/light classes
-    root.classList.toggle("dark", t === "dark" || t === "cyberpunk" || t === "neon");
+    root.classList.toggle("dark", t === "dark" || t === "cyberpunk" || t === "neon" || t === "anime");
     root.classList.toggle("light", t === "light" || t === "earth" || t === "nordic" || t === "sakura");
     try { localStorage.setItem("mira:initial-theme", t); } catch {}
   }, [settings.theme]);

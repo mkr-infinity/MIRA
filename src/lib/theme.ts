@@ -1,7 +1,7 @@
 // Theme metadata and classname helpers.
 // Themes are applied via the `data-theme` attribute on <html>.
 
-export type ThemeId = "dark" | "light" | "cyberpunk" | "sakura" | "nordic" | "neon" | "earth";
+export type ThemeId = "dark" | "light" | "cyberpunk" | "sakura" | "nordic" | "neon" | "earth" | "anime";
 
 export interface ThemeMeta {
   id: ThemeId;
@@ -84,6 +84,16 @@ export const THEMES: ThemeMeta[] = [
     surface: "#181e10",
     font: "Nunito",
     preview: ["#0f1208", "#181e10", "#8bc34a", "#e8f0e0"],
+  },
+  {
+    id: "anime",
+    name: "Anime",
+    description: "Pastel pink, lavender and neon cyan — anime dreamscape",
+    accent: "#ff7eb3",
+    bg: "#0f0a1a",
+    surface: "#1a1228",
+    font: "Nunito",
+    preview: ["#0f0a1a", "#1a1228", "#ff7eb3", "#f0e6ff"],
   },
 ];
 

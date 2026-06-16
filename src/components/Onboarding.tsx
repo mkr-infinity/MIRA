@@ -123,7 +123,7 @@ export function Onboarding() {
   useEffect(() => {
     const root = document.documentElement;
     root.setAttribute("data-theme", themeChoice);
-    root.classList.toggle("dark", themeChoice === "dark" || themeChoice === "cyberpunk" || themeChoice === "neon");
+    root.classList.toggle("dark", themeChoice === "dark" || themeChoice === "cyberpunk" || themeChoice === "neon" || themeChoice === "anime");
     root.classList.toggle("light", themeChoice === "light" || themeChoice === "earth" || themeChoice === "nordic" || themeChoice === "sakura");
   }, [themeChoice]);
 

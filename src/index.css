@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 /* =========================================================
-   THEME TOKENS — 7 themes via data-theme attribute
+   THEME TOKENS — 8 themes via data-theme attribute
    .dark       → Vercel-inspired true black + cyan
    .light      → Dribbble-inspired warm cream + terracotta
    .cyberpunk  → Blade Runner neon pink/cyan on deep purple
@@ -11,6 +11,7 @@
    .nordic     → Icy blues + snow whites on slate
    .neon       → Electric green + magenta on pitch black
    .earth      → Forest greens + warm browns on deep soil
+   .anime      → Pastel pink, lavender, cyan — anime dreamscape
    ========================================================= */
 
 :root {
@@ -154,6 +155,26 @@ html[data-theme="earth"] {
   --font-display: "Plus Jakarta Sans", system-ui, sans-serif;
 }
 
+html[data-theme="anime"] {
+  --bg: #0f0a1a;
+  --surface: #1a1228;
+  --elevated: #241a35;
+  --hover: #2e2242;
+  --border: #3f2d55;
+  --text: #f0e6ff;
+  --muted: #c4a8e0;
+  --subtle: #7a5a9a;
+  --accent: #ff7eb3;
+  --accent-faint: rgba(255, 126, 179, 0.08);
+  --accent-soft: rgba(255, 126, 179, 0.15);
+  --accent-ring: rgba(255, 126, 179, 0.4);
+  --danger: #ff4081;
+  --warning: #ffd740;
+  --success: #69f0ae;
+  --font-sans: "Nunito", "Inter", system-ui, sans-serif;
+  --font-display: "Space Grotesk", system-ui, sans-serif;
+}
+
 /* Backward compat: html.dark = :root defaults */
 html[data-theme="dark"] {
   --bg: #000000;
@@ -221,6 +242,10 @@ html[data-theme="earth"] .jarvis-backdrop {
 html[data-theme="neon"] .mira-backdrop,
 html[data-theme="neon"] .jarvis-backdrop {
   background: rgba(0, 0, 0, 0.7);
+}
+html[data-theme="anime"] .mira-backdrop,
+html[data-theme="anime"] .jarvis-backdrop {
+  background: rgba(15, 10, 26, 0.6);
 }
 
 /* Toggle switch — track + thumb with hard-bounded dimensions */
@@ -360,6 +385,7 @@ html[data-theme="cyberpunk"] .voice-bar { background: var(--accent); box-shadow:
 html[data-theme="earth"] .voice-bar { background: var(--accent); box-shadow: 0 0 6px rgba(139, 195, 74, 0.3); }
 html[data-theme="neon"] .voice-bar { background: var(--accent); box-shadow: 0 0 6px rgba(57, 255, 20, 0.4); }
 html[data-theme="nordic"] .voice-bar { background: var(--accent); box-shadow: 0 0 6px rgba(136, 192, 208, 0.4); }
+html[data-theme="anime"] .voice-bar { background: var(--accent); box-shadow: 0 0 6px rgba(255, 126, 179, 0.4); }
 
 /* =========================================================
    MARKDOWN
@@ -565,6 +591,10 @@ html[data-theme="neon"] .glass {
   background: rgba(0, 0, 0, 0.65);
   border-color: rgba(57, 255, 20, 0.1);
 }
+html[data-theme="anime"] .glass {
+  background: rgba(15, 10, 26, 0.65);
+  border-color: rgba(255, 126, 179, 0.1);
+}
 
 .glass-strong {
   background: rgba(10, 10, 10, 0.82);
@@ -595,6 +625,10 @@ html[data-theme="earth"] .glass-strong {
 html[data-theme="neon"] .glass-strong {
   background: rgba(0, 0, 0, 0.85);
   border-color: rgba(57, 255, 20, 0.12);
+}
+html[data-theme="anime"] .glass-strong {
+  background: rgba(15, 10, 26, 0.85);
+  border-color: rgba(255, 126, 179, 0.12);
 }
 
 .gradient-text {
@@ -635,6 +669,12 @@ html[data-theme="neon"] .gradient-text {
 }
 html[data-theme="earth"] .gradient-text {
   background: linear-gradient(135deg, #8bc34a, #ffb300);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+html[data-theme="anime"] .gradient-text {
+  background: linear-gradient(135deg, #ff7eb3, #b388ff, #00e5ff);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
