@@ -230,7 +230,8 @@ export const useStore = create<State & Actions>((set, get) => ({
     const settings = get().settings;
     const provider = settings.providers.find(
       (p) => p.id === settings.activeProviderId
-    )!;
+    ) ?? settings.providers[0];
+    if (!provider) return id;
     const targetProject =
       projectId !== undefined
         ? projectId
@@ -247,7 +248,9 @@ export const useStore = create<State & Actions>((set, get) => ({
     };
     const conversations = [conv, ...get().conversations];
     set({ conversations, activeId: id, activeProjectId: targetProject });
-    storage.saveConversations(conversations);
+    storage.saveConversations(conversations).catch((e) =>
+      devlog("storage", `Failed to save conversations: ${e}`)
+    );
     devlog("conversation", `New conversation ${id} (${provider.name}/${provider.model})`, {
       projectId: targetProject, provider: settings.activeProviderId,
     });
@@ -284,7 +287,8 @@ export const useStore = create<State & Actions>((set, get) => ({
     let conv = conversations.find((c) => c.id === activeId);
     if (!conv) {
       const id = get().newConversation();
-      conv = get().conversations.find((c) => c.id === id)!;
+      conv = get().conversations.find((c) => c.id === id);
+      if (!conv) return;
     }
 
     // Sync conversation provider/model with current active provider
@@ -293,7 +297,7 @@ export const useStore = create<State & Actions>((set, get) => ({
     );
     if (activeProvider && (conv.provider !== activeProvider.id || conv.model !== activeProvider.model)) {
       const synced = get().conversations.map((c) =>
-        c.id === conv!.id
+        c.id === conv.id
           ? { ...c, provider: activeProvider.id, model: activeProvider.model }
           : c
       );
@@ -786,7 +790,9 @@ export const useStore = create<State & Actions>((set, get) => ({
     };
     const projects = [project, ...get().projects];
     set({ projects, activeProjectId: id });
-    storage.saveProjects(projects);
+    storage.saveProjects(projects).catch((e) =>
+      devlog("storage", `Failed to save projects: ${e}`)
+    );
     devlog("projects", `Created project: ${project.name} (${id})`, { color: project.color, memoryScope: project.memoryScope });
     return id;
   },
@@ -954,18 +960,21 @@ export const useStore = create<State & Actions>((set, get) => ({
 }));
 
 let saveTimer: number | null = null;
-function scheduleSave(conversations: Conversation[]) {
+function scheduleSave(_conversations: Conversation[]) {
   if (saveTimer) window.clearTimeout(saveTimer);
   saveTimer = window.setTimeout(() => {
-    storage.saveConversations(conversations);
+    const latest = get().conversations;
+    storage.saveConversations(latest).catch((e) =>
+      devlog("storage", `scheduleSave failed: ${e}`)
+    );
   }, 500);
 }
 
 function classifyError(
-  e: any,
+  e: unknown,
   providerName: string
 ): { reason: string; hint: string; status?: number } {
-  const raw: string = (e?.message || String(e)) + "";
+  const raw: string = (e instanceof Error ? e.message : String(e)) + "";
   let status: number | undefined;
   const statusMatch = raw.match(/\b(4\d{2}|5\d{2})\b/);
   if (statusMatch) status = parseInt(statusMatch[1]);
