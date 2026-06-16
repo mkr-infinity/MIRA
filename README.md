@@ -1,101 +1,123 @@
 <div align="center">
 
-<img src="assets/mira-logo.svg" width="120" />
-
-# ✦ MIRA v2 ✦
-
-### **M**KR **I**ntelligent **R**esponsive **A**ssistant
-
-**Your personal AI desktop assistant.**
-
-Multi-provider · Voice-activated · Project-aware · Fully local
-
-[![GitHub release](https://img.shields.io/github/v/release/mkr-infinity/MIRA?style=flat-square&color=00D4FF)](https://github.com/mkr-infinity/MIRA/releases)
-[![License](https://img.shields.io/github/license/mkr-infinity/MIRA?style=flat-square)](LICENSE)
-[![Stars](https://img.shields.io/github/stars/mkr-infinity/MIRA?style=flat-square&color=FFD700)](https://github.com/mkr-infinity/MIRA)
+<img src="assets/mira-logo.svg" width="140" />
 
 <br/>
 
-Built with **Tauri 2 + React 18 + TypeScript + Zustand**
+# MIRA
 
-[🚀 Quick Start](#-quick-start) · [🔌 Providers](#-providers) · [🎨 Themes](#-themes) · [⌨️ Shortcuts](#%EF%B8%8F-keyboard-shortcuts) · [📦 Build](#-build)
+<br/>
+
+![Midnight](https://img.shields.io/badge/Midnight-000000?style=for-the-badge&labelColor=000000&color=00D4FF)
+![Daylight](https://img.shields.io/badge/Daylight-FAF7F2?style=for-the-badge&labelColor=FAF7F2&color=C2410C&textColor=1A1612)
+![Cyberpunk](https://img.shields.io/badge/Cyberpunk-0A0014?style=for-the-badge&labelColor=0A0014&color=FF2D95)
+![Sakura](https://img.shields.io/badge/Sakura-1A0F1E?style=for-the-badge&labelColor=1A0F1E&color=FF6EB4)
+![Nordic](https://img.shields.io/badge/Nordic-0F1923?style=for-the-badge&labelColor=0F1923&color=88C0D0)
+![Neon](https://img.shields.io/badge/Neon-000000?style=for-the-badge&labelColor=000000&color=39FF14)
+![Earth](https://img.shields.io/badge/Earth-0F1208?style=for-the-badge&labelColor=0F1208&color=8BC34A)
+
+<br/>
+
+**Your personal AI assistant that lives on your machine.**
+
+<br/>
+
+`Multi-provider` · `Voice-activated` · `Project-aware` · `Fully local`
+
+<br/>
+
+<a href="#-get-started">Get Started</a> · <a href="#-providers">Providers</a> · <a href="#-themes">Themes</a> · <a href="#-voice-mode">Voice</a> · <a href="#-keyboard-shortcuts">Shortcuts</a>
+
+<br/>
 
 </div>
 
 ---
 
-## 🌟 Features
+<br/>
+
+## What is MIRA?
+
+<br/>
+
+MIRA is a beautiful, privacy-first AI desktop assistant. It connects to **any AI provider** you choose, responds to your **voice**, organizes your work into **projects**, and keeps **every byte of data** on your machine.
+
+No accounts. No telemetry. No cloud. Just you and your AI.
+
+<br/>
 
 <table>
 <tr>
-<td>
+<td align="center" width="33%">
 
-**🤖 6 AI Providers**
-- OpenAI · Anthropic · Gemini
-- Ollama (local) · OpenRouter
-- Custom OpenAI-compatible endpoint
-- Auto-fallback on errors
+### 🤖
 
-</td>
-<td>
+**6 Providers**
 
-**🎙️ Voice Mode**
-- Full-screen arc-reactor orb
-- Speech-to-text & text-to-speech
-- Push-to-talk with F11
-- Custom wake word support
+OpenAI · Anthropic · Gemini · Ollama · OpenRouter · Custom
 
 </td>
-</tr>
-<tr>
-<td>
+<td align="center" width="34%">
 
-**🖥️ Desktop Control**
-- Open apps, URLs, folders
-- Play music, search web
-- Set volume, lock, shutdown
-- Native notifications
+### 🎙️
+
+**Voice Mode**
+
+Arc-reactor orb · STT/TTS · Push-to-talk · F11 to enter
 
 </td>
-<td>
+<td align="center" width="33%>
 
-**📁 Projects**
-- ChatGPT-style sidebar
-- Project-scoped chats
-- Custom instructions per project
-- Attached files & memory
+### 🖥️
+
+**Desktop Control**
+
+Open apps · Play music · Set volume · Lock · Notify
 
 </td>
 </tr>
 <tr>
-<td>
+<td align="center">
 
-**🧠 Memory & Skills**
-- Long-term fact memory
-- Import `.md` skill files
-- Searchable skill library
-- Category filtering
+### 📁
+
+**Projects**
+
+ChatGPT-style sidebar · Project memory · Custom instructions
 
 </td>
-<td>
+<td align="center">
 
-**🎨 7 Themes**
-- Midnight · Daylight · Cyberpunk
-- Sakura · Nordic · Neon · Earth
-- Dynamic accent colors
-- Animated components
+### 🎨
+
+**7 Themes**
+
+Midnight · Daylight · Cyberpunk · Sakura · Nordic · Neon · Earth
+
+</td>
+<td align="center">
+
+### 🧠
+
+**Memory & Skills**
+
+Long-term facts · Import .md files · Searchable library
 
 </td>
 </tr>
 </table>
 
-**⌨️ Keyboard Shortcuts** · **🔒 Zero telemetry** · **📊 Activity logs** · **🎯 Personality presets**
+<br/>
 
 ---
 
-## 🚀 Quick Start
+<br/>
 
-### 🌐 Browser (localhost)
+## 🚀 Get Started
+
+<br/>
+
+### Option 1: Browser (localhost)
 
 ```bash
 git clone https://github.com/mkr-infinity/MIRA
@@ -104,74 +126,220 @@ npm install
 npm run dev
 ```
 
-Open **http://localhost:5173** 🎉
+Open **http://localhost:5173** → Done 🎉
 
-### 🖥️ Desktop (Tauri)
+<br/>
+
+### Option 2: Desktop App
 
 ```bash
-npm run tauri:dev      # hot-reload dev
-npm run tauri:build    # produce platform installers
+npm install
+npm run tauri:dev       # development
+npm run tauri:build     # production build
 ```
 
-### 📋 First Launch
+<br/>
 
-| Step | Action |
-|------|--------|
-| 1️⃣ | Onboarding wizard opens automatically |
-| 2️⃣ | Pick a provider and enter your API key |
-| 3️⃣ | Test the voice sample |
-| 4️⃣ | Start chatting — press **F11** for voice mode |
+### First Launch
+
+<br/>
+
+```
+┌─────────────────────────────────────────────────────┐
+│                                                     │
+│   1.  Onboarding wizard opens automatically         │
+│                                                     │
+│   2.  Pick a provider → paste your API key          │
+│                                                     │
+│   3.  Test the voice sample                         │
+│                                                     │
+│   4.  Start chatting → press F11 for voice mode     │
+│                                                     │
+└─────────────────────────────────────────────────────┘
+```
+
+<br/>
 
 ---
+
+<br/>
 
 ## 🔌 Providers
 
-| Provider | Auth | Default Model | Get Key |
-|----------|------|---------------|---------|
-| 🔹 OpenAI | API key | `gpt-4o-mini` | [platform.openai.com](https://platform.openai.com/api-keys) |
-| 🟠 Anthropic | API key | `claude-3-5-sonnet-20241022` | [console.anthropic.com](https://console.anthropic.com/settings/keys) |
-| 🔵 Gemini | API key | `gemini-1.5-flash` | [aistudio.google.com](https://aistudio.google.com/apikey) |
-| 🦙 Ollama | none | auto-detected | [ollama.com](https://ollama.com) |
-| 🟣 OpenRouter | API key | `anthropic/claude-3.5-sonnet` | [openrouter.ai](https://openrouter.ai/keys) |
-| 🟢 Custom | API key | any endpoint | — |
+<br/>
 
-> 💡 **Auto-fallback**: If your active provider fails, MIRA rotates to the next enabled one automatically.
+| | Provider | Auth | Default Model | Get Key |
+|:-:|----------|------|---------------|---------|
+| 🔹 | **OpenAI** | API key | `gpt-4o-mini` | [Get Key →](https://platform.openai.com/api-keys) |
+| 🟠 | **Anthropic** | API key | `claude-3-5-sonnet-20241022` | [Get Key →](https://console.anthropic.com/settings/keys) |
+| 🔵 | **Gemini** | API key | `gemini-1.5-flash` | [Get Key →](https://aistudio.google.com/apikey) |
+| 🦙 | **Ollama** | none | auto-detected | [Install →](https://ollama.com) |
+| 🟣 | **OpenRouter** | API key | `anthropic/claude-3.5-sonnet` | [Get Key →](https://openrouter.ai/keys) |
+| 🟢 | **Custom** | API key | any endpoint | — |
+
+<br/>
+
+> **Auto-fallback** — if your active provider fails, MIRA silently rotates to the next enabled one.
+
+<br/>
 
 ---
+
+<br/>
 
 ## 🎨 Themes
 
-Switch between **7 beautiful themes** in **Settings → General**:
+<br/>
 
-| Theme | Preview | Style |
-|-------|---------|-------|
-| 🌑 **Midnight** | ⬛🔵 | True black + cyan |
-| ☀️ **Daylight** | ⬜🟠 | Warm cream + terracotta |
-| 🌆 **Cyberpunk** | 🟣💗 | Neon pink on deep purple |
-| 🌸 **Sakura** | 🩷🌸 | Cherry blossom pink |
-| ❄️ **Nordic** | 🔷🧊 | Icy blues on slate |
-| ⚡ **Neon** | 🟢💜 | Electric green + magenta |
-| 🌿 **Earth** | 🟤💚 | Forest greens + browns |
+<div align="center">
 
-> 🎯 All components dynamically adapt to the active theme's accent color.
+| | Theme | Colors |
+|:-:|-------|--------|
+| 🌑 | **Midnight** | True black + electric cyan |
+| ☀️ | **Daylight** | Warm cream + terracotta |
+| 🌆 | **Cyberpunk** | Neon pink on deep purple |
+| 🌸 | **Sakura** | Cherry blossom pink on dark rose |
+| ❄️ | **Nordic** | Icy blues on slate |
+| ⚡ | **Neon** | Electric green + magenta |
+| 🌿 | **Earth** | Forest greens + warm browns |
+
+<br/>
+
+</div>
+
+> Every component — orb, sidebar, messages, settings — dynamically adapts to your theme's accent color.
+
+<br/>
 
 ---
 
+<br/>
+
+## 🎙️ Voice Mode
+
+<br/>
+
+```
+┌──────────────────────────────────────────────────┐
+│                                                  │
+│              ╭──────────────────╮                │
+│              │                  │                │
+│              │    ◉ ARC REACTOR │                │
+│              │                  │                │
+│              ╰──────────────────╯                │
+│                                                  │
+│            ─── LISTENING ───                     │
+│                                                  │
+│    Press F11 to enter · Escape to exit           │
+│                                                  │
+└──────────────────────────────────────────────────┘
+```
+
+<br/>
+
+- **Arc-reactor orb** — beautiful animated orb that breathes with your conversation
+- **Push-to-talk** — hold to speak, release to send
+- **Auto-speak** — MIRA replies by voice automatically
+- **Interrupt** — cut MIRA off mid-sentence
+- **Custom voice** — pick any OS voice, adjust rate & pitch
+- **Wake word** — say "Hey MIRA" to activate (configurable)
+
+<br/>
+
+---
+
+<br/>
+
 ## ⌨️ Keyboard Shortcuts
+
+<br/>
 
 | Shortcut | Action |
 |----------|--------|
 | `F11` | 🎙️ Enter voice mode |
 | `Escape` | ❌ Close modal / exit voice |
-| `Ctrl+N` | 💬 New conversation |
-| `Ctrl+,` | ⚙️ Open settings |
-| `Ctrl+/` | ✏️ Focus chat input |
+| `Ctrl + N` | 💬 New conversation |
+| `Ctrl + ,` | ⚙️ Open settings |
+| `Ctrl + /` | ✏️ Focus chat input |
+
+<br/>
 
 ---
 
+<br/>
+
+## 📁 Projects
+
+<br/>
+
+Organize your conversations into projects, each with its own:
+
+- **Memory scope** — project-only or shared with global
+- **Custom instructions** — injected into the system prompt
+- **Attached files** — text content appended to prompts
+- **Color coding** — visual distinction in the sidebar
+
+<br/>
+
+---
+
+<br/>
+
+## 🧠 Memory & Skills
+
+<br/>
+
+### Memory
+
+Facts you share with MIRA persist across sessions. Say *"Remember I prefer dark mode"* and MIRA will recall it forever.
+
+### Skills
+
+Import `.md` files as reusable prompt modules:
+
+```markdown
+---
+name: Web Search
+icon: search
+category: Research
+description: Search the internet and summarise results.
+---
+
+When the user asks a question that benefits from
+up-to-date information, prefer the web_search tool…
+```
+
+<br/>
+
+---
+
+<br/>
+
+## 🔒 Privacy
+
+<br/>
+
+```
+┌─────────────────────────────────────────┐
+│                                         │
+│   ✅  All data lives on YOUR machine    │
+│   ✅  No telemetry, no tracking        │
+│   ✅  No accounts, no signup           │
+│   ✅  Open source (MIT license)        │
+│   ✅  API keys never leave your device  │
+│                                         │
+└─────────────────────────────────────────┘
+```
+
+<br/>
+
+---
+
+<br/>
+
 ## 📦 Storage
 
-All data lives **100% locally** on your machine:
+<br/>
 
 | Platform | Location |
 |----------|----------|
@@ -179,74 +347,94 @@ All data lives **100% locally** on your machine:
 | 🖥️ Desktop | `~/Desktop/MIRA/` |
 
 ```
-settings.json          ⚙️  App configuration
+settings.json          ⚙️  Configuration
 conversations.json     💬  Chat history
 memory.json            🧠  Long-term facts
 skills.json            🎯  Skill definitions
 projects.json          📁  Project data
-project_memory.json    🔗  Project-scoped memory
+project_memory.json    🔗  Project memory
 custom_commands.json   ⚡  Custom commands
 ```
 
+<br/>
+
 ---
+
+<br/>
 
 ## 🔧 Build
 
-**Prerequisites:** Node 20+ · npm or pnpm
+<br/>
 
-### 🌐 Web
+**Prerequisites:** Node 20+ · npm or pnpm · (Desktop: Rust 1.77+)
 
 ```bash
+# 🌐 Web
 npm install
-npm run dev        # dev server → localhost:5173
+npm run dev        # → localhost:5173
 npm run build      # production build
-npm run preview    # preview build
-```
+npm run preview    # preview production build
 
-### 🖥️ Desktop (requires Rust 1.77+)
-
-```bash
-npm run tauri:dev      # hot-reload dev
+# 🖥️ Desktop
+npm run tauri:dev      # hot-reload
 npm run tauri:build    # platform installers
 ```
 
+<br/>
+
 ---
+
+<br/>
 
 ## 📂 Project Structure
 
+<br/>
+
 ```
 src/
-├── App.tsx              🏠 Root layout, theme, shortcuts
-├── main.tsx             🚀 Boot, theme pre-paint
-├── index.css            🎨 CSS variables, components
-├── store/index.ts       🗄️ Zustand store
+├── App.tsx                  🏠  Root layout
+├── main.tsx                 🚀  Boot
+├── index.css                🎨  CSS variables
+├── store/index.ts           🗄️  Zustand store
 ├── lib/
-│   ├── ai/              🤖 Provider adapters
-│   ├── voice/           🎙️ TTS / STT
-│   ├── desktop/         🖥️ Desktop control
-│   ├── storage/         💾 Persistence layer
-│   └── theme.ts         🎨 Theme helpers
+│   ├── ai/                  🤖  Provider adapters
+│   ├── voice/               🎙️  TTS / STT
+│   ├── desktop/             🖥️  Desktop control
+│   ├── storage/             💾  Persistence
+│   └── theme.ts             🎨  Theme helpers
 ├── components/
-│   ├── Sidebar.tsx      📁 Chat list, projects
-│   ├── ChatView.tsx     💬 Main chat interface
-│   ├── VoiceMode.tsx    🎙️ Full-screen voice
-│   ├── Orb.tsx          ✨ Arc-reactor animation
-│   ├── Onboarding.tsx   🚀 First-run wizard
-│   ├── SettingsModal.tsx ⚙️ All settings
-│   └── MessageBubble.tsx 💬 Message rendering
-└── types/index.ts       📝 TypeScript types
+│   ├── Sidebar.tsx          📁  Chat list
+│   ├── ChatView.tsx         💬  Main chat
+│   ├── VoiceMode.tsx        🎙️  Voice mode
+│   ├── Orb.tsx              ✨  Arc-reactor
+│   ├── Onboarding.tsx       🚀  First-run
+│   ├── SettingsModal.tsx    ⚙️  Settings
+│   ├── MessageBubble.tsx    💬  Messages
+│   ├── ThinkingAnimation.tsx 🔮  Thinking
+│   ├── ActivityLog.tsx      📊  Activity
+│   ├── MiraLogo.tsx         🎯  Logo
+│   └── AboutView.tsx        ℹ️  About
+└── types/index.ts           📝  Types
 ```
+
+<br/>
 
 ---
 
+<br/>
+
 ## 📄 License
 
-MIT License · Made with 💙 by **[Mohammad Kaif Raja (MKR-Infinity)](https://mkr-infinity.github.io)**
+<br/>
+
+**MIT** — Made with 💙 by [Mohammad Kaif Raja (MKR-Infinity)](https://mkr-infinity.github.io)
+
+<br/>
 
 ---
 
 <div align="center">
 
-**[⬆ Back to top](#-mira-v2)**
+**[⬆ Back to top](#-mira)**
 
 </div>
