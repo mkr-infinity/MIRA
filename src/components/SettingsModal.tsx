@@ -2293,6 +2293,21 @@ function DataTab() {
               : "Running in browser — using localStorage."}
           </Hint>
         </Field>
+        <div className="flex gap-2 pt-2">
+          <button
+            onClick={() => useStore.getState().exportConversations()}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-cyan-500/10 text-cyan-400 text-sm font-medium hover:bg-cyan-500/20 border border-cyan-500/30"
+          >
+            <Save size={14} /> Export all data
+          </button>
+          <button
+            onClick={() => useStore.getState().importConversations()}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-lg mira-elevated mira-text border mira-border hover:mira-hover text-sm"
+          >
+            <Folder size={14} /> Import data
+          </button>
+        </div>
+        <Hint>Export as JSON. Import merges conversations, memory, and skills.</Hint>
       </Card>
 
       {/* Beautiful stat grid */}

@@ -120,6 +120,8 @@ interface Actions {
   searchMessageResults: string[];
   setSearchMessageQuery: (q: string) => void;
   searchInConversation: () => void;
+  exportConversations: () => void;
+  importConversations: () => Promise<void>;
 }
 
 const abortControllers = new Map<string, AbortController>();
@@ -952,14 +954,51 @@ export const useStore = create<State & Actions>((set, get) => ({
     set({ logs: [] });
   },
 
-  setSearchMessageQuery(q) {
-    set({ searchMessageQuery: q });
-    if (!q.trim()) {
-      set({ searchMessageResults: [] });
-      return;
-    }
-    get().searchInConversation();
+  exportConversations() {
+    const { conversations, memory, skills, projects, settings } = get();
+    const data = { conversations, memory, skills, projects, settings, exportedAt: Date.now() };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `mira-export-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    devlog("export", `Exported ${conversations.length} convs, ${memory.length} memory, ${skills.length} skills, ${projects.length} projects`);
   },
+
+  async importConversations() {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".json";
+    input.onchange = async () => {
+      if (!input.files?.[0]) return;
+      try {
+        const text = await input.files[0].text();
+        const data = JSON.parse(text);
+        if (data.conversations) {
+          const merged = [...data.conversations, ...get().conversations];
+          set({ conversations: merged });
+          await storage.saveConversations(merged);
+        }
+        if (data.skills) {
+          await get().importSkills(data.skills);
+        }
+        if (data.memory) {
+          const merged = [...data.memory, ...get().memory];
+          set({ memory: merged });
+          await storage.saveMemory(merged);
+        }
+        devlog("export", `Imported: ${data.conversations?.length || 0} convs, ${data.memory?.length || 0} memory, ${data.skills?.length || 0} skills`);
+      } catch (e: any) {
+        devlog("export", `Import failed: ${e?.message || e}`, undefined, "error");
+        alert("Import failed: " + (e?.message || "Invalid file"));
+      }
+    };
+    input.click();
+  },
+
+  setSearchMessageQuery(q) {
 
   searchInConversation() {
     const { activeId, conversations, searchMessageQuery } = get();
