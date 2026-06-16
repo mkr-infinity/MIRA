@@ -2671,109 +2671,168 @@ function DataTab() {
         </div>
       </div>
 
-      {/* 7-day bar chart */}
+      {/* 7-day bar chart (SVG) */}
       <Card>
         <div className="flex items-center justify-between mb-3">
-          <h3 className="font-display text-base font-semibold">Last 7 days</h3>
+          <div className="flex items-center gap-2">
+            <h3 className="font-display text-base font-semibold">Last 7 days</h3>
+            <svg className="w-4 h-4 mira-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+            </svg>
+          </div>
           <span className="text-[10px] font-mono uppercase tracking-wider mira-muted">
-            prompts per day
+            prompts / tokens
           </span>
         </div>
-        <div className="flex items-end gap-2 h-32">
-          {last7.map((d) => {
-            const h = (d.prompts / maxPrompts) * 100;
+        <svg viewBox="0 0 700 160" className="w-full h-32" preserveAspectRatio="none">
+          {last7.map((d, i) => {
+            const h = Math.max(4, (d.prompts / maxPrompts) * 120);
+            const x = i * 90 + 20;
             return (
-              <div key={d.key} className="flex-1 flex flex-col items-center gap-1.5 min-w-0">
-                <div className="w-full h-full flex items-end justify-center">
-                  <div
-                    className="w-full rounded-t-md transition-all"
-                    style={{
-                      height: `${Math.max(4, h)}%`,
-                      background:
-                        d.prompts > 0
-                          ? "var(--accent)"
-                          : "var(--border)",
-                      boxShadow: d.prompts > 0 ? "0 0 8px var(--accent-faint)" : "none",
-                    }}
-                    title={`${d.label}: ${d.prompts} prompts, ${formatNum(d.tokens)} tokens`}
-                  />
-                </div>
-                <div className="text-[9px] font-mono mira-muted uppercase tracking-wider">
-                  {d.label}
-                </div>
+              <g key={d.key}>
+                <motion.rect
+                  x={x} y={160 - h}
+                  width={40} height={h}
+                  rx={4}
+                  fill={d.prompts > 0 ? "var(--accent)" : "var(--border)"}
+                  initial={{ height: 0, y: 160 }}
+                  animate={{ height: h, y: 160 - h }}
+                  transition={{ duration: 0.5, delay: i * 0.08, ease: "easeOut" }}
+                />
                 {d.prompts > 0 && (
-                  <div className="text-[9px] font-mono mira-text font-medium">
+                  <text
+                    x={x + 20} y={140 - h}
+                    textAnchor="middle"
+                    fill="var(--muted)"
+                    fontSize="9"
+                    fontFamily="monospace"
+                  >
                     {d.prompts}
-                  </div>
+                  </text>
                 )}
-              </div>
+                <text
+                  x={x + 20} y="155"
+                  textAnchor="middle"
+                  fill="var(--subtle)"
+                  fontSize="8"
+                  fontFamily="monospace"
+                >
+                  {d.label}
+                </text>
+              </g>
             );
           })}
-        </div>
+        </svg>
       </Card>
 
-      {/* Per-provider breakdown */}
+      {/* Per-provider breakdown with SVG donut */}
       {Object.keys(stats.providerCounts).length > 0 && (
         <Card>
           <h3 className="font-display text-base font-semibold mb-3">By provider</h3>
-          <div className="space-y-2">
-            {Object.entries(stats.providerCounts)
-              .sort((a, b) => b[1].prompts - a[1].prompts)
-              .map(([id, v]) => {
+          <div className="flex items-center gap-6">
+            <svg viewBox="0 0 100 100" className="w-32 h-32 flex-shrink-0 -rotate-90">
+              {(() => {
+                const entries = Object.entries(stats.providerCounts).sort((a, b) => b[1].prompts - a[1].prompts);
                 const total = stats.totalPrompts || 1;
-                const pct = (v.prompts / total) * 100;
-                return (
-                  <div key={id}>
-                    <div className="flex items-center justify-between text-xs mb-1">
-                      <span className="font-mono uppercase tracking-wider mira-text">{id}</span>
-                      <span className="font-mono mira-muted">
-                        {v.prompts} prompts · {formatNum(v.tokens)} tok
-                      </span>
+                const colors = ["#00D4FF", "#FF7EB3", "#8BC34A", "#B388FF", "#FFB86C", "#39FF14"];
+                let cumPct = 0;
+                return entries.map(([id, v], i) => {
+                  const pct = v.prompts / total;
+                  const r = 38;
+                  const circumference = 2 * Math.PI * r;
+                  const offset = cumPct * circumference;
+                  const length = pct * circumference;
+                  cumPct += pct;
+                  return (
+                    <motion.circle
+                      key={id}
+                      cx="50" cy="50" r={r}
+                      fill="none"
+                      stroke={colors[i % colors.length]}
+                      strokeWidth="10"
+                      strokeDasharray={`${length} ${circumference - length}`}
+                      strokeDashoffset={-offset}
+                      initial={{ strokeDasharray: "0 1000" }}
+                      animate={{ strokeDasharray: `${length} ${circumference - length}` }}
+                      transition={{ duration: 0.6, delay: i * 0.1, ease: "easeOut" }}
+                    />
+                  );
+                });
+              })()}
+            </svg>
+            <div className="flex-1 space-y-1.5 min-w-0">
+              {Object.entries(stats.providerCounts)
+                .sort((a, b) => b[1].prompts - a[1].prompts)
+                .map(([id, v], i) => {
+                  const pct = ((v.prompts / (stats.totalPrompts || 1)) * 100).toFixed(1);
+                  const colors = ["#00D4FF", "#FF7EB3", "#8BC34A", "#B388FF", "#FFB86C", "#39FF14"];
+                  return (
+                    <div key={id} className="flex items-center gap-2 text-xs">
+                      <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: colors[i % colors.length] }} />
+                      <span className="font-mono uppercase tracking-wider mira-text flex-1 truncate">{id}</span>
+                      <span className="font-mono mira-muted">{pct}%</span>
+                      <span className="font-mono mira-muted">{formatNum(v.tokens)} tok</span>
                     </div>
-                    <div className="h-1.5 rounded-full mira-elevated overflow-hidden">
-                      <div
-                        className="h-full rounded-full"
-                        style={{
-                          width: `${pct}%`,
-                          background: "var(--accent)",
-                        }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+            </div>
           </div>
         </Card>
       )}
 
-      {/* Per-entity storage sizes */}
+      {/* Per-entity storage sizes with SVG stacked bar */}
       <Card>
-        <h3 className="font-display text-base font-semibold mb-3">Storage breakdown</h3>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-display text-base font-semibold">Storage breakdown</h3>
+          <span className="font-mono mira-text font-medium text-sm">{formatBytes(totalEntityBytes)}</span>
+        </div>
+        <svg viewBox="0 0 600 24" className="w-full h-6 mb-3">
+          {(() => {
+            const colors = ["#00D4FF", "#FF7EB3", "#8BC34A", "#B388FF", "#FFB86C"];
+            let cumPct = 0;
+            return entitySizes.map((e, i) => {
+              const pct = totalEntityBytes ? e.bytes / totalEntityBytes : 0;
+              const x = cumPct * 600;
+              cumPct += pct;
+              return (
+                <motion.rect
+                  key={e.id}
+                  x={x} y={0}
+                  width={pct * 600} height={24}
+                  rx={4}
+                  fill={colors[i % colors.length]}
+                  initial={{ width: 0, x: x }}
+                  animate={{ width: pct * 600, x: x }}
+                  transition={{ duration: 0.5, delay: i * 0.08, ease: "easeOut" }}
+                  opacity={pct > 0.01 ? 1 : 0.3}
+                />
+              );
+            });
+          })()}
+        </svg>
         <div className="space-y-1.5">
-          {entitySizes.map((e) => {
+          {entitySizes.map((e, i) => {
             const pct = totalEntityBytes ? (e.bytes / totalEntityBytes) * 100 : 0;
+            const colors = ["#00D4FF", "#FF7EB3", "#8BC34A", "#B388FF", "#FFB86C"];
             return (
               <div key={e.id} className="flex items-center gap-3 text-xs">
-                <div className="w-32 flex-shrink-0 truncate mira-text">{e.label}</div>
-                <div className="flex-1 h-2 rounded-full mira-elevated overflow-hidden">
+                <span className="w-2 h-2 rounded-sm flex-shrink-0" style={{ background: colors[i % colors.length] }} />
+                <div className="w-28 flex-shrink-0 truncate mira-text">{e.label}</div>
+                <div className="flex-1 h-1.5 rounded-full mira-elevated overflow-hidden">
                   <div
-                    className="h-full rounded-full mira-accent-bg"
-                    style={{ width: `${Math.max(2, pct)}%`, background: "var(--accent)" }}
+                    className="h-full rounded-full"
+                    style={{ width: `${Math.max(2, pct)}%`, background: colors[i % colors.length] }}
                   />
                 </div>
-                <div className="w-28 text-right font-mono mira-muted flex-shrink-0">
+                <div className="w-24 text-right font-mono mira-muted flex-shrink-0 tabular-nums">
                   {formatBytes(e.bytes)}
                 </div>
-                <div className="w-14 text-right font-mono mira-muted flex-shrink-0">
+                <div className="w-16 text-right font-mono mira-muted flex-shrink-0 tabular-nums">
                   {e.count} item{e.count === 1 ? "" : "s"}
                 </div>
               </div>
             );
           })}
-        </div>
-        <div className="flex justify-between text-xs mt-3 pt-2 border-t mira-border">
-          <span className="mira-muted">Total on disk</span>
-          <span className="font-mono mira-text font-medium">{formatBytes(totalEntityBytes)}</span>
         </div>
       </Card>
 
