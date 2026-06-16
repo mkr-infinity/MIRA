@@ -18,6 +18,7 @@ import { tts } from "../lib/voice/tts";
 import { buildSystemPrompt } from "../lib/mira";
 import { isTauri } from "../lib/platform";
 import { devlog } from "../lib/log";
+import type { ThemeId } from "../lib/theme";
 import { parseAndExecuteToolCalls, DESKTOP_TOOL_DEFS } from "../lib/desktop";
 
 function uid() {
@@ -72,7 +73,7 @@ interface State {
 
 interface Actions {
   init: () => Promise<void>;
-  setTheme: (t: string) => Promise<void>;
+  setTheme: (t: ThemeId) => Promise<void>;
   updateSettings: (patch: Partial<AppSettings>) => Promise<void>;
   setActiveProvider: (id: ProviderId) => Promise<void>;
   setProviderConfig: (id: ProviderId, patch: Partial<ProviderConfig>) => Promise<void>;
@@ -175,7 +176,7 @@ export const useStore = create<State & Actions>((set, get) => ({
     }
   },
 
-  async setTheme(t) {
+  async setTheme(t: ThemeId) {
     const settings = { ...get().settings, theme: t };
     set({ settings });
     await storage.saveSettings(settings);
