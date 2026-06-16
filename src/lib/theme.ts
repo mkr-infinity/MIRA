@@ -104,7 +104,7 @@ export function cx(...parts: Array<string | false | null | undefined>): string {
 
 // Get current theme ID from the DOM
 export function getCurrentTheme(): ThemeId {
-  return (document.documentElement.getAttribute("data-theme") as ThemeId) || "dark";
+  return (document.documentElement.getAttribute("data-theme") as ThemeId) || "anime";
 }
 
 // Get metadata for a theme

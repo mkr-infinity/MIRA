@@ -101,7 +101,7 @@ export const storage = {
     // any invalid value → "dark"
     const validThemes = ["dark", "light", "cyberpunk", "sakura", "nordic", "neon", "earth"];
     if (!validThemes.includes(s.theme)) {
-      (s as any).theme = "dark";
+      (s as any).theme = "anime";
       changed = true;
     }
     if (changed) {
@@ -155,7 +155,7 @@ export const storage = {
 
 export function defaultSettings(): AppSettings {
   return {
-    theme: "dark",
+    theme: "anime",
     voiceEnabled: true,
     voiceAutoSpeak: true,
     voiceWakeWord: false,

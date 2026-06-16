@@ -114,7 +114,7 @@ export function Onboarding() {
   const [probeResults, setProbeResults] = useState<ProbeResult[] | null>(null);
   const [voiceTest, setVoiceTest] = useState<"idle" | "speaking" | "done">("idle");
   const [userName, setUserName] = useState("sir");
-  const [themeChoice, setThemeChoice] = useState<ThemeId>((settings.theme as ThemeId) || "dark");
+  const [themeChoice, setThemeChoice] = useState<ThemeId>((settings.theme as ThemeId) || "anime");
   const nameInputRef = useRef<HTMLInputElement>(null);
 
   const stepIdx = STEPS.indexOf(step);

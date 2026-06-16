@@ -39,7 +39,7 @@ export default function App() {
 
   useEffect(() => {
     const root = document.documentElement;
-    const t = settings.theme || "dark";
+    const t = settings.theme || "anime";
     root.setAttribute("data-theme", t);
     // Backward compat: also toggle dark/light classes
     const isDark = t === "dark" || t === "cyberpunk" || t === "neon" || t === "anime";
