@@ -234,6 +234,7 @@ export function defaultSettings(): AppSettings {
     voiceWakeWordText: "hey mira",
     personality: "default",
     customSystemPrompt: "",
+    customCSS: "",
   };
 }
 

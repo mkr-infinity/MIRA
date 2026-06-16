@@ -46,7 +46,7 @@ import { cx } from "../lib/theme";
 import { tts } from "../lib/voice/tts";
 import { THEMES, type ThemeId } from "../lib/theme";
 
-type Tab = "general" | "providers" | "voice" | "skills" | "memory" | "projects" | "logs" | "data" | "about";
+type Tab = "general" | "providers" | "voice" | "skills" | "memory" | "projects" | "logs" | "data" | "custom" | "about";
 
 function formatNum(n: number): string {
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + "M";
@@ -132,6 +132,7 @@ function SettingsContent({
     { id: "memory", label: "Memory", icon: Brain, group: "Workspace" },
     { id: "projects", label: "Projects", icon: Folder, group: "Workspace" },
     { id: "data", label: "Data", icon: Folder, group: "System" },
+    { id: "custom", label: "Custom CSS", icon: Code, group: "System" },
     { id: "logs", label: "Logs", icon: FileText, group: "System" },
     { id: "about", label: "About", icon: Coffee, group: "System" },
   ];
@@ -199,6 +200,7 @@ function SettingsContent({
             {tab === "projects" && <ProjectsTab />}
             {tab === "logs" && <LogsTab />}
             {tab === "data" && <DataTab />}
+            {tab === "custom" && <CustomCSSTab />}
             {tab === "about" && <AboutView />}
           </div>
         </div>
@@ -2109,6 +2111,40 @@ function ProjectEditor({
           </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+function CustomCSSTab() {
+  const { settings, updateSettings } = useStore();
+  return (
+    <div className="space-y-4">
+      <div>
+        <h2 className="font-display text-2xl font-semibold mb-1">Custom CSS</h2>
+        <p className="text-sm mira-muted">
+          Inject your own CSS to override MIRA's styles. Changes apply in real time.
+        </p>
+      </div>
+      <Card>
+        <Field label="CSS code">
+          <textarea
+            value={settings.customCSS || ""}
+            onChange={(e) => updateSettings({ customCSS: e.target.value })}
+            rows={20}
+            placeholder="/* MIRA custom styles */&#10;&#10;.message-bubble {&#10;  background: rgba(255,255,255,0.05);&#10;  border-radius: 12px;&#10;}"
+            className="w-full px-3 py-2 rounded-lg mira-elevated border mira-border mira-text text-sm focus:outline-none focus:border-cyan-500/50 resize-none font-mono"
+          />
+          <Hint>
+            Use any valid CSS. Changes are saved automatically. Reset below to clear.
+          </Hint>
+        </Field>
+        <button
+          onClick={() => updateSettings({ customCSS: "" })}
+          className="text-[11px] mira-muted hover:mira-text"
+        >
+          Reset custom CSS
+        </button>
+      </Card>
     </div>
   );
 }

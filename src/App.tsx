@@ -20,6 +20,7 @@ type SettingsTab =
   | "projects"
   | "logs"
   | "data"
+  | "custom"
   | "about";
 
 const SIDEBAR_COLLAPSE_KEY = "mira:sidebar-collapsed";
@@ -51,6 +52,23 @@ export default function App() {
       localStorage.setItem(SIDEBAR_COLLAPSE_KEY, sidebarCollapsed ? "1" : "0");
     } catch {}
   }, [sidebarCollapsed]);
+
+  // Custom CSS injector
+  useEffect(() => {
+    const existing = document.querySelector("style[data-mira-css]");
+    if (settings.customCSS?.trim()) {
+      if (existing) {
+        existing.textContent = settings.customCSS;
+      } else {
+        const style = document.createElement("style");
+        style.setAttribute("data-mira-css", "");
+        style.textContent = settings.customCSS;
+        document.head.appendChild(style);
+      }
+    } else {
+      existing?.remove();
+    }
+  }, [settings.customCSS]);
 
   // Auto-collapse sidebar on narrow viewports
   useEffect(() => {

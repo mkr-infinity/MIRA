@@ -195,6 +195,8 @@ export interface AppSettings {
   // Cached live model IDs per provider (populated by Settings → Fetch models).
   // Used by the model-cycling logic in the store.
   providerModels?: Partial<Record<ProviderId, string[]>>;
+  // Custom CSS injected via <style> tag
+  customCSS?: string;
 }
 
 export interface ChatRequest {
