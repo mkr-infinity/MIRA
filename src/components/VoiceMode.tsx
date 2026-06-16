@@ -6,6 +6,7 @@ import { stt } from "../lib/voice/stt";
 import { tts } from "../lib/voice/tts";
 import { MiraOrb, VoiceWave } from "./Orb";
 import { cx } from "../lib/theme";
+import { devlog } from "../lib/log";
 
 type Status = "idle" | "listening" | "thinking" | "speaking" | "denied" | "unsupported";
 
@@ -59,11 +60,13 @@ export function VoiceMode() {
 
     (async () => {
       await tts.whenReady();
-      tts.speak(greetingFor(settings.userName), {
+      const greeting = greetingFor(settings.userName);
+      const isOnline = typeof navigator !== "undefined" ? navigator.onLine : true;
+      const voiceOpts = {
         voice: settings.voiceName,
-        rate: settings.voiceRate,
+        rate: isOnline ? Math.min(settings.voiceRate, 1.1) : settings.voiceRate,
         pitch: settings.voicePitch,
-        lang: settings.voiceLang,
+        lang: settings.voiceLang || "en-US",
         onStart: () => setSpeaking(true),
         onEnd: () => {
           setSpeaking(false);
@@ -73,8 +76,22 @@ export function VoiceMode() {
             }, 350);
           }
         },
-        onError: () => setSpeaking(false),
-      });
+        onError: () => {
+          setSpeaking(false);
+          devlog("voice", "Greeting TTS failed, starting listen directly");
+          if (autoListenArmedRef.current && !exitedRef.current) {
+            setTimeout(() => startListening(), 300);
+          }
+        },
+      };
+      try {
+        await tts.speak(greeting, voiceOpts);
+      } catch {
+        devlog("voice", "TTS speak threw, skipping greeting");
+        if (autoListenArmedRef.current && !exitedRef.current) {
+          setTimeout(() => startListening(), 200);
+        }
+      }
     })();
 
     return () => {
@@ -411,7 +428,10 @@ function EscListener({ onEsc }: { onEsc: () => void }) {
 
 function greetingFor(name?: string): string {
   const h = new Date().getHours();
-  const tod = h < 5 ? "evening" : h < 12 ? "morning" : h < 18 ? "afternoon" : "evening";
-  if (name && name.trim()) return `Good ${tod}, ${name.trim()}. How may I help you?`;
-  return `Good ${tod}. How may I help you?`;
+  const period =
+    h < 5 ? "night" : h < 12 ? "morning" : h < 18 ? "afternoon" : "evening";
+  const base = `Good ${period}`;
+  const userPart = name?.trim() ? `, ${name.trim()}` : "";
+  const helpPart = "How may I help you today?";
+  return `${base}${userPart}. ${helpPart}`;
 }
