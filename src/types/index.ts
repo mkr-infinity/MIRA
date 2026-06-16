@@ -35,7 +35,7 @@ export interface Message {
   model?: string;
   toolCalls?: ToolCall[];
   toolResults?: Array<{ toolCallId: string; result: string; ok: boolean }>;
-  attachments?: Array<{ name: string; type: string; size: number }>;
+  attachments?: Array<{ name: string; type: string; size: number; content?: string }>;
   error?: string;
   streaming?: boolean;
   usage?: {

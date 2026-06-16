@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useStore } from "../store";
 import { MiraOrb, VoiceWave } from "./Orb";
 import {
@@ -23,6 +23,8 @@ import {
   ChevronUp,
   ChevronDown,
   X,
+  Image as ImageIcon,
+  Paperclip,
 } from "lucide-react";
 import { stt } from "../lib/voice/stt";
 import { tts } from "../lib/voice/tts";
@@ -73,6 +75,24 @@ export function ChatView({
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchIdx, setSearchIdx] = useState(0);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const [dragOver, setDragOver] = useState(false);
+  const [pendingImages, setPendingImages] = useState<Array<{ name: string; type: string; size: number; content: string }>>([]);
+
+  const handleFiles = useCallback((files: FileList) => {
+    const images: typeof pendingImages = [];
+    for (const f of Array.from(files)) {
+      if (f.type.startsWith("image/") && f.size <= 10 * 1024 * 1024) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          images.push({ name: f.name, type: f.type, size: f.size, content: reader.result as string });
+          if (images.length === Array.from(files).filter((x) => x.type.startsWith("image/") && x.size <= 10 * 1024 * 1024).length) {
+            setPendingImages((prev) => [...prev, ...images]);
+          }
+        };
+        reader.readAsDataURL(f);
+      }
+    }
+  }, []);
 
   const conv = conversations.find((c) => c.id === activeId);
   const activeProvider = settings.providers.find(
@@ -178,10 +198,17 @@ export function ChatView({
   }, [onOpenVoiceMode, searchOpen]);
 
   function handleSend(text?: string) {
-    const msg = (text ?? input).trim();
-    if (!msg || isProcessing) return;
+    let msg = (text ?? input).trim();
+    if (!msg && pendingImages.length === 0) return;
+    if (isProcessing) return;
+    // Append image names to the message text
+    if (pendingImages.length > 0) {
+      const imageRefs = pendingImages.map((img) => `[Image: ${img.name}]`).join("\n");
+      msg = msg ? `${msg}\n\n${imageRefs}` : imageRefs;
+    }
     setInput("");
-    sendMessage(msg);
+    sendMessage(msg, pendingImages.length > 0 ? pendingImages : undefined);
+    setPendingImages([]);
   }
 
   const orbState = isProcessing
@@ -193,7 +220,30 @@ export function ChatView({
     : "idle";
 
   return (
-    <div className="flex-1 h-full min-h-0 flex flex-col mira-bg">
+    <div
+      className="flex-1 h-full min-h-0 flex flex-col mira-bg relative"
+      onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+      onDragLeave={(e) => { if (e.currentTarget === e.target) setDragOver(false); }}
+      onDrop={(e) => { e.preventDefault(); setDragOver(false); handleFiles(e.dataTransfer.files); }}
+    >
+      {/* Drag-drop overlay */}
+      <AnimatePresence>
+        {dragOver && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+          >
+            <div className="flex flex-col items-center gap-3 p-8 rounded-2xl border-2 border-dashed border-cyan-400/50 bg-cyan-500/5">
+              <ImageIcon size={40} className="text-cyan-400" />
+              <p className="text-lg font-medium text-white">Drop images to attach</p>
+              <p className="text-sm text-gray-400">Max 10 MB per image</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Top bar — glass effect with refined accent */}
       <header
         className="h-12 flex-shrink-0 flex items-center gap-3 px-3 border-b mira-border glass relative overflow-hidden"
@@ -405,6 +455,29 @@ export function ChatView({
         )}
       </AnimatePresence>
 
+      {/* Pending image attachments */}
+      {pendingImages.length > 0 && (
+        <div className="px-4 pt-2 flex-shrink-0">
+          <div className="max-w-3xl mx-auto flex gap-2 overflow-x-auto pb-2">
+            {pendingImages.map((img, i) => (
+              <div key={i} className="relative group flex-shrink-0">
+                <img
+                  src={img.content}
+                  alt={img.name}
+                  className="w-16 h-16 rounded-lg object-cover border mira-border"
+                />
+                <button
+                  onClick={() => setPendingImages((prev) => prev.filter((_, j) => j !== i))}
+                  className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <X size={10} />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Input — glass morphism, refined */}
       <div className="p-4 flex-shrink-0">
         <div className="max-w-3xl mx-auto">
@@ -433,6 +506,24 @@ export function ChatView({
               aria-label="Message MIRA"
               value={input}
               onChange={(e) => setInput(e.target.value)}
+              onPaste={(e) => {
+                const items = e.clipboardData?.items;
+                if (items) {
+                  const files: File[] = [];
+                  for (const item of Array.from(items)) {
+                    if (item.type.startsWith("image/")) {
+                      const file = item.getAsFile();
+                      if (file) files.push(file);
+                    }
+                  }
+                  if (files.length > 0) {
+                    e.preventDefault();
+                    const dt = new DataTransfer();
+                    files.forEach((f) => dt.items.add(f));
+                    handleFiles(dt.files);
+                  }
+                }
+              }}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();

@@ -82,7 +82,7 @@ interface Actions {
   setActive: (id: string) => void;
   deleteConversation: (id: string) => Promise<void>;
   renameConversation: (id: string, title: string) => Promise<void>;
-  sendMessage: (text: string) => Promise<void>;
+  sendMessage: (text: string, attachments?: Message["attachments"]) => Promise<void>;
   stopGeneration: () => void;
   regenerate: () => Promise<void>;
   setListening: (b: boolean) => void;
@@ -289,8 +289,8 @@ export const useStore = create<State & Actions>((set, get) => ({
     devlog("conversation", `Renamed ${id} → "${title}"`);
   },
 
-  async sendMessage(text) {
-    if (!text.trim()) return;
+  async sendMessage(text, attachments) {
+    if (!text.trim() && (!attachments || attachments.length === 0)) return;
     const { settings, conversations, activeId, projects, memory, skills } = get();
     let conv = conversations.find((c) => c.id === activeId);
     if (!conv) {
@@ -319,6 +319,7 @@ export const useStore = create<State & Actions>((set, get) => ({
       role: "user",
       content: text,
       timestamp: Date.now(),
+      attachments: attachments || undefined,
     };
     const assistantMsg: Message = {
       id: uid(),
