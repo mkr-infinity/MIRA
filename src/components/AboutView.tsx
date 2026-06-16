@@ -14,14 +14,9 @@ import {
   Heart,
   ExternalLink,
   Shield,
-  Cpu,
-  Folder,
-  Download,
   GitBranch,
   ChevronDown,
-  Terminal,
   Database,
-  Activity,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MiraLogo } from "./MiraLogo";
@@ -52,6 +47,26 @@ interface GhRepo {
   html_url: string;
 }
 
+function AnimatedCounter({ value, suffix = "" }: { value: number; suffix?: string }) {
+  const [display, setDisplay] = useState(0);
+  useEffect(() => {
+    let start = 0;
+    const duration = 800;
+    const step = Math.max(1, Math.floor(value / 30));
+    const interval = setInterval(() => {
+      start += step;
+      if (start >= value) {
+        setDisplay(value);
+        clearInterval(interval);
+      } else {
+        setDisplay(start);
+      }
+    }, duration / (value / step));
+    return () => clearInterval(interval);
+  }, [value]);
+  return <>{display}{suffix}</>;
+}
+
 export function AboutView() {
   const { settings } = useStore();
   const [profile, setProfile] = useState<GhProfile | null>(null);
@@ -73,14 +88,18 @@ export function AboutView() {
     });
   }, []);
 
-  const star = repo?.stargazers_count ?? 0;
+  const stars = repo?.stargazers_count ?? 0;
   const forks = repo?.forks_count ?? 0;
-  const issues = repo?.open_issues_count ?? 0;
+  const openIssues = repo?.open_issues_count ?? 0;
 
   return (
     <div className="space-y-5">
       {/* Terminal-style header */}
-      <div className="rounded-mira border mira-border overflow-hidden">
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="rounded-mira border mira-border overflow-hidden"
+      >
         <div className="flex items-center gap-2 px-4 py-2 mira-elevated border-b mira-border">
           <div className="flex gap-1.5">
             <div className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
@@ -122,40 +141,83 @@ export function AboutView() {
             </div>
           </div>
         </div>
+      </motion.div>
+
+      <div className="grid grid-cols-1 gap-3">
+        <DeveloperCard profile={profile} loading={loading} stars={stars} forks={forks} issues={openIssues} />
       </div>
 
-      <DeveloperCard profile={profile} loading={loading} />
-
-      <ActionPills />
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.15 }}
+      >
+        <ActionPills />
+      </motion.div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <SupportCard />
-        <PrivacyCard />
+        <motion.div
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <SupportCard />
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, x: 10 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.25 }}
+        >
+          <PrivacyCard />
+        </motion.div>
       </div>
 
-      <SocialGrid />
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+      >
+        <SocialGrid />
+      </motion.div>
 
-      <TechCard />
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.35 }}
+      >
+        <TechCard />
+      </motion.div>
 
-      <div className="flex items-center gap-2 text-[10px] font-mono mira-muted justify-center">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.4 }}
+        className="flex items-center gap-2 text-[10px] font-mono mira-muted justify-center"
+      >
         <Heart size={10} className="text-red-400 fill-red-400" />
         <span>Made with love by </span>
         <a href="https://github.com/mkr-infinity" target="_blank" rel="noreferrer" className="text-cyan-400 hover:underline">
           MKR-Infinity
         </a>
-      </div>
+      </motion.div>
 
-      <VersionChangelog version={settings.version || "2.0.0"} />
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.45 }}
+      >
+        <VersionChangelog version={settings.version || "2.0.0"} />
+      </motion.div>
     </div>
   );
 }
 
-function DeveloperCard({ profile, loading }: { profile: GhProfile | null; loading: boolean }) {
+function DeveloperCard({ profile, loading, stars, forks, issues }: { profile: GhProfile | null; loading: boolean; stars: number; forks: number; issues: number }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="relative overflow-hidden rounded-mira border mira-border mira-elevated"
+      className="relative overflow-hidden rounded-mira border mira-border mira-elevated hover:scale-[1.01] transition-transform"
     >
       <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full bg-cyan-500/8 blur-3xl pointer-events-none" />
       <div className="absolute -bottom-8 -left-8 w-32 h-32 rounded-full bg-blue-500/5 blur-3xl pointer-events-none" />
@@ -202,13 +264,13 @@ function DeveloperCard({ profile, loading }: { profile: GhProfile | null; loadin
       {profile && (
         <div className="border-t mira-border grid grid-cols-3 divide-x divide-[color:var(--border)]">
           {[
-            { label: "followers", value: profile.followers },
-            { label: "following", value: profile.following },
-            { label: "repos", value: profile.public_repos },
+            { label: "followers", value: profile.followers, icon: null },
+            { label: "following", value: profile.following, icon: null },
+            { label: "repos", value: profile.public_repos, icon: null },
           ].map((s) => (
             <div key={s.label} className="px-4 py-3 text-center">
               <div className="text-lg font-semibold font-mono mira-text tabular-nums">
-                {loading ? "—" : s.value}
+                {loading ? "—" : <AnimatedCounter value={s.value} />}
               </div>
               <div className="text-[10px] font-mono uppercase tracking-wider mira-muted">
                 {s.label}
@@ -217,48 +279,22 @@ function DeveloperCard({ profile, loading }: { profile: GhProfile | null; loadin
           ))}
         </div>
       )}
+      {/* Repo stats row */}
+      <div className="border-t mira-border flex items-center justify-around px-4 py-2.5 text-[11px] font-mono mira-muted">
+        <span className="flex items-center gap-1">
+          <Star size={11} className="text-amber-400" />
+          {loading ? "—" : <AnimatedCounter value={stars} />}
+        </span>
+        <span className="flex items-center gap-1">
+          <GitBranch size={11} className="text-cyan-400" />
+          {loading ? "—" : forks}
+        </span>
+        <span className="flex items-center gap-1">
+          <AlertCircle size={11} className="text-green-400" />
+          {loading ? "—" : issues} open
+        </span>
+      </div>
     </motion.div>
-  );
-}
-
-function RepoCard({ repo, star, forks, issues, loading }: { repo: GhRepo | null; star: number; forks: number; issues: number; loading: boolean }) {
-  return (
-    <div className="p-5 rounded-mira border mira-border mira-elevated">
-      <div className="flex items-start justify-between gap-3 mb-3">
-        <div className="flex items-center gap-2 min-w-0">
-          <Github size={16} className="text-cyan-400 flex-shrink-0" />
-          <a
-            href={REPO}
-            target="_blank"
-            rel="noreferrer"
-            className="font-mono text-sm mira-text hover:text-cyan-400 truncate"
-          >
-            mkr-infinity/MIRA
-          </a>
-          <ExternalLink size={11} className="mira-muted flex-shrink-0" />
-        </div>
-      </div>
-      <p className="text-sm mira-muted mb-4">
-        {repo?.description || "MIRA — MKR Intelligent Responsive Assistant. Your personal AI desktop assistant. Voice, memory, projects, and full desktop automation."}
-      </p>
-      <div className="flex items-center gap-4 text-xs font-mono mira-muted">
-        <span className="flex items-center gap-1.5">
-          <Star size={12} className="text-amber-400" />
-          <span className="mira-text font-medium">{loading ? "—" : star}</span> stars
-        </span>
-        <span className="flex items-center gap-1.5">
-          <GitBranch size={12} className="text-cyan-400" />
-          <span className="mira-text font-medium">{loading ? "—" : forks}</span> forks
-        </span>
-        <span className="flex items-center gap-1.5">
-          <AlertCircle size={12} className="text-green-400" />
-          <span className="mira-text font-medium">{loading ? "—" : issues}</span> issues
-        </span>
-        {repo?.default_branch && (
-          <span className="ml-auto mira-muted">main</span>
-        )}
-      </div>
-    </div>
   );
 }
 
@@ -348,7 +384,7 @@ function SocialGrid() {
               href={l.href}
               target="_blank"
               rel="noreferrer"
-              className={`p-3 rounded-mira border mira-border mira-elevated flex items-center gap-3 transition-colors ${l.color}`}
+              className={`p-3 rounded-mira border mira-border mira-elevated flex items-center gap-3 transition-all hover:scale-[1.02] ${l.color}`}
             >
               <Icon size={16} className="mira-muted" />
               <div className="min-w-0 flex-1">
