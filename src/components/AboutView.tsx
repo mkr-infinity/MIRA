@@ -155,22 +155,21 @@ export function AboutView() {
         <ActionPills />
       </motion.div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <motion.div
-          initial={{ opacity: 0, x: -10 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <SupportCard />
-        </motion.div>
-        <motion.div
-          initial={{ opacity: 0, x: 10 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.25 }}
-        >
-          <PrivacyCard />
-        </motion.div>
-      </div>
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+      >
+        <SupportCard />
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.25 }}
+      >
+        <PrivacyCard />
+      </motion.div>
 
       <motion.div
         initial={{ opacity: 0, y: 10 }}
@@ -332,34 +331,65 @@ function ActionPills() {
   );
 }
 
+const SUPPORT_QUOTES = [
+  "Open source thrives on generosity — every coffee keeps the commits flowing.",
+  "Your support turns late-night coding into morning breakthroughs.",
+  "Building free tools for everyone, funded by kindness.",
+  "One coffee = one feature. Two coffees = two features. Math checks out.",
+  "MIRA runs on code, caffeine, and the warmth of the open-source community.",
+  "Every star, every share, every coffee — it all adds up to something beautiful.",
+  "Free software isn't free to build. Your support makes it possible.",
+];
+
 function SupportCard() {
+  const [quote] = useState(() => SUPPORT_QUOTES[Math.floor(Math.random() * SUPPORT_QUOTES.length)]);
+
   return (
-    <div className="p-5 rounded-mira border border-amber-500/30 bg-gradient-to-br from-amber-500/10 to-amber-500/0">
-      <div className="flex items-start gap-3">
-        <div className="w-10 h-10 rounded-mira bg-amber-500/20 flex items-center justify-center text-amber-400 flex-shrink-0">
-          <Coffee size={18} />
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      className="relative overflow-hidden rounded-mira border border-amber-500/20"
+    >
+      <div className="absolute inset-0 bg-gradient-to-br from-amber-500/8 via-transparent to-rose-500/5 pointer-events-none" />
+      <div className="absolute -top-24 -right-24 w-64 h-64 rounded-full bg-amber-500/10 blur-[80px] pointer-events-none" />
+      <div className="absolute -bottom-16 -left-16 w-48 h-48 rounded-full bg-rose-500/8 blur-[60px] pointer-events-none" />
+      <div className="relative p-6 sm:p-8 text-center">
+        <div className="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-br from-amber-400 to-rose-400 flex items-center justify-center shadow-lg shadow-amber-500/25 mb-5">
+          <Coffee size={22} className="text-black" />
         </div>
-        <div className="flex-1 min-w-0">
-          <h3 className="font-display font-semibold mira-text">
-            Support development
-          </h3>
-          <p className="text-sm mira-muted mt-1">
-            MIRA is open-source and free. If it makes your day a little easier,
-            consider buying the developer a coffee.
-          </p>
-          <a
-            href="https://buymeacoffee.com/mkr_infinity"
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-2 mt-3 px-4 py-2 rounded-pill bg-amber-500 text-black text-sm font-semibold hover:bg-amber-400 transition-colors"
-          >
-            <Coffee size={14} />
-            Buy me a coffee
-            <ExternalLink size={11} />
-          </a>
+        <h3 className="font-display text-xl font-semibold mira-text mb-2">
+          Fuel the vision
+        </h3>
+        <p className="text-sm mira-muted leading-relaxed max-w-md mx-auto mb-5">
+          MIRA is free, open-source, and built with love. If it makes your day
+          a little easier, consider supporting the developer behind the code.
+        </p>
+        <div className="max-w-lg mx-auto mb-6">
+          <div className="relative px-4 py-3 rounded-mira bg-amber-500/5 border border-amber-500/10">
+            <svg className="absolute -top-2 -left-2 w-4 h-4 text-amber-400/30" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
+            </svg>
+            <p className="text-sm text-amber-200/90 italic font-medium px-2 leading-relaxed">
+              &ldquo;{quote}&rdquo;
+            </p>
+          </div>
         </div>
+        <a
+          href="https://buymeacoffee.com/mkr_infinity"
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center gap-2.5 px-6 py-3 rounded-pill bg-gradient-to-r from-amber-500 to-rose-500 text-black text-sm font-bold hover:from-amber-400 hover:to-rose-400 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-amber-500/20"
+        >
+          <Coffee size={16} />
+          Buy me a coffee
+          <ExternalLink size={12} />
+        </a>
+        <p className="text-[10px] font-mono mira-muted mt-4">
+          ~$ echo "thanks for being awesome" &gt; /dev/heart
+        </p>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
