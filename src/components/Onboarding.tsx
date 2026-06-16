@@ -28,6 +28,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import type { ProviderId, ProviderConfig } from "../types";
 import { cx, THEMES, type ThemeId } from "../lib/theme";
 import { MiraLogo } from "./MiraLogo";
+import { MagneticGrid } from "./MagneticGrid";
 
 type Step = "welcome" | "provider" | "voice" | "done";
 
@@ -258,7 +259,15 @@ export function Onboarding() {
 
   return (
     <div className="h-full w-full mira-bg mira-text overflow-y-auto">
-      {/* Background decorations */}
+      <MagneticGrid lineCount={20} repulsionRadius={180} maxDisplacement={50} />
+      {/* Jarvis-style scan lines */}
+      <div
+        className="fixed inset-0 pointer-events-none opacity-[0.03]"
+        style={{
+          backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,212,255,0.5) 2px, rgba(0,212,255,0.5) 4px)",
+          backgroundSize: "100% 4px",
+        }}
+      />
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full opacity-10" style={{ background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)" }} />
         <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full opacity-5" style={{ background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)" }} />
@@ -368,20 +377,71 @@ export function Onboarding() {
 }
 
 function WelcomeStep() {
+  const [displayText, setDisplayText] = useState("");
+  const fullText = "MKR Intelligent Responsive Assistant";
+  const [showCursor, setShowCursor] = useState(true);
+
+  useEffect(() => {
+    let i = 0;
+    const interval = setInterval(() => {
+      setDisplayText(fullText.slice(0, i + 1));
+      i++;
+      if (i >= fullText.length) clearInterval(interval);
+    }, 45);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const cursor = setInterval(() => {
+      setShowCursor((c) => !c);
+    }, 530);
+    return () => clearInterval(cursor);
+  }, []);
+
   return (
-    <div className="text-center py-4 sm:py-8">
+    <div className="text-center py-4 sm:py-8 relative">
+      {/* Jarvis rotating rings */}
       <motion.div
         initial={{ scale: 0.5, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-        className="relative w-32 h-32 sm:w-44 sm:h-44 mx-auto mb-6 sm:mb-8"
+        className="relative w-36 h-36 sm:w-48 sm:h-48 mx-auto mb-6 sm:mb-8"
       >
-        <div className="absolute inset-0 rounded-full blur-3xl animate-pulse" style={{ background: "var(--accent-faint)" }} />
-        <div className="absolute inset-2 rounded-full border border-white/5" />
-        <div className="absolute inset-5 rounded-full border border-white/5" />
+        <motion.div
+          className="absolute inset-0 rounded-full border border-cyan-500/15"
+          animate={{ rotate: 360 }}
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+        />
+        <motion.div
+          className="absolute inset-3 rounded-full border border-cyan-400/10"
+          animate={{ rotate: -360 }}
+          transition={{ duration: 14, repeat: Infinity, ease: "linear" }}
+        />
+        <motion.div
+          className="absolute inset-6 rounded-full border border-cyan-300/8"
+          animate={{ rotate: 360 }}
+          transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+        />
+        <motion.div
+          className="absolute inset-0 rounded-full"
+          style={{
+            background: "radial-gradient(circle, rgba(0,212,255,0.12) 0%, transparent 70%)",
+          }}
+          animate={{ scale: [1, 1.08, 1], opacity: [0.4, 0.7, 0.4] }}
+          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+        />
         <div className="absolute inset-0 flex items-center justify-center">
           <MiraLogo size={72} glow={true} />
         </div>
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.15 }}
+        className="text-[10px] font-mono text-cyan-400/50 mb-3 tracking-[0.3em] uppercase"
+      >
+        &gt; SYSTEM INITIALIZED
       </motion.div>
 
       <motion.div
@@ -392,12 +452,32 @@ function WelcomeStep() {
         <h1 className="font-display text-4xl sm:text-6xl font-bold mb-3 tracking-tight gradient-text">
           MIRA
         </h1>
-        <p className="text-base sm:text-lg max-w-md mx-auto mb-2" style={{ color: "var(--muted)" }}>
-          Your personal AI assistant
+        <p className="text-sm font-mono text-cyan-400/70 mb-2 h-5">
+          {displayText}
+          {showCursor && <span className="text-cyan-400 ml-0.5">▎</span>}
         </p>
         <p className="text-xs sm:text-sm max-w-md mx-auto" style={{ color: "var(--subtle)" }}>
-          Multi-provider, voice-activated, and runs on your machine.
+          Multi-provider, voice-activated, runs on your machine.
         </p>
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.9, duration: 0.5 }}
+        className="mt-6 space-y-1"
+      >
+        {["VOICE MODULE: ONLINE", "MEMORY BANK: STANDBY", "PROVIDER INTERFACE: READY"].map((msg, i) => (
+          <motion.div
+            key={msg}
+            initial={{ opacity: 0, x: -8 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 1.2 + i * 0.25 }}
+            className="text-[10px] font-mono text-emerald-400/50"
+          >
+            &gt; {msg}
+          </motion.div>
+        ))}
       </motion.div>
 
       <motion.div
