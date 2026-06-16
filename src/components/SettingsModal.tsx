@@ -39,7 +39,7 @@ import { findModelMeta, modelsForProvider, formatContextWindow, type ModelMeta }
 import { detectAllLocalModels, type ProbeResult } from "../lib/localModels";
 import { isTauri } from "../lib/platform";
 import { storage } from "../lib/storage";
-import { PROVIDER_META, metaFor } from "../lib/ai/providerMeta";
+import { metaFor } from "../lib/ai/providerMeta";
 import { AboutView } from "./AboutView";
 import { MiraLogo } from "./MiraLogo";
 import { cx } from "../lib/theme";
@@ -2651,21 +2651,6 @@ function ToggleRow({
       </div>
       <Toggle checked={checked} onChange={onChange} />
     </label>
-  );
-}
-
-function ThemeButton({ active, onClick, icon: Icon, label }: any) {
-  return (
-    <button
-      onClick={onClick}
-      className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${
-        active
-          ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-400"
-          : "mira-border mira-muted hover:mira-text"
-      }`}
-    >
-      <Icon size={14} /> {label}
-    </button>
   );
 }
 
