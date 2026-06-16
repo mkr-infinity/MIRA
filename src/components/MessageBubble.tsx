@@ -15,22 +15,22 @@ function CodeBlock({ className, children }: { className?: string; children?: Rea
   const lang = className?.replace("language-", "") || "sh";
 
   return (
-    <div className="relative group my-2 rounded-lg overflow-hidden border border-white/10 bg-black/60">
-      <div className="flex items-center justify-between px-3 py-1.5 bg-white/5 border-b border-white/10">
-        <span className="text-[10px] font-mono uppercase tracking-wider text-white/40">{lang}</span>
+    <div className="relative group my-2 rounded-lg overflow-hidden border mira-border mira-elevated">
+      <div className="flex items-center justify-between px-3 py-1.5 bg-white/5 border-b mira-border">
+        <span className="text-[10px] font-mono uppercase tracking-wider mira-muted">{lang}</span>
         <button
           onClick={() => {
-            navigator.clipboard.writeText(code);
+            navigator.clipboard.writeText(code).catch(() => {});
             setCopied(true);
             setTimeout(() => setCopied(false), 1500);
           }}
-          className="flex items-center gap-1 text-[10px] font-mono text-white/40 hover:text-white/80 transition-colors"
+          className="flex items-center gap-1 text-[10px] font-mono mira-muted hover:mira-text transition-colors"
         >
           {copied ? <Check size={11} /> : <Copy size={11} />}
           <span>{copied ? "copied" : "copy"}</span>
         </button>
       </div>
-      <pre className="overflow-x-auto p-4 text-sm font-mono leading-relaxed text-white/85">
+      <pre className="overflow-x-auto p-4 text-sm font-mono leading-relaxed mira-text">
         <code>{code}</code>
       </pre>
     </div>
@@ -39,7 +39,7 @@ function CodeBlock({ className, children }: { className?: string; children?: Rea
 
 function InlineCode({ children }: { children?: React.ReactNode }) {
   return (
-    <code className="px-1.5 py-0.5 rounded text-[0.88em] font-mono bg-white/10 text-cyan-300 border border-white/10">
+    <code className="px-1.5 py-0.5 rounded text-[0.88em] font-mono mira-accent-soft mira-text border mira-border">
       {children}
     </code>
   );
@@ -56,7 +56,7 @@ function ToolCallBlock({ text }: { text: string }) {
       {calls.map((call, i) => (
         <span
           key={i}
-          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-mono bg-cyan-500/10 text-cyan-400 border border-cyan-500/20"
+          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-mono mira-accent-soft mira-accent border mira-border"
         >
           <Terminal size={9} />
           {call}
@@ -162,8 +162,8 @@ export function MessageBubble({ message }: { message: Message }) {
             borderColor: `${accent}30`,
             color: "var(--text)",
           } : {
-            background: 'rgba(255,255,255,0.03)',
-            borderColor: 'rgba(255,255,255,0.06)',
+            background: 'var(--surface)',
+            borderColor: 'var(--border)',
           }}
         >
           {message.streaming && !message.content ? (
@@ -205,7 +205,7 @@ export function MessageBubble({ message }: { message: Message }) {
                 icon={copied ? Check : Copy}
                 label="Copy"
                 onClick={() => {
-                  navigator.clipboard.writeText(message.content);
+                  navigator.clipboard.writeText(message.content).catch(() => {});
                   setCopied(true);
                   setTimeout(() => setCopied(false), 1500);
                 }}
@@ -260,7 +260,7 @@ function ActionBtn({
   onClick,
   disabled,
 }: {
-  icon: any;
+  icon: React.ComponentType<{ size?: number }>;
   label: string;
   onClick: () => void;
   disabled?: boolean;
@@ -277,20 +277,3 @@ function ActionBtn({
   );
 }
 
-function ThinkingDots() {
-  return (
-    <div className="flex items-center gap-1.5 py-1">
-      {[0, 1, 2].map((i) => (
-        <span
-          key={i}
-          className="w-2 h-2 rounded-full bg-cyan-400/70"
-          style={{
-            animation: "wave 1.2s ease-in-out infinite",
-            animationDelay: `${i * 0.15}s`,
-            transformOrigin: "center",
-          }}
-        />
-      ))}
-    </div>
-  );
-}
