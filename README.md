@@ -1,31 +1,32 @@
 <div align="center">
 
-<img src="assets/mira-logo.svg" width="120" height="120" alt="MIRA Logo" />
+<img src="assets/mira-logo.svg" width="130" height="130" alt="MIRA Logo" />
 
 # MIRA
 
 **Your intelligent AI assistant that lives on your machine.**
 
-No telemetry. No accounts. Just you and your AI.
+No telemetry. No accounts. No cloud. Just you and your AI.
 
 <br/>
 
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.6-3178C6?style=flat-square&logo=typescript)](https://www.typescriptlang.org)
-[![React](https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react)](https://react.dev)
-[![Vite](https://img.shields.io/badge/Vite-6-646CFF?style=flat-square&logo=vite)](https://vitejs.dev)
-[![Tauri](https://img.shields.io/badge/Tauri-2-FFC131?style=flat-square&logo=tauri)](https://tauri.app)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square)](CONTRIBUTING.md)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue?style=flat-square&labelColor=000)](LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.6-3178C6?style=flat-square&logo=typescript&labelColor=000)](https://www.typescriptlang.org)
+[![React](https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react&labelColor=000)](https://react.dev)
+[![Vite](https://img.shields.io/badge/Vite-6-646CFF?style=flat-square&logo=vite&labelColor=000)](https://vitejs.dev)
+[![Tauri](https://img.shields.io/badge/Tauri-2-FFC131?style=flat-square&logo=tauri&labelColor=000)](https://tauri.app)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square&labelColor=000)](CONTRIBUTING.md)
 
 <br/>
 
 <p>
-  <a href="#-prerequisites">Prerequisites</a> ·
-  <a href="#-quick-start">Quick Start</a> ·
-  <a href="#-features">Features</a> ·
-  <a href="#-keyboard-shortcuts">Shortcuts</a> ·
-  <a href="#-build">Build</a> ·
-  <a href="#-contributing">Contributing</a>
+  <a href="#-prerequisites">📋 Prerequisites</a> ·
+  <a href="#-quick-start">🚀 Quick Start</a> ·
+  <a href="#-keyboard-shortcuts">⌨️ Shortcuts</a> ·
+  <a href="#-build">🔧 Build</a> ·
+  <a href="#-documentation">📚 Docs</a> ·
+  <a href="#-contributing">🤝 Contributing</a> ·
+  <a href="#-license">📄 License</a>
 </p>
 
 <br/>
@@ -38,150 +39,125 @@ No telemetry. No accounts. Just you and your AI.
 
 ## 📋 Prerequisites
 
-Before running `npm install`, ensure you have the following installed:
+Before running `npm install`, make sure you have these installed:
 
-| Tool  | Minimum Version | Installation                              |
-|-------|-----------------|------------------------------------------|
-| Node  | `>=20`          | [nodejs.org](https://nodejs.org)         |
-| npm   | `>=10`          | ships with Node                          |
-| Rust  | `>=1.77`        | [rustup.rs](https://rustup.rs) *         |
+| Tool  | Minimum | For             | Install                                    |
+|-------|---------|-----------------|--------------------------------------------|
+| Node  | `>=20`  | Runtime         | [nodejs.org](https://nodejs.org)           |
+| npm   | `>=10`  | Package manager | ships with Node                            |
+| Rust  | `>=1.77`| Desktop build   | [rustup.rs](https://rustup.rs)             |
 
-> *Rust is only required for the **desktop (Tauri)** build. The web version works without it.
+> **Rust is optional.** The web version at `http://localhost:5173` works without it.  
+> Rust + Tauri are only needed if you want to build the native desktop app.
 
 <br/>
 
 ## 🚀 Quick Start
 
+Get MIRA running in under a minute:
+
 ```bash
+# 1. Clone
 git clone https://github.com/mkr-infinity/MIRA
 cd MIRA
+
+# 2. Install dependencies
 npm install
+
+# 3. Start development server
 npm run dev
 ```
 
-Open **http://localhost:5173** and you're ready to go.
+Open **http://localhost:5173** in your browser.  
+The onboarding wizard will guide you through your first provider setup.
+
+> 💡 **First time?** The wizard walks you through picking a provider, pasting your API key, and testing voice — takes about 60 seconds.
 
 <br/>
 
-## ✨ Features
+### What you can do next
 
-### 🤖 AI Providers
-
-Connect any combination of providers — all keys stay on your machine.
-
-| Provider   | Auth        | Default Model                  |
-|------------|-------------|--------------------------------|
-| **OpenAI** | API key     | `gpt-4o-mini`                  |
-| **Anthropic** | API key  | `claude-3-5-sonnet-20241022`   |
-| **Gemini** | API key     | `gemini-1.5-flash`             |
-| **Ollama** | Local       | auto-detected                  |
-| **OpenRouter** | API key | `anthropic/claude-3.5-sonnet`  |
-| **Custom** | API key     | any OpenAI-compatible endpoint |
-
-> 💡 **Auto-fallback** — If your active provider fails, MIRA silently rotates to the next enabled one.
-
-### 🎙️ Voice
-
-- Push-to-talk with arc-reactor orb animation
-- Auto-speak replies with configurable voice, rate, and pitch
-- Wake word activation ("Hey MIRA")
-- Save and restore speech profiles
-
-### 🎨 Customisation
-
-- **7 themes** — Midnight, Daylight, Cyberpunk, Sakura, Nordic, Neon, Earth
-- **Custom CSS** — Inject your own styles in real-time
-- **Accent color** — Choose from 10 accent colors or let the theme decide
-- **Personality presets** — Default, Concise, Friendly, Code Mentor, Therapist, or write your own system prompt
-
-### 📁 Projects
-
-Organise conversations into projects with:
-- Custom instructions injected into every prompt
-- File attachments (text content appended automatically)
-- Color-coded sidebar navigation
-
-### 🖼️ Image Attachments
-
-- **Drag & drop** images into the chat
-- **Paste** from clipboard
-- **Camera capture** via `getUserMedia`
-- All images stored as base64 in message attachments
-
-### 🔍 Full-Text Search
-
-Press `Ctrl+F` to search within the current conversation. Results are highlighted and navigable with up/down arrows.
-
-### 🔌 Plugin System
-
-Load external JavaScript modules from URLs to extend MIRA's capabilities. Plugins can hook into messages and settings.
-
-### 🔒 Privacy
-
-- 100% local — all data stays on your machine
-- No telemetry, no tracking, no accounts
-- Open source (MIT license)
-- API keys never leave your device
-
-### 🔄 E2E Sync
-
-End-to-end encrypted sync across devices (scaffold). Bring your own relay server or use the default.
-
-> 📖 See [FEATURES.md](./FEATURES.md) for the complete feature list.
+| Action | How |
+|--------|-----|
+| 💬 **Chat** | Type a message and press `Enter` |
+| 🎙️ **Use voice** | Press `F11` or click the mic button |
+| 🖼️ **Attach images** | Drag & drop, paste, or click the camera icon |
+| 🔍 **Search** | Press `Ctrl+F` in any conversation |
+| ⚙️ **Configure** | Press `Ctrl+,` to open settings |
+| 📁 **Organise** | Create projects in the sidebar |
 
 <br/>
 
 ## ⌨️ Keyboard Shortcuts
 
-| Shortcut      | Action              |
-|---------------|---------------------|
-| `F11`         | Enter voice mode    |
-| `Escape`      | Close modal / exit voice |
-| `Ctrl + N`    | New conversation    |
-| `Ctrl + ,`    | Open settings       |
-| `Ctrl + /`    | Focus chat input    |
-| `Ctrl + F`    | Search in conversation |
+| Shortcut      | Action                    |
+|---------------|---------------------------|
+| `F11`         | Enter / exit voice mode   |
+| `Escape`      | Close modal / exit voice  |
+| `Ctrl + N`    | New conversation          |
+| `Ctrl + ,`    | Open settings             |
+| `Ctrl + /`    | Focus the chat input      |
+| `Ctrl + F`    | Search within conversation|
+
+> All shortcuts work in the web app and the desktop build.
 
 <br/>
 
 ## 🔧 Build
 
-```bash
-# Web (browser)
-npm run dev          → http://localhost:5173
-npm run build        → production build
-npm run preview      → preview build
+Build MIRA for production or package it as a desktop app.
 
-# Desktop (requires Rust)
-npm run tauri:dev    → hot-reload desktop app
-npm run tauri:build  → platform installers
+```bash
+# ── Web (browser) ─────────────────────────────
+npm run dev              # Development server at localhost:5173
+npm run build            # Production build → dist/
+npm run preview          # Preview the production build
+
+# ── Desktop (requires Rust ≥1.77) ─────────────
+npm run tauri:dev        # Hot-reload desktop app
+npm run tauri:build      # Platform-specific installer
 ```
+
+### Output
+
+| Command | Produces |
+|---------|----------|
+| `npm run build` | `dist/` — static files for any web server |
+| `npm run tauri:build` | `.dmg` (macOS), `.msi` (Windows), `.AppImage` (Linux) |
 
 <br/>
 
 ## 📚 Documentation
 
-| File              | Description                |
-|-------------------|----------------------------|
-| [FEATURES.md](./FEATURES.md)   | Complete feature list      |
-| [CHANGELOG.md](./CHANGELOG.md) | Version history            |
-| [CONTRIBUTING.md](./CONTRIBUTING.md) | Setup, guidelines, structure |
+| File | What you'll find |
+|------|------------------|
+| [FEATURES.md](./FEATURES.md) | Complete feature list — providers, voice, themes, plugins, and more |
+| [CHANGELOG.md](./CHANGELOG.md) | Full version history from v1.0.0 to latest |
+| [CONTRIBUTING.md](./CONTRIBUTING.md) | Setup guide, project structure, coding guidelines, PR workflow |
 
 <br/>
 
 ## 🤝 Contributing
 
-We welcome contributions! See [CONTRIBUTING.md](./CONTRIBUTING.md) for:
-- Setup instructions
-- Project structure
-- Code style guidelines
-- PR workflow
+We'd love your help! Whether it's a bug fix, a new feature, or better docs — every contribution counts.
+
+**Quick steps:**
+
+1. Fork the repo
+2. Create a feature branch (`git checkout -b feat/my-thing`)
+3. Make your changes
+4. Run `npx tsc --noEmit` and `npm run build` to verify
+5. Commit with [conventional commits](https://www.conventionalcommits.org) (`feat:`, `fix:`, `docs:`, etc.)
+6. Open a pull request
+
+> See [CONTRIBUTING.md](./CONTRIBUTING.md) for the full guide.
 
 <br/>
 
 ## 📄 License
 
-**MIT** — Made with 💙 by [Mohammad Kaif Raja](https://mkr-infinity.github.io)
+**MIT** — Free to use, modify, and distribute.  
+Made with 💙 by [Mohammad Kaif Raja](https://mkr-infinity.github.io).
 
 <br/>
 
