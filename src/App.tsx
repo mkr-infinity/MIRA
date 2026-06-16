@@ -38,9 +38,12 @@ export default function App() {
 
   useEffect(() => {
     const root = document.documentElement;
-    root.classList.toggle("dark", settings.theme === "dark");
-    root.classList.toggle("light", settings.theme !== "dark");
-    try { localStorage.setItem("mira:initial-theme", settings.theme); } catch {}
+    const t = settings.theme || "dark";
+    root.setAttribute("data-theme", t);
+    // Backward compat: also toggle dark/light classes
+    root.classList.toggle("dark", t === "dark" || t === "cyberpunk" || t === "neon");
+    root.classList.toggle("light", t === "light" || t === "earth" || t === "nordic" || t === "sakura");
+    try { localStorage.setItem("mira:initial-theme", t); } catch {}
   }, [settings.theme]);
 
   useEffect(() => {

@@ -78,7 +78,7 @@ export function AboutView() {
     <div className="space-y-6">
       {/* Hero */}
       <div>
-        <h2 className="font-display text-2xl font-semibold mb-1">
+        <h2 className="font-display text-2xl font-semibold mb-1 gradient-text">
           About MIRA
         </h2>
         <p className="text-sm mira-muted">

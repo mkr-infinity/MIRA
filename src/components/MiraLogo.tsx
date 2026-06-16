@@ -5,11 +5,13 @@ interface Props {
   size?: number;
   glow?: boolean;
   className?: string;
+  animated?: boolean;
 }
 
-export function MiraLogo({ size = 36, glow = true, className }: Props) {
+export function MiraLogo({ size = 36, glow = true, className, animated = true }: Props) {
   const id = useId();
-  const gradId = `mira-grad-${id}`;
+  const gradId = `mira-ring-${id}`;
+  const glowId = `mira-glow-${id}`;
 
   return (
     <div
@@ -20,41 +22,102 @@ export function MiraLogo({ size = 36, glow = true, className }: Props) {
         <motion.div
           className="absolute inset-0 rounded-full pointer-events-none"
           style={{
-            background: `radial-gradient(circle, rgba(0,212,255,0.35) 0%, transparent 70%)`,
-            filter: "blur(8px)",
+            background: `radial-gradient(circle, rgba(0,212,255,0.3) 0%, rgba(0,119,255,0.1) 40%, transparent 70%)`,
+            filter: "blur(6px)",
           }}
-          animate={{ scale: [1, 1.12, 1], opacity: [0.5, 1, 0.5] }}
+          animate={animated ? { scale: [1, 1.1, 1], opacity: [0.6, 1, 0.6] } : undefined}
           transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
         />
       )}
       <svg
-        viewBox="0 0 64 64"
+        viewBox="0 0 100 100"
         style={{ width: size, height: size }}
         className="relative z-10"
         fill="none"
       >
         <defs>
-          <linearGradient id={gradId} x1="-0.2" y1="0" x2="1.2" y2="1">
+          <linearGradient id={gradId} x1="0" y1="0" x2="1" y2="1">
             <stop offset="0%" stopColor="#00D4FF" />
+            <stop offset="50%" stopColor="#00AAFF" />
             <stop offset="100%" stopColor="#0077FF" />
           </linearGradient>
+          <radialGradient id={glowId} cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#00FFFF" stopOpacity={0.9} />
+            <stop offset="40%" stopColor="#00D4FF" stopOpacity={0.4} />
+            <stop offset="100%" stopColor="#0077FF" stopOpacity={0} />
+          </radialGradient>
+          <filter id={`mira-blur-${id}`}>
+            <feGaussianBlur stdDeviation="2" />
+          </filter>
         </defs>
-        <circle cx="32" cy="32" r="28" stroke="#00D4FF" strokeWidth="1.2" strokeOpacity="0.25" />
-        <path
-          d="M14 46V20l10 18 10-18v26"
+
+        {/* Background ambient glow */}
+        <circle cx="50" cy="50" r="46" fill={`url(#${glowId})`} opacity={0.4} />
+
+        {/* Outer arc reactor segmented ring */}
+        <circle
+          cx="50" cy="50" r="44"
           stroke={`url(#${gradId})`}
-          strokeWidth="3.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
+          strokeWidth="1.5"
+          strokeDasharray="5 3.5"
+          opacity={0.8}
         />
-        <path
-          d="M48 18A22 22 0 0 1 54 32A22 22 0 0 1 46 46"
+
+        {/* Middle ring */}
+        <circle
+          cx="50" cy="50" r="34"
+          stroke={`url(#${gradId})`}
+          strokeWidth="1"
+          opacity={0.45}
+        />
+
+        {/* Inner ring */}
+        <circle
+          cx="50" cy="50" r="24"
           stroke="#00D4FF"
           strokeWidth="1.8"
-          strokeOpacity="0.45"
+          opacity={0.35}
+        />
+
+        {/* Radiating energy lines (8 directions) */}
+        <g opacity={0.35}>
+          <line x1="50" y1="20" x2="50" y2="28" stroke={`url(#${gradId})`} strokeWidth="1.2" strokeLinecap="round" />
+          <line x1="50" y1="72" x2="50" y2="80" stroke={`url(#${gradId})`} strokeWidth="1.2" strokeLinecap="round" />
+          <line x1="20" y1="50" x2="28" y2="50" stroke={`url(#${gradId})`} strokeWidth="1.2" strokeLinecap="round" />
+          <line x1="72" y1="50" x2="80" y2="50" stroke={`url(#${gradId})`} strokeWidth="1.2" strokeLinecap="round" />
+          <line x1="28.8" y1="28.8" x2="34.5" y2="34.5" stroke={`url(#${gradId})`} strokeWidth="1" strokeLinecap="round" />
+          <line x1="71.2" y1="28.8" x2="65.5" y2="34.5" stroke={`url(#${gradId})`} strokeWidth="1" strokeLinecap="round" />
+          <line x1="28.8" y1="71.2" x2="34.5" y2="65.5" stroke={`url(#${gradId})`} strokeWidth="1" strokeLinecap="round" />
+          <line x1="71.2" y1="71.2" x2="65.5" y2="65.5" stroke={`url(#${gradId})`} strokeWidth="1" strokeLinecap="round" />
+        </g>
+
+        {/* Core glow circle */}
+        <circle cx="50" cy="50" r="14" fill={`url(#${glowId})`} stroke="#00D4FF" strokeWidth="1.5" opacity={0.9} />
+
+        {/* Central bright core */}
+        <circle cx="50" cy="50" r="5" fill="#00FFFF" opacity={0.85} />
+        <circle cx="50" cy="50" r="2.5" fill="#FFFFFF" opacity={0.95} />
+
+        {/* Orbital arc (right side) */}
+        <path
+          d="M73.5 22.5 A38 38 0 0 1 84 50"
+          stroke={`url(#${gradId})`}
+          strokeWidth="2.5"
+          strokeOpacity={0.6}
+          strokeLinecap="round"
+          filter={`url(#mira-blur-${id})`}
+        />
+        <path
+          d="M73.5 22.5 A38 38 0 0 1 84 50"
+          stroke="#00D4FF"
+          strokeWidth="1.5"
+          strokeOpacity={0.8}
           strokeLinecap="round"
         />
-        <circle cx="46" cy="46" r="2" fill="#00D4FF" fillOpacity="0.7" />
+
+        {/* Orbital dot */}
+        <circle cx="84" cy="50" r="3.5" fill="#00D4FF" fillOpacity={0.9} />
+        <circle cx="84" cy="50" r="1.5" fill="#FFFFFF" fillOpacity={0.8} />
       </svg>
     </div>
   );

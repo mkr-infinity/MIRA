@@ -18,7 +18,7 @@ import { tts } from "../lib/voice/tts";
 import { buildSystemPrompt } from "../lib/mira";
 import { isTauri } from "../lib/platform";
 import { devlog } from "../lib/log";
-import { parseAndExecuteToolCalls } from "../lib/desktop";
+import { parseAndExecuteToolCalls, DESKTOP_TOOL_DEFS } from "../lib/desktop";
 
 function uid() {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
@@ -72,7 +72,7 @@ interface State {
 
 interface Actions {
   init: () => Promise<void>;
-  setTheme: (t: "dark" | "light") => Promise<void>;
+  setTheme: (t: string) => Promise<void>;
   updateSettings: (patch: Partial<AppSettings>) => Promise<void>;
   setActiveProvider: (id: ProviderId) => Promise<void>;
   setProviderConfig: (id: ProviderId, patch: Partial<ProviderConfig>) => Promise<void>;
@@ -180,8 +180,9 @@ export const useStore = create<State & Actions>((set, get) => ({
     set({ settings });
     await storage.saveSettings(settings);
     const root = document.documentElement;
-    root.classList.toggle("dark", t === "dark");
-    root.classList.toggle("light", t !== "dark");
+    root.setAttribute("data-theme", t);
+    root.classList.toggle("dark", t === "dark" || t === "cyberpunk" || t === "neon");
+    root.classList.toggle("light", t === "light" || t === "earth" || t === "nordic" || t === "sakura");
     try { localStorage.setItem("mira:initial-theme", t); } catch {}
     devlog("settings", `Theme → ${t}`);
   },
@@ -338,6 +339,15 @@ export const useStore = create<State & Actions>((set, get) => ({
     const ac = new AbortController();
     abortControllers.set(conv.id, ac);
 
+    // Hard timeout: if the entire request takes > 120s, abort it
+    const TIMEOUT_MS = 120_000;
+    const timeoutId = setTimeout(() => {
+      if (!ac.signal.aborted) {
+        devlog("sendMessage", `Request timed out after ${TIMEOUT_MS}ms, aborting`);
+        ac.abort();
+      }
+    }, TIMEOUT_MS);
+
     const provider = settings.providers.find((p) => p.id === conv!.provider);
 
     devlog("sendMessage", `→ ${conv!.provider}/${provider?.model || "?"} (${text.length} chars)`, {
@@ -452,6 +462,7 @@ export const useStore = create<State & Actions>((set, get) => ({
     const attempt = async (prov: ProviderConfig, model: string) => {
       const a = getAdapter(prov.id);
       const t0 = performance.now();
+      const tools = settings.desktopControlEnabled ? DESKTOP_TOOL_DEFS : undefined;
       const res = await a.streamChat(
         {
           provider: prov.id,
@@ -460,6 +471,7 @@ export const useStore = create<State & Actions>((set, get) => ({
           temperature: settings.temperature,
           maxTokens: settings.maxTokens,
           stream: true,
+          tools,
         },
         prov,
         (chunk) => {
@@ -571,53 +583,58 @@ export const useStore = create<State & Actions>((set, get) => ({
         error: `${reason}${status ? ` (HTTP ${status})` : ""}`,
       });
     } else if (fellBack) {
-      // Mark the assistant with the swap so the UI knows
       get().patchMessage(conv!.id, assistantMsg.id, {
         content: accumulated,
         streaming: false,
         usage: lastUsage,
         latencyMs: lastLatencyMs,
       });
-      if (settings.voiceAutoSpeak && accumulated) {
-        tts.speak(stripMarkdown(accumulated), {
+    }
+
+    // Final content to display and speak
+    let finalContent = accumulated || "";
+    let displayContent = finalContent;
+    let toolResults: string[] = [];
+
+    // Execute tool calls BEFORE speaking/displaying
+    if (finalContent && settings.desktopControlEnabled) {
+      try {
+        toolResults = await parseAndExecuteToolCalls(finalContent);
+        const toolPattern = /\b(?:open_app|open_url|play_music|search_web|set_volume|notify|type_text|open_folder|list_running_apps|run_command|clipboard_write|clipboard_read|remember)\s*\([^)]*\)\s*/g;
+        displayContent = finalContent.replace(toolPattern, "").replace(/\s+/g, " ").trim();
+      } catch (e: any) {
+        devlog("sendMessage", `Tool execution error: ${e?.message}`);
+      }
+    }
+
+    // Patch final display content
+    if (finalContent) {
+      let patchedContent = displayContent || finalContent;
+      if (toolResults.length) {
+        patchedContent += "\n\n" + toolResults.map((r) => `> ${r}`).join("\n");
+      }
+      get().patchMessage(conv!.id, assistantMsg.id, {
+        content: patchedContent,
+        streaming: false,
+        usage: lastUsage,
+        latencyMs: lastLatencyMs,
+      });
+
+      // Speak the CLEANED version (without tool call syntax)
+      const speakText = displayContent || finalContent;
+      if (settings.voiceAutoSpeak && speakText) {
+        set({ isSpeaking: true });
+        tts.speak(stripMarkdown(speakText), {
           voice: settings.voiceName,
           rate: settings.voiceRate,
           pitch: settings.voicePitch,
+          onEnd: () => set({ isSpeaking: false }),
+          onError: () => set({ isSpeaking: false }),
         });
       }
     }
 
-    if (accumulated && !abortControllers.has(conv.id)) {
-      // Final flush already happened above; ensure the message is in the right state
-      get().patchMessage(conv!.id, assistantMsg.id, {
-        content: accumulated,
-        streaming: false,
-        usage: lastUsage,
-        latencyMs: lastLatencyMs,
-      });
-      if (settings.voiceAutoSpeak && accumulated) {
-        // Avoid double-speaking on the primary path
-        if (usedProviderId === conv.provider) {
-          tts.speak(stripMarkdown(accumulated), {
-            voice: settings.voiceName,
-            rate: settings.voiceRate,
-            pitch: settings.voicePitch,
-          });
-        }
-      }
-    }
-
-    // Parse and execute inline tool calls in the assistant's reply
-    if (accumulated && settings.desktopControlEnabled) {
-      parseAndExecuteToolCalls(accumulated).then((toolResults) => {
-        if (toolResults.length) {
-          get().patchMessage(conv!.id, assistantMsg.id, {
-            content: accumulated + "\n\n" + toolResults.map((r) => `> ${r}`).join("\n"),
-          });
-        }
-      });
-    }
-
+    clearTimeout(timeoutId);
     abortControllers.delete(conv.id);
     set({ isProcessing: false });
     get().log("info", "sendMessage", `Completed turn: ${usedProvider.name}/${usedModel}`, {

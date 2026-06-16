@@ -26,7 +26,7 @@ import {
   MessageSquarePlus,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { cx } from "../lib/theme";
+import { cx, THEMES, type ThemeId } from "../lib/theme";
 import { ProjectModal } from "./ProjectModal";
 import { MiraLogo } from "./MiraLogo";
 
@@ -137,7 +137,7 @@ export function Sidebar({
   const activeProvider = settings.providers.find((p) => p.id === settings.activeProviderId);
   const userInitial = (settings.userName || "M").slice(0, 1).toUpperCase();
   const activeProject = projects.find((p) => p.id === activeProjectId);
-  const isDark = settings.theme === "dark";
+  const currentTheme = THEMES.find((t) => t.id === settings.theme) || THEMES[0];
 
   function handleNewChat() {
     // newConversation() reads activeProjectId from the store, so chats
@@ -190,8 +190,8 @@ export function Sidebar({
 
   return (
     <aside className="w-[260px] h-full flex-shrink-0 flex flex-col border-r mira-border mira-surface">
-      {/* Logo */}
-      <div className="h-14 px-3 flex items-center gap-2.5">
+      {/* Logo — glass header */}
+      <div className="h-14 px-3 flex items-center gap-2.5 border-b mira-border">
         <button
           onClick={onToggleCollapse}
           className="w-8 h-8 flex items-center justify-center rounded-lg mira-elevated hover:mira-hover transition-colors"
@@ -200,12 +200,12 @@ export function Sidebar({
           <PanelLeftClose size={15} className="mira-accent" />
         </button>
         <div className="flex-1 min-w-0 flex items-center gap-2">
-          <MiraLogo size={24} glow={false} />
-          <div className="font-display font-semibold tracking-wide mira-text text-sm">
+          <MiraLogo size={24} glow={true} animated={true} />
+          <div className="font-display font-semibold tracking-wide gradient-text text-sm">
             MIRA
           </div>
-          <div className="text-[9px] uppercase tracking-[0.2em] mira-muted">
-            MKR Intelligent Responsive Assistant
+          <div className="text-[9px] uppercase tracking-[0.2em] mira-muted hidden 2xl:block">
+            Intelligent Assistant
           </div>
         </div>
         <button
@@ -243,13 +243,18 @@ export function Sidebar({
       </div>
 
       {/* New chat + Voice mode */}
-      <div className="px-3 space-y-1.5">
+      <div className="px-3 pt-3 space-y-1.5">
         <button
           onClick={handleNewChat}
           title={newChatLabel}
-          className="w-full flex items-center gap-2 px-3 py-2.5 rounded-mira mira-elevated hover:mira-hover mira-text border mira-border transition-all"
+          className="w-full flex items-center gap-2 px-3 py-2.5 rounded-mira border transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+          style={{
+            background: 'linear-gradient(135deg, rgba(0,212,255,0.12), rgba(0,119,255,0.06))',
+            borderColor: 'rgba(0,212,255,0.25)',
+            color: 'var(--text)',
+          }}
         >
-          <Plus size={16} />
+          <Plus size={16} className="mira-accent" />
           <span className="text-sm font-medium truncate">{newChatLabel}</span>
         </button>
         <button
@@ -447,13 +452,18 @@ export function Sidebar({
           <div className="absolute bottom-[68px] left-3 right-3 mira-elevated border mira-border rounded-mira shadow-pop p-1 z-30 animate-fade-in">
             <button
               onClick={() => {
-                setTheme(isDark ? "light" : "dark");
+                const idx = THEMES.findIndex((t) => t.id === settings.theme);
+                const next = THEMES[(idx + 1) % THEMES.length].id;
+                setTheme(next);
                 setUserMenuOpen(false);
               }}
               className="w-full flex items-center gap-2 px-3 py-2 rounded-lg mira-muted hover:mira-hover mira-text text-sm"
             >
-              {isDark ? <Sun size={14} /> : <Moon size={14} />}
-              <span>{isDark ? "Light theme" : "Dark theme"}</span>
+              <div
+                className="w-3.5 h-3.5 rounded-full border border-white/20"
+                style={{ background: currentTheme.accent }}
+              />
+              <span>{currentTheme.name} theme</span>
             </button>
             <button
               onClick={() => {

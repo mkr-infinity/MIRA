@@ -3,14 +3,14 @@
 @tailwind utilities;
 
 /* =========================================================
-   THEME TOKENS — MIRA
-   Two themes only:
-   - .dark   → Vercel-inspired true black & white
-   - .light  → Dribbble-inspired warm cream + terracotta
-
-   Class names: canonical `mira-*`, with `jarvis-*` kept as
-   deprecated aliases for backward-compat with existing localStorage
-   keys and any external themes/plugins.
+   THEME TOKENS — 7 themes via data-theme attribute
+   .dark       → Vercel-inspired true black + cyan
+   .light      → Dribbble-inspired warm cream + terracotta
+   .cyberpunk  → Blade Runner neon pink/cyan on deep purple
+   .sakura     → Soft pink + cherry blossom on dark rose
+   .nordic     → Icy blues + snow whites on slate
+   .neon       → Electric green + magenta on pitch black
+   .earth      → Forest greens + warm browns on deep soil
    ========================================================= */
 
 :root {
@@ -30,9 +30,11 @@
   --danger: #ef4444;
   --warning: #f59e0b;
   --success: #10b981;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-display: "Space Grotesk", system-ui, sans-serif;
 }
 
-html.light {
+html[data-theme="light"] {
   --bg: #faf7f2;
   --surface: #ffffff;
   --elevated: #f4efe6;
@@ -48,6 +50,129 @@ html.light {
   --danger: #b91c1c;
   --warning: #b45309;
   --success: #047857;
+  --font-sans: "Nunito", system-ui, sans-serif;
+  --font-display: "Plus Jakarta Sans", system-ui, sans-serif;
+}
+
+html[data-theme="cyberpunk"] {
+  --bg: #0a0014;
+  --surface: #120024;
+  --elevated: #1a0036;
+  --hover: #220048;
+  --border: #3a006a;
+  --text: #f0e6ff;
+  --muted: #b088cc;
+  --subtle: #6a3d8a;
+  --accent: #ff2d95;
+  --accent-faint: rgba(255, 45, 149, 0.06);
+  --accent-soft: rgba(255, 45, 149, 0.15);
+  --accent-ring: rgba(255, 45, 149, 0.4);
+  --danger: #ff1744;
+  --warning: #ffab00;
+  --success: #00e676;
+  --font-sans: "Orbitron", "Inter", system-ui, sans-serif;
+  --font-display: "Orbitron", system-ui, sans-serif;
+}
+
+html[data-theme="sakura"] {
+  --bg: #1a0f1e;
+  --surface: #261528;
+  --elevated: #321b35;
+  --hover: #3d2142;
+  --border: #5a3060;
+  --text: #fce4f0;
+  --muted: #c498b4;
+  --subtle: #7a4f6e;
+  --accent: #ff6eb4;
+  --accent-faint: rgba(255, 110, 180, 0.06);
+  --accent-soft: rgba(255, 110, 180, 0.15);
+  --accent-ring: rgba(255, 110, 180, 0.4);
+  --danger: #ff4081;
+  --warning: #ffab40;
+  --success: #69f0ae;
+  --font-sans: "Lora", Georgia, serif;
+  --font-display: "Lora", Georgia, serif;
+}
+
+html[data-theme="nordic"] {
+  --bg: #0f1923;
+  --surface: #162028;
+  --elevated: #1c2830;
+  --hover: #233240;
+  --border: #334458;
+  --text: #dce8f0;
+  --muted: #88a0b8;
+  --subtle: #506880;
+  --accent: #88c0d0;
+  --accent-faint: rgba(136, 192, 208, 0.06);
+  --accent-soft: rgba(136, 192, 208, 0.12);
+  --accent-ring: rgba(136, 192, 208, 0.35);
+  --danger: #bf616a;
+  --warning: #ebcb8b;
+  --success: #a3be8c;
+  --font-sans: "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-display: "Space Grotesk", system-ui, sans-serif;
+}
+
+html[data-theme="neon"] {
+  --bg: #000000;
+  --surface: #0a0a0a;
+  --elevated: #141414;
+  --hover: #1a1a1a;
+  --border: #2a2a2a;
+  --text: #f0f0f0;
+  --muted: #808080;
+  --subtle: #505050;
+  --accent: #39ff14;
+  --accent-faint: rgba(57, 255, 20, 0.06);
+  --accent-soft: rgba(57, 255, 20, 0.12);
+  --accent-ring: rgba(57, 255, 20, 0.4);
+  --danger: #ff0040;
+  --warning: #ffff00;
+  --success: #39ff14;
+  --font-sans: "Orbitron", "Inter", system-ui, sans-serif;
+  --font-display: "Orbitron", system-ui, sans-serif;
+}
+
+html[data-theme="earth"] {
+  --bg: #0f1208;
+  --surface: #181e10;
+  --elevated: #20281a;
+  --hover: #283022;
+  --border: #3a4828;
+  --text: #e8f0e0;
+  --muted: #8ca070;
+  --subtle: #5a6e48;
+  --accent: #8bc34a;
+  --accent-faint: rgba(139, 195, 74, 0.06);
+  --accent-soft: rgba(139, 195, 74, 0.12);
+  --accent-ring: rgba(139, 195, 74, 0.35);
+  --danger: #e53935;
+  --warning: #ffb300;
+  --success: #66bb6a;
+  --font-sans: "Nunito", system-ui, sans-serif;
+  --font-display: "Plus Jakarta Sans", system-ui, sans-serif;
+}
+
+/* Backward compat: html.dark = :root defaults */
+html[data-theme="dark"] {
+  --bg: #000000;
+  --surface: #0a0a0a;
+  --elevated: #141414;
+  --hover: #1a1a1a;
+  --border: #262626;
+  --text: #fafafa;
+  --muted: #888888;
+  --subtle: #525252;
+  --accent: #00d4ff;
+  --accent-faint: rgba(0, 212, 255, 0.06);
+  --accent-soft: rgba(0, 212, 255, 0.12);
+  --accent-ring: rgba(0, 212, 255, 0.4);
+  --danger: #ef4444;
+  --warning: #f59e0b;
+  --success: #10b981;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-display: "Space Grotesk", system-ui, sans-serif;
 }
 
 html, body, #root {
@@ -60,7 +185,7 @@ html, body, #root {
 }
 
 body {
-  font-family: "Inter", system-ui, sans-serif;
+  font-family: var(--font-sans);
   background: var(--bg);
   color: var(--text);
   transition: background-color 200ms ease, color 200ms ease;
@@ -73,9 +198,25 @@ body {
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
-html.light .mira-backdrop,
-html.light .jarvis-backdrop {
+html[data-theme="light"] .mira-backdrop,
+html[data-theme="light"] .jarvis-backdrop {
   background: rgba(26, 22, 18, 0.45);
+}
+html[data-theme="sakura"] .mira-backdrop,
+html[data-theme="sakura"] .jarvis-backdrop {
+  background: rgba(26, 15, 30, 0.55);
+}
+html[data-theme="cyberpunk"] .mira-backdrop,
+html[data-theme="cyberpunk"] .jarvis-backdrop {
+  background: rgba(10, 0, 20, 0.6);
+}
+html[data-theme="nordic"] .mira-backdrop,
+html[data-theme="nordic"] .jarvis-backdrop {
+  background: rgba(15, 25, 35, 0.55);
+}
+html[data-theme="earth"] .mira-backdrop,
+html[data-theme="earth"] .jarvis-backdrop {
+  background: rgba(15, 18, 8, 0.55);
 }
 
 /* Toggle switch — track + thumb with hard-bounded dimensions */
@@ -179,7 +320,7 @@ html.light .jarvis-backdrop {
     linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
   background-size: 40px 40px;
 }
-html.light .grid-bg {
+html[data-theme="light"] .grid-bg {
   background-image:
     linear-gradient(rgba(0,0,0,0.035) 1px, transparent 1px),
     linear-gradient(90deg, rgba(0,0,0,0.035) 1px, transparent 1px);
@@ -208,8 +349,11 @@ html.light .grid-bg {
   transform-origin: center;
   opacity: 0.85;
 }
-html:not(.light) .voice-bar { background: var(--text); box-shadow: 0 0 6px rgba(255,255,255,0.4); }
-html.light .voice-bar { background: var(--accent); }
+html:not([data-theme="light"]) .voice-bar { background: var(--text); box-shadow: 0 0 6px rgba(255,255,255,0.4); }
+html[data-theme="light"] .voice-bar { background: var(--accent); }
+html[data-theme="sakura"] .voice-bar { background: var(--accent); box-shadow: 0 0 6px rgba(255, 110, 180, 0.4); }
+html[data-theme="cyberpunk"] .voice-bar { background: var(--accent); box-shadow: 0 0 6px rgba(255, 45, 149, 0.4); }
+html[data-theme="earth"] .voice-bar { background: var(--accent); box-shadow: 0 0 6px rgba(139, 195, 74, 0.3); }
 
 /* =========================================================
    MARKDOWN
@@ -383,5 +527,102 @@ select:focus-visible {
 .jarvis-shadow-strong {
   box-shadow: 0 12px 48px -12px rgba(0, 0, 0, 0.6),
               0 0 0 1px var(--border);
+}
+
+.glass {
+  background: rgba(10, 10, 10, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+html[data-theme="light"] .glass {
+  background: rgba(255, 255, 255, 0.7);
+  border-color: rgba(0, 0, 0, 0.06);
+}
+html[data-theme="cyberpunk"] .glass {
+  background: rgba(10, 0, 20, 0.65);
+  border-color: rgba(255, 45, 149, 0.12);
+}
+html[data-theme="sakura"] .glass {
+  background: rgba(26, 15, 30, 0.65);
+  border-color: rgba(255, 110, 180, 0.1);
+}
+html[data-theme="nordic"] .glass {
+  background: rgba(15, 25, 35, 0.6);
+  border-color: rgba(136, 192, 208, 0.08);
+}
+html[data-theme="earth"] .glass {
+  background: rgba(15, 18, 8, 0.6);
+  border-color: rgba(139, 195, 74, 0.08);
+}
+
+.glass-strong {
+  background: rgba(10, 10, 10, 0.82);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+html[data-theme="light"] .glass-strong {
+  background: rgba(255, 255, 255, 0.88);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+html[data-theme="cyberpunk"] .glass-strong {
+  background: rgba(10, 0, 20, 0.85);
+  border-color: rgba(255, 45, 149, 0.15);
+}
+html[data-theme="sakura"] .glass-strong {
+  background: rgba(26, 15, 30, 0.85);
+  border-color: rgba(255, 110, 180, 0.12);
+}
+html[data-theme="nordic"] .glass-strong {
+  background: rgba(15, 25, 35, 0.82);
+  border-color: rgba(136, 192, 208, 0.1);
+}
+html[data-theme="earth"] .glass-strong {
+  background: rgba(15, 18, 8, 0.82);
+  border-color: rgba(139, 195, 74, 0.1);
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #00D4FF, #0077FF);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+html[data-theme="light"] .gradient-text {
+  background: linear-gradient(135deg, #C2410C, #E65C00);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+html[data-theme="cyberpunk"] .gradient-text {
+  background: linear-gradient(135deg, #ff2d95, #b400ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+html[data-theme="sakura"] .gradient-text {
+  background: linear-gradient(135deg, #ff6eb4, #ff9a5c);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+html[data-theme="nordic"] .gradient-text {
+  background: linear-gradient(135deg, #88c0d0, #5e81ac);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+html[data-theme="neon"] .gradient-text {
+  background: linear-gradient(135deg, #39ff14, #ff00ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+html[data-theme="earth"] .gradient-text {
+  background: linear-gradient(135deg, #8bc34a, #ffb300);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 

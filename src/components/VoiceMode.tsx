@@ -84,23 +84,46 @@ export function VoiceMode() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [voiceMode]);
 
-  // After a model turn finishes, re-arm listening (one-shot).
+  // After a model turn finishes and TTS is done, re-arm listening.
+  // Tracks state: idle → processing → speaking → idle → re-arm
+  const phaseRef = useRef<"idle" | "processing" | "speaking">("idle");
+
   useEffect(() => {
-    if (!voiceMode) return;
-    if (isProcessing) {
-      wasProcessingRef.current = true;
+    if (!voiceMode) {
+      phaseRef.current = "idle";
       return;
     }
-    if (wasProcessingRef.current && !isProcessing) {
-      wasProcessingRef.current = false;
-      if (!isSpeaking && !isListening && autoListenArmedRef.current && !exitedRef.current) {
-        setTimeout(() => {
+    if (isProcessing) {
+      phaseRef.current = "processing";
+      return;
+    }
+    // Processing just finished
+    if (phaseRef.current === "processing" && !isProcessing) {
+      if (isSpeaking) {
+        phaseRef.current = "speaking";
+        return;
+      }
+      // No TTS speaking — re-arm directly after a brief pause
+      phaseRef.current = "idle";
+      if (!isListening && autoListenArmedRef.current && !exitedRef.current) {
+        const timer = setTimeout(() => {
           if (autoListenArmedRef.current && !exitedRef.current) startListening();
-        }, 500);
+        }, 400);
+        return () => clearTimeout(timer);
+      }
+      return;
+    }
+    // TTS finished speaking
+    if (phaseRef.current === "speaking" && !isSpeaking && !isProcessing) {
+      phaseRef.current = "idle";
+      if (!isListening && autoListenArmedRef.current && !exitedRef.current) {
+        const timer = setTimeout(() => {
+          if (autoListenArmedRef.current && !exitedRef.current) startListening();
+        }, 400);
+        return () => clearTimeout(timer);
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isProcessing]);
+  }, [isProcessing, isSpeaking]);
 
   // Keep TTS alive in long utterances (Chrome 15s drop).
   useEffect(() => {
@@ -208,9 +231,9 @@ export function VoiceMode() {
       transition={{ duration: 0.18 }}
       className="fixed inset-0 z-50 mira-bg grid-bg"
     >
-      {/* Top bar */}
+      {/* Top bar — glass */}
       <div className="absolute top-6 left-6 right-6 flex items-center justify-between z-10">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 glass-strong px-3 py-1.5 rounded-pill">
           <div
             className={cx(
               "w-2 h-2 rounded-full",
@@ -227,7 +250,7 @@ export function VoiceMode() {
         </div>
         <button
           onClick={close}
-          className="p-2 rounded-pill mira-elevated hover:mira-hover mira-muted hover:mira-text border mira-border"
+          className="p-2 rounded-pill glass-strong hover:opacity-80 mira-muted hover:mira-text transition-all"
           title="Exit (Esc)"
         >
           <X size={18} />
@@ -311,7 +334,7 @@ export function VoiceMode() {
         </div>
       </div>
 
-      {/* Bottom controls */}
+      {/* Bottom controls — glass */}
       <div className="absolute bottom-14 left-1/2 -translate-x-1/2 z-10 flex items-center gap-4">
         {isSpeaking && (
           <motion.button
@@ -319,7 +342,7 @@ export function VoiceMode() {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
             onClick={interruptSpeaking}
-            className="w-14 h-14 rounded-full mira-elevated border mira-border mira-text flex items-center justify-center hover:mira-hover"
+            className="w-14 h-14 rounded-full glass-strong mira-text flex items-center justify-center hover:scale-105 transition-transform"
             title="Interrupt"
           >
             <Square size={20} fill="currentColor" />
@@ -331,14 +354,17 @@ export function VoiceMode() {
           disabled={isProcessing}
           whileTap={{ scale: 0.95 }}
           className={cx(
-            "relative w-20 h-20 rounded-full flex items-center justify-center transition-all border-2",
+            "relative w-20 h-20 rounded-full flex items-center justify-center transition-all duration-200 border-2",
             isListening
               ? "border-transparent"
               : isProcessing
-              ? "mira-elevated mira-muted cursor-not-allowed border-transparent"
-              : "mira-accent-bg border-transparent text-white shadow-glow-lg hover:scale-105"
+              ? "glass-strong mira-muted cursor-not-allowed border-transparent"
+              : "border-transparent text-white hover:scale-105"
           )}
-          style={isListening ? { background: "var(--danger)" } : undefined}
+          style={isListening ? { background: "var(--danger)" } : {
+            background: 'linear-gradient(135deg, #00D4FF, #0077FF)',
+            boxShadow: '0 0 40px rgba(0,212,255,0.4)',
+          }}
           title={isListening ? "Stop listening" : "Tap to speak"}
         >
           {isListening ? <MicOff size={28} className="text-white" /> : <Mic size={28} />}
@@ -355,7 +381,7 @@ export function VoiceMode() {
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             onClick={stopGeneration}
-            className="w-14 h-14 rounded-full mira-elevated border mira-border mira-danger flex items-center justify-center hover:mira-hover"
+            className="w-14 h-14 rounded-full glass-strong mira-danger flex items-center justify-center hover:scale-105 transition-transform"
             title="Stop"
           >
             <Square size={20} fill="currentColor" />
@@ -363,7 +389,7 @@ export function VoiceMode() {
         )}
       </div>
 
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[10px] font-mono uppercase tracking-[0.2em] mira-muted">
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 glass-strong px-3 py-1 rounded-pill text-[10px] font-mono uppercase tracking-[0.2em] mira-muted">
         Tap mic to {isListening ? "stop" : "speak"} · Esc to exit
       </div>
 

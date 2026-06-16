@@ -6,14 +6,6 @@ export interface DesktopCommandResult {
   data?: unknown;
 }
 
-/**
- * Desktop control layer.
- *
- * In the Tauri build, commands are executed via the Rust backend (see
- * src-tauri/src/commands.rs). In the browser fallback, we use shell.open()
- * for URLs and show a clear message for OS-level operations.
- */
-
 async function tauriInvoke<T>(cmd: string, args?: Record<string, unknown>): Promise<T> {
   const { invoke } = await import("@tauri-apps/api/core");
   return invoke<T>(cmd, args);
@@ -25,7 +17,6 @@ export const desktop = {
       if (isTauri()) {
         return await tauriInvoke<DesktopCommandResult>("open_app", { name });
       }
-      // Browser fallback: can't open arbitrary desktop apps
       return { ok: false, message: `Open ${name}: requires desktop build` };
     } catch (e: any) {
       return { ok: false, message: e?.message || "Failed" };
@@ -35,27 +26,44 @@ export const desktop = {
   async openUrl(url: string): Promise<DesktopCommandResult> {
     try {
       if (isTauri()) {
-        const opener = await import("@tauri-apps/plugin-opener");
-        // Tauri 2: use opener plugin
-        await opener.openUrl(url);
-        return { ok: true, message: `Opened ${url}` };
-      } else {
-        window.open(url, "_blank", "noopener");
-        return { ok: true, message: `Opened ${url}` };
+        return await tauriInvoke<DesktopCommandResult>("open_url", { url });
       }
+      const w = window.open(url, "_blank", "noopener,noreferrer");
+      if (!w || w.closed) {
+        return { ok: false, message: `Popup blocked. Open manually: ${url}` };
+      }
+      return { ok: true, message: `Opened ${url}` };
     } catch (e: any) {
       return { ok: false, message: e?.message || "Failed" };
     }
   },
 
   async playMusic(query: string): Promise<DesktopCommandResult> {
-    // If user provided a URL, open it
     if (/^https?:\/\//.test(query)) {
       return this.openUrl(query);
     }
-    // Otherwise, search YouTube and open the first result
+    // Try to play via system media player in Tauri
+    if (isTauri()) {
+      const encoded = encodeURIComponent(query);
+      const searchUrl = `https://music.youtube.com/search?q=${encoded}`;
+      // Try mpv (most capable), then vlc, then fallback to browser
+      const playerCmds = [
+        `mpv --no-video --ytdl-format=bestaudio 'ytsearch:${query}'`,
+        `vlc --intf dummy 'ytsearch:${query}'`,
+      ];
+      for (const cmd of playerCmds) {
+        const result = await this.runCommand(cmd);
+        if (result.ok) return { ok: true, message: `Playing "${query}"` };
+      }
+      return this.openUrl(searchUrl);
+    }
+    // Browser: open YouTube Music search
     const search = encodeURIComponent(query);
-    return this.openUrl(`https://www.youtube.com/results?search_query=${search}`);
+    const w = window.open(`https://music.youtube.com/search?q=${search}`, "_blank", "noopener,noreferrer");
+    if (!w || w.closed) {
+      return { ok: false, message: `Pop-up blocked. Open manually: https://music.youtube.com/search?q=${search}` };
+    }
+    return { ok: true, message: `Playing "${query}" on YouTube Music` };
   },
 
   async searchWeb(query: string): Promise<DesktopCommandResult> {
@@ -129,7 +137,6 @@ export const desktop = {
     if (isTauri()) {
       return tauriInvoke<DesktopCommandResult>("open_folder", { path });
     }
-    // Browser fallback: if it's http(s), open as URL
     if (/^https?:\/\//.test(path)) return this.openUrl(path);
     return { ok: false, message: "Open-folder requires desktop build" };
   },
@@ -143,7 +150,13 @@ export const desktop = {
 
   async runCommand(command: string): Promise<DesktopCommandResult> {
     if (isTauri()) {
-      return tauriInvoke<DesktopCommandResult>("run_command", { command });
+      const result = await tauriInvoke<DesktopCommandResult>("run_command", { command });
+      if (result.ok) {
+        const msg = result.message || "";
+        const truncated = msg.length > 500 ? msg.slice(0, 500) + "…" : msg;
+        return { ok: true, message: truncated, data: result.data };
+      }
+      return result;
     }
     return { ok: false, message: "Shell commands require the desktop build" };
   },
@@ -189,6 +202,11 @@ export const desktop = {
  *   type_text("text")
  *   open_folder("path")
  *   list_running_apps()
+ *   run_command("cmd")
+ *   clipboard_write("text")
+ *   clipboard_read()
+ *   shutdown()
+ *   lock()
  */
 export async function parseAndExecuteToolCalls(text: string): Promise<string[]> {
   const results: string[] = [];
@@ -206,6 +224,8 @@ export async function parseAndExecuteToolCalls(text: string): Promise<string[]> 
     { pattern: `run_command\(["']([^"']+)["']\)`, fn: (c) => desktop.runCommand(c) },
     { pattern: `clipboard_write\(["']([^"']+)["']\)`, fn: (t) => desktop.clipboardWrite(t) },
     { pattern: `clipboard_read\(\)`, fn: () => desktop.clipboardRead() },
+    { pattern: `shutdown\(\)`, fn: () => desktop.shutdown() },
+    { pattern: `lock\(\)`, fn: () => desktop.lock() },
     { pattern: `remember\(["']([^"']+)["']\)`, fn: async (content) => {
         try {
           const { useStore } = await import("../../store");
@@ -265,7 +285,7 @@ export const DESKTOP_TOOL_DEFS = [
   {
     name: "play_music",
     description:
-      "Play a song, artist, playlist, or open a music URL. If a YouTube/Spotify/etc URL is given, opens it directly. Otherwise searches YouTube.",
+      "Play a song, artist, or playlist. First tries system media player (mpv/vlc), then falls back to opening YouTube Music in the browser.",
     parameters: {
       type: "object" as const,
       properties: {
@@ -368,5 +388,15 @@ export const DESKTOP_TOOL_DEFS = [
       properties: { text: { type: "string", description: "Text to copy to clipboard" } },
       required: ["text"],
     },
+  },
+  {
+    name: "shutdown",
+    description: "Shut down the computer.",
+    parameters: { type: "object" as const, properties: {} },
+  },
+  {
+    name: "lock",
+    description: "Lock the computer screen.",
+    parameters: { type: "object" as const, properties: {} },
   },
 ];

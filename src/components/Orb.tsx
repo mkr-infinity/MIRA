@@ -43,29 +43,29 @@ export function MiraOrb({ state, size = 180 }: Props) {
       <motion.div
         className="absolute rounded-full"
         style={{
-          width: size * 1.4,
-          height: size * 1.4,
+          width: size * 1.5,
+          height: size * 1.5,
           background: `radial-gradient(circle, ${
-            state === "speaking" ? "rgba(245,158,11,0.25)" : "rgba(0,212,255,0.18)"
-          } 0%, transparent 60%)`,
+            state === "speaking" ? "rgba(245,158,11,0.2)" : "rgba(0,212,255,0.15)"
+          } 0%, rgba(0,119,255,0.05) 40%, transparent 70%)`,
         }}
         animate={
           isActive
-            ? { scale: [1, 1.1, 1], opacity: [0.6, 1, 0.6] }
-            : { scale: 1, opacity: 0.5 }
+            ? { scale: [1, 1.08, 1], opacity: [0.5, 0.9, 0.5] }
+            : { scale: 1, opacity: 0.4 }
         }
-        transition={{ duration: 2, repeat: Infinity }}
+        transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
       />
 
-      {/* Rotating outer ring */}
+      {/* Rotating outer ring with dash array (arc reactor style) */}
       <motion.div
-        className="absolute rounded-full border-2"
+        className="absolute rounded-full"
         style={{
           width: size * 1.15,
           height: size * 1.15,
-          borderColor: state === "speaking" ? "rgba(245,158,11,0.5)" : "rgba(0,212,255,0.4)",
+          border: `2px solid ${state === "speaking" ? "rgba(245,158,11,0.4)" : "rgba(0,212,255,0.3)"}`,
           borderTopColor: "transparent",
-          borderRightColor: state === "speaking" ? "rgba(245,158,11,0.8)" : "rgba(0,212,255,0.8)",
+          borderRightColor: state === "speaking" ? "rgba(245,158,11,0.8)" : "rgba(0,212,255,0.7)",
         }}
         animate={{ rotate: 360 }}
         transition={{ duration: ringSpeed, repeat: Infinity, ease: "linear" }}
@@ -73,38 +73,53 @@ export function MiraOrb({ state, size = 180 }: Props) {
 
       {/* Inner ring (counter-rotating) */}
       <motion.div
-        className="absolute rounded-full border"
+        className="absolute rounded-full"
         style={{
-          width: size * 0.85,
-          height: size * 0.85,
-          borderColor: state === "speaking" ? "rgba(245,158,11,0.3)" : "rgba(0,212,255,0.25)",
+          width: size * 0.82,
+          height: size * 0.82,
+          border: `1.5px solid ${state === "speaking" ? "rgba(245,158,11,0.25)" : "rgba(0,212,255,0.2)"}`,
           borderBottomColor: "transparent",
-          borderLeftColor: state === "speaking" ? "rgba(245,158,11,0.7)" : "rgba(0,212,255,0.7)",
+          borderLeftColor: state === "speaking" ? "rgba(245,158,11,0.6)" : "rgba(0,212,255,0.6)",
         }}
         animate={{ rotate: -360 }}
         transition={{ duration: ringSpeed * 1.5, repeat: Infinity, ease: "linear" }}
       />
 
+      {/* Middle ring */}
+      <motion.div
+        className="absolute rounded-full"
+        style={{
+          width: size * 0.98,
+          height: size * 0.98,
+          border: `1px dashed ${state === "speaking" ? "rgba(245,158,11,0.15)" : "rgba(0,212,255,0.12)"}`,
+        }}
+        animate={{ rotate: isActive ? 360 : 0 }}
+        transition={{ duration: ringSpeed * 2, repeat: Infinity, ease: "linear" }}
+      />
+
       {/* Core orb */}
       <motion.div
-        className={`relative rounded-full bg-gradient-to-br ${colorClass}`}
+        className="relative rounded-full"
         style={{
-          width: size * 0.55,
-          height: size * 0.55,
+          width: size * 0.5,
+          height: size * 0.5,
+          background: state === "speaking"
+            ? 'linear-gradient(135deg, #F59E0B, #D97706)'
+            : 'linear-gradient(135deg, #00D4FF, #0077FF)',
           boxShadow:
             state === "speaking"
-              ? "0 0 60px rgba(245,158,11,0.7), inset 0 0 30px rgba(255,255,255,0.4)"
-              : "0 0 60px rgba(0,212,255,0.7), inset 0 0 30px rgba(255,255,255,0.4)",
+              ? "0 0 80px rgba(245,158,11,0.6), inset 0 0 30px rgba(255,255,255,0.3)"
+              : "0 0 80px rgba(0,212,255,0.5), inset 0 0 30px rgba(255,255,255,0.3)",
         }}
         animate={
           isActive
-            ? { scale: [1, 1.08, 1] }
+            ? { scale: [1, 1.06, 1] }
             : { scale: 1 }
         }
         transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
       >
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-1/3 h-1/3 rounded-full bg-white/80 blur-sm" />
+          <div className="w-1/3 h-1/3 rounded-full bg-white/60 blur-md" />
         </div>
       </motion.div>
 

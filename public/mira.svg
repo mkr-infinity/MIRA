@@ -1,27 +1,56 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
   <defs>
-    <linearGradient id="mg" x1="-0.2" y1="0" x2="1.2" y2="1">
+    <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0%" stop-color="#00D4FF"/>
+      <stop offset="50%" stop-color="#00AAFF"/>
       <stop offset="100%" stop-color="#0077FF"/>
     </linearGradient>
-    <linearGradient id="mg2" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#00D4FF" stop-opacity="0.8"/>
-      <stop offset="100%" stop-color="#00D4FF" stop-opacity="0.2"/>
-    </linearGradient>
-    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#00D4FF" stop-opacity="0.35"/>
-      <stop offset="70%" stop-color="#00D4FF" stop-opacity="0.05"/>
-      <stop offset="100%" stop-color="#00D4FF" stop-opacity="0"/>
+    <radialGradient id="coreGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#00FFFF" stop-opacity="0.9"/>
+      <stop offset="40%" stop-color="#00D4FF" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#0077FF" stop-opacity="0"/>
     </radialGradient>
+    <filter id="blur">
+      <feGaussianBlur stdDeviation="2"/>
+    </filter>
   </defs>
-  <!-- Soft glow -->
-  <circle cx="32" cy="32" r="30" fill="url(#glow)"/>
-  <!-- Outer orbital ring -->
-  <circle cx="32" cy="32" r="28" stroke="url(#mg2)" stroke-width="1.2" fill="none"/>
-  <!-- Bold "M" monogram — three strokes forming a clean, heavy letter -->
-  <path d="M14 46V20l10 18 10-18v26" stroke="url(#mg)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-  <!-- Orbital trail arc on the right -->
-  <path d="M48 18A22 22 0 0 1 54 32A22 22 0 0 1 46 46" stroke="#00D4FF" stroke-width="1.8" stroke-opacity="0.45" fill="none" stroke-linecap="round"/>
-  <!-- Orbital dot indicating active listening -->
-  <circle cx="46" cy="46" r="2" fill="#00D4FF" fill-opacity="0.7"/>
+
+  <!-- Background ambient glow -->
+  <circle cx="50" cy="50" r="46" fill="url(#coreGlow)" opacity="0.4"/>
+
+  <!-- Outer arc reactor segmented ring -->
+  <circle cx="50" cy="50" r="44" stroke="url(#ringGrad)" stroke-width="1.5" stroke-dasharray="5 3.5" opacity="0.8"/>
+
+  <!-- Middle ring -->
+  <circle cx="50" cy="50" r="34" stroke="url(#ringGrad)" stroke-width="1" opacity="0.45"/>
+
+  <!-- Inner ring -->
+  <circle cx="50" cy="50" r="24" stroke="#00D4FF" stroke-width="1.8" opacity="0.35"/>
+
+  <!-- Radiating energy lines -->
+  <g opacity="0.35">
+    <line x1="50" y1="20" x2="50" y2="28" stroke="url(#ringGrad)" stroke-width="1.2" stroke-linecap="round"/>
+    <line x1="50" y1="72" x2="50" y2="80" stroke="url(#ringGrad)" stroke-width="1.2" stroke-linecap="round"/>
+    <line x1="20" y1="50" x2="28" y2="50" stroke="url(#ringGrad)" stroke-width="1.2" stroke-linecap="round"/>
+    <line x1="72" y1="50" x2="80" y2="50" stroke="url(#ringGrad)" stroke-width="1.2" stroke-linecap="round"/>
+    <line x1="28.8" y1="28.8" x2="34.5" y2="34.5" stroke="url(#ringGrad)" stroke-width="1" stroke-linecap="round"/>
+    <line x1="71.2" y1="28.8" x2="65.5" y2="34.5" stroke="url(#ringGrad)" stroke-width="1" stroke-linecap="round"/>
+    <line x1="28.8" y1="71.2" x2="34.5" y2="65.5" stroke="url(#ringGrad)" stroke-width="1" stroke-linecap="round"/>
+    <line x1="71.2" y1="71.2" x2="65.5" y2="65.5" stroke="url(#ringGrad)" stroke-width="1" stroke-linecap="round"/>
+  </g>
+
+  <!-- Core glow circle -->
+  <circle cx="50" cy="50" r="14" fill="url(#coreGlow)" stroke="#00D4FF" stroke-width="1.5" opacity="0.9"/>
+
+  <!-- Central bright core -->
+  <circle cx="50" cy="50" r="5" fill="#00FFFF" opacity="0.85"/>
+  <circle cx="50" cy="50" r="2.5" fill="#FFFFFF" opacity="0.95"/>
+
+  <!-- Orbital arc (right side) -->
+  <path d="M73.5 22.5 A38 38 0 0 1 84 50" stroke="url(#ringGrad)" stroke-width="2.5" stroke-opacity="0.6" stroke-linecap="round" filter="url(#blur)"/>
+  <path d="M73.5 22.5 A38 38 0 0 1 84 50" stroke="#00D4FF" stroke-width="1.5" stroke-opacity="0.8" stroke-linecap="round"/>
+
+  <!-- Orbital dot -->
+  <circle cx="84" cy="50" r="3.5" fill="#00D4FF" fill-opacity="0.9"/>
+  <circle cx="84" cy="50" r="1.5" fill="#FFFFFF" fill-opacity="0.8"/>
 </svg>

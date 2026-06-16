@@ -6,6 +6,8 @@ import type { Message } from "../types";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { MiraLogo } from "./MiraLogo";
+import { ThinkingAnimation } from "./ThinkingAnimation";
+import { ActivityLog } from "./ActivityLog";
 
 function CodeBlock({ className, children }: { className?: string; children?: React.ReactNode }) {
   const [copied, setCopied] = useState(false);
@@ -70,9 +72,10 @@ function formatTime(ts: number) {
 
 export function MessageBubble({ message }: { message: Message }) {
   const isUser = message.role === "user";
-  const { isProcessing, regenerate, settings, isSpeaking } = useStore();
+  const { isProcessing, regenerate, settings, isSpeaking, conversations, activeId } = useStore();
   const [copied, setCopied] = useState(false);
   const [showReasoning, setShowReasoning] = useState(message.streaming || false);
+  const conv = conversations.find((c) => c.id === activeId);
 
   useEffect(() => {
     if (message.streaming) setShowReasoning(true);
@@ -86,8 +89,8 @@ export function MessageBubble({ message }: { message: Message }) {
     <div className={`flex gap-3 ${isUser ? "justify-end" : "justify-start"} group`}>
       {!isUser && (
         <div className="flex-shrink-0 mt-1">
-          <div className="w-8 h-8 rounded-full flex items-center justify-center ring-1 ring-white/10 overflow-hidden">
-            <MiraLogo size={28} glow={false} />
+          <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden glass-strong">
+            <MiraLogo size={24} glow={false} />
           </div>
         </div>
       )}
@@ -132,12 +135,25 @@ export function MessageBubble({ message }: { message: Message }) {
           </>
         )}
 
+        {/* Activity log for assistant messages */}
+        {!isUser && (
+          <div className="w-full px-1">
+            <ActivityLog
+              providerId={message.provider || conv?.provider}
+              model={message.model || conv?.model}
+              isProcessing={message.streaming}
+              usage={message.usage}
+              latencyMs={message.latencyMs}
+            />
+          </div>
+        )}
+
         {/* Bubble */}
         <div
           className={`px-4 py-3 rounded-2xl w-full ${
             isUser
               ? "rounded-tr-sm text-sm"
-              : "rounded-tl-sm mira-elevated border mira-border"
+              : "rounded-tl-sm border"
           }`}
           style={isUser ? {
             background: `${accent}18`,
@@ -145,10 +161,13 @@ export function MessageBubble({ message }: { message: Message }) {
             borderStyle: "solid",
             borderColor: `${accent}30`,
             color: "var(--text)",
-          } : undefined}
+          } : {
+            background: 'rgba(255,255,255,0.03)',
+            borderColor: 'rgba(255,255,255,0.06)',
+          }}
         >
           {message.streaming && !message.content ? (
-            <ThinkingDots />
+            <ThinkingAnimation />
           ) : isUser ? (
             <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
           ) : (

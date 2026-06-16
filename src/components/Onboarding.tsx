@@ -28,7 +28,7 @@ import { detectAllLocalModels, type ProbeResult } from "../lib/localModels";
 import { tts } from "../lib/voice/tts";
 import { motion, AnimatePresence } from "framer-motion";
 import type { ProviderId, ProviderConfig } from "../types";
-import { cx } from "../lib/theme";
+import { cx, THEMES, type ThemeId } from "../lib/theme";
 import { MiraLogo } from "./MiraLogo";
 
 type Step = "welcome" | "provider" | "voice" | "done";
@@ -115,7 +115,7 @@ export function Onboarding() {
   const [probeResults, setProbeResults] = useState<ProbeResult[] | null>(null);
   const [voiceTest, setVoiceTest] = useState<"idle" | "speaking" | "done">("idle");
   const [userName, setUserName] = useState("sir");
-  const [themeChoice, setThemeChoice] = useState<"dark" | "light">(settings.theme || "dark");
+  const [themeChoice, setThemeChoice] = useState<ThemeId>((settings.theme as ThemeId) || "dark");
   const nameInputRef = useRef<HTMLInputElement>(null);
 
   const stepIdx = STEPS.indexOf(step);
@@ -417,23 +417,25 @@ function WelcomeStep() {
         className="relative w-40 h-40 mx-auto mb-8"
       >
         <div className="absolute inset-0 rounded-full bg-cyan-400/10 blur-2xl animate-breathe" />
-        <div className="absolute inset-3 rounded-full border mira-border" />
-        <div className="absolute inset-6 rounded-full border mira-border" />
+        <div className="absolute inset-3 rounded-full border border-white/5" />
+        <div className="absolute inset-6 rounded-full border border-white/5" />
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-10 h-10 rounded-full mira-accent-bg shadow-glow animate-pulse-glow" />
+          <MiraLogo size={80} glow={true} />
         </div>
       </motion.div>
       <div className="flex justify-center mb-4">
-        <MiraLogo size={48} />
+        <MiraLogo size={48} glow={true} />
       </div>
-      <h1 className="font-display text-5xl font-semibold mb-3 tracking-tight">MIRA</h1>
-      <p className="mira-muted text-lg max-w-lg mx-auto mb-2">
+      <h1 className="font-display text-5xl font-semibold mb-3 tracking-tight gradient-text">
+        MIRA
+      </h1>
+      <p className="text-lg max-w-lg mx-auto mb-2" style={{color: 'var(--muted)'}}>
         Your personal AI, on every device.
       </p>
-      <p className="mira-muted text-sm max-w-lg mx-auto">
+      <p className="text-sm max-w-lg mx-auto" style={{color: 'var(--muted)'}}>
         Conversational, voice-activated, and ready to control your desktop. Connect a model to get started.
       </p>
-      <div className="mt-8 flex items-center justify-center gap-6 text-[11px] font-mono uppercase tracking-wider mira-muted flex-wrap">
+      <div className="mt-8 flex items-center justify-center gap-6 text-[11px] font-mono uppercase tracking-wider flex-wrap" style={{color: 'var(--muted)'}}>
         <span className="flex items-center gap-1.5">
           <Zap size={11} className="mira-accent" /> Multi-provider
         </span>
@@ -471,8 +473,8 @@ function ProviderStep(props: {
   probeResults: ProbeResult[] | null;
   userName: string;
   setUserName: (s: string) => void;
-  theme: "dark" | "light";
-  setTheme: (t: "dark" | "light") => void;
+  theme: ThemeId;
+  setTheme: (t: ThemeId) => void;
   nameInputRef?: React.RefObject<HTMLInputElement>;
 }) {
   const meta = props.selected ? providerMeta[props.selected] : null;
@@ -685,29 +687,30 @@ function ProviderStep(props: {
             </div>
             <div>
               <div className="text-[10px] uppercase tracking-[0.2em] mira-muted mb-1.5">Theme</div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => props.setTheme("dark")}
-                  className={cx(
-                    "flex-1 px-3 py-2 rounded-mira text-sm border",
-                    props.theme === "dark"
-                      ? "mira-elevated mira-text mira-border"
-                      : "mira-elevated mira-muted border-transparent"
-                  )}
-                >
-                  <Moon size={12} className="inline mr-1" /> Dark
-                </button>
-                <button
-                  onClick={() => props.setTheme("light")}
-                  className={cx(
-                    "flex-1 px-3 py-2 rounded-mira text-sm border",
-                    props.theme === "light"
-                      ? "mira-elevated mira-text mira-border"
-                      : "mira-elevated mira-muted border-transparent"
-                  )}
-                >
-                  <Sun size={12} className="inline mr-1" /> Light
-                </button>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+                {THEMES.map((t) => (
+                  <button
+                    key={t.id}
+                    onClick={() => props.setTheme(t.id)}
+                    className={cx(
+                      "flex flex-col items-center gap-1 p-2.5 rounded-xl border text-xs",
+                      props.theme === t.id
+                        ? "border-[var(--accent)] bg-[var(--accent-soft)] mira-text"
+                        : "mira-elevated mira-muted border-transparent hover:border-[var(--accent)]/30"
+                    )}
+                  >
+                    <div className="flex gap-0.5">
+                      {t.preview.map((c, i) => (
+                        <div
+                          key={i}
+                          className="w-3 h-3 rounded-full border border-white/10"
+                          style={{ background: c }}
+                        />
+                      ))}
+                    </div>
+                    <span>{t.name}</span>
+                  </button>
+                ))}
               </div>
             </div>
           </div>
@@ -760,14 +763,20 @@ function DoneStep() {
         initial={{ scale: 0.6, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: "spring", damping: 18 }}
-        className="w-20 h-20 mx-auto mb-6 rounded-full mira-elevated border mira-border flex items-center justify-center"
+        className="w-24 h-24 mx-auto mb-6"
       >
-        <Check size={36} className="mira-accent" strokeWidth={2.5} />
+        <MiraLogo size={96} glow={true} />
       </motion.div>
-      <h2 className="font-display text-3xl font-semibold mb-2">You're set</h2>
-      <p className="mira-muted max-w-md mx-auto">
-        MIRA is ready. Type or press F11 to start talking.
-      </p>
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+      >
+        <h2 className="font-display text-3xl font-semibold mb-2 gradient-text">You're set</h2>
+        <p className="text-sm max-w-md mx-auto" style={{color: 'var(--muted)'}}>
+          MIRA is ready. Type or press F11 to start talking.
+        </p>
+      </motion.div>
     </div>
   );
 }

@@ -85,18 +85,23 @@ async function writeJSON(file: string, data: unknown): Promise<void> {
 export const storage = {
   async getSettings(): Promise<AppSettings> {
     const s = await readJSON<AppSettings>("settings.json", defaultSettings());
-    // Migration: v2.0.1 — clear fake "llama3.2" defaults for local providers
-    // so we never show a model as selected when none is actually installed.
     let changed = false;
+    // Migration: v2.0.1 — clear fake "llama3.2" defaults for local providers
     for (const p of s.providers) {
       if (p.authType === "local" && p.model && !(p as any).__liveConfirmed) {
-        // Heuristic: known curated model IDs that were auto-defaulted
         const curatedLocalDefaults = ["llama3.2", "llama3.1", "qwen2.5", "mistral", "mistral-nemo", "phi3.5", "gemma2", "gemma3", "codellama", "deepseek-coder-v2"];
         if (curatedLocalDefaults.includes(p.model)) {
           p.model = "";
           changed = true;
         }
       }
+    }
+    // Migration: normalize theme — old "dark" → "dark", old "light" → "light",
+    // any invalid value → "dark"
+    const validThemes = ["dark", "light", "cyberpunk", "sakura", "nordic", "neon", "earth"];
+    if (!validThemes.includes(s.theme)) {
+      (s as any).theme = "dark";
+      changed = true;
     }
     if (changed) {
       try { await writeJSON("settings.json", s); } catch {}

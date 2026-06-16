@@ -26,6 +26,8 @@ import { tts } from "../lib/voice/tts";
 import { MessageBubble } from "./MessageBubble";
 import { motion, AnimatePresence } from "framer-motion";
 import { isTauri } from "../lib/platform";
+import { metaFor } from "../lib/ai/providerMeta";
+import { THEMES } from "../lib/theme";
 
 interface Props {
   onOpenSettings: (tab?: string) => void;
@@ -74,6 +76,9 @@ export function ChatView({
   );
   const activeProject = projects.find((p) => p.id === activeProjectId);
   const accent = settings.accentColor || "#00D4FF";
+  const resolvedProvider = convProvider || activeProvider;
+  const providerName = resolvedProvider?.name || metaFor(activeProvider?.id || "openai").name;
+  const modelName = resolvedProvider?.model || conv?.model || "No model selected";
 
   useEffect(() => {
     const el = messagesEndRef.current;
@@ -171,14 +176,13 @@ export function ChatView({
 
   return (
     <div className="flex-1 h-full min-h-0 flex flex-col mira-bg">
-      {/* Top bar — local machine info + conversation title + clean controls */}
+      {/* Top bar — glass effect with refined accent */}
       <header
-        className="h-12 flex-shrink-0 flex items-center gap-3 px-3 border-b mira-border backdrop-blur-md mira-elevated relative overflow-hidden"
-        style={{ boxShadow: `inset 0 -1px 0 0 ${accent}22` }}
+        className="h-12 flex-shrink-0 flex items-center gap-3 px-3 border-b mira-border glass relative overflow-hidden"
       >
         {/* Accent stripe on the left edge */}
         <div
-          className="absolute left-0 top-0 bottom-0 w-[3px]"
+          className="absolute left-0 top-1 bottom-1 w-[3px] rounded-full"
           style={{ background: accent, boxShadow: `0 0 12px ${accent}80` }}
         />
 
@@ -220,11 +224,15 @@ export function ChatView({
 
         <div className="flex-1" />
 
-        {/* Current model badge — Jarvis-style power-user indicator */}
+        {/* Current model badge — shows active provider + model */}
         <button
           onClick={() => onOpenSettings("providers")}
           title="Open providers"
-          className="hidden md:flex items-center gap-2 px-2.5 py-1 rounded-md mira-elevated border mira-border hover:mira-hover transition-colors group flex-shrink-0"
+          className="hidden md:flex items-center gap-2 px-2.5 py-1 rounded-md border hover:scale-[1.02] transition-all duration-200 group flex-shrink-0"
+          style={{
+            background: 'rgba(255,255,255,0.03)',
+            borderColor: 'rgba(255,255,255,0.08)',
+          }}
         >
           <span className="relative flex h-1.5 w-1.5">
             <span
@@ -240,10 +248,13 @@ export function ChatView({
           </span>
           <span className="flex flex-col items-start leading-none">
             <span className="text-[8.5px] font-mono uppercase tracking-[0.18em] mira-muted">
-              {convProvider?.name || activeProvider?.name || "no provider"}
+              {providerName}
             </span>
-            <span className="text-[11px] font-mono font-medium mira-text truncate max-w-[180px] group-hover:mira-accent transition-colors">
-              {convProvider?.model || activeProvider?.model || conv?.model || "—"}
+            <span
+              className="text-[11px] font-mono font-medium truncate max-w-[180px] group-hover:opacity-80 transition-opacity"
+              style={{ color: modelName === "No model selected" ? 'var(--muted)' : 'var(--text)' }}
+            >
+              {modelName}
             </span>
           </span>
         </button>
@@ -267,9 +278,12 @@ export function ChatView({
             />
           )}
           <TopButton
-            icon={settings.theme === "dark" ? Sun : Moon}
-            label="Toggle theme"
-            onClick={() => setTheme(settings.theme === "dark" ? "light" : "dark")}
+            icon={Sun}
+            label={`Theme: ${THEMES.find((t) => t.id === settings.theme)?.name || "Dark"}`}
+            onClick={() => {
+              const idx = THEMES.findIndex((t) => t.id === settings.theme);
+              setTheme(THEMES[(idx + 1) % THEMES.length].id);
+            }}
           />
           <button
             onClick={() => onOpenSettings("general")}
@@ -316,12 +330,12 @@ export function ChatView({
         )}
       </AnimatePresence>
 
-      {/* Input — clean: attach, type, voice input, voice mode shortcut, send */}
+      {/* Input — glass morphism, refined */}
       <div className="p-4 flex-shrink-0">
         <div className="max-w-3xl mx-auto">
           <div
-            className="relative flex items-end gap-2 p-2 rounded-2xl border mira-border mira-elevated backdrop-blur-md shadow-lg transition-all"
-            style={{ boxShadow: "0 8px 30px -10px rgba(0,0,0,0.5), inset 0 1px 0 var(--accent-faint)" }}
+            className="relative flex items-end gap-2 p-2 rounded-2xl border glass-strong shadow-lg transition-all duration-200"
+            style={{ boxShadow: "0 8px 32px -12px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06)" }}
           >
             <input
               ref={fileRef}
@@ -381,8 +395,11 @@ export function ChatView({
               <button
                 onClick={() => handleSend()}
                 disabled={!input.trim()}
-                className="p-2.5 rounded-xl mira-accent-bg text-white hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-glow-sm"
-                style={{ background: accent }}
+                className="p-2.5 rounded-xl text-white hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200"
+                style={{
+                  background: accent,
+                  boxShadow: input.trim() ? `0 0 20px ${accent}60` : 'none',
+                }}
                 title="Send"
               >
                 <Send size={18} />
@@ -470,19 +487,19 @@ function EmptyState({ onPrompt, onVoice }: { onPrompt: (p: string) => void; onVo
           />
           <MiraOrb state="idle" size={220} />
         </div>
-        <h2 className="font-display text-4xl font-semibold mira-text mb-2 tracking-tight">
+        <h2 className="font-display text-4xl font-semibold gradient-text mb-2 tracking-tight">
           {greeting}, {settings.userName || "sir"}.
         </h2>
         <p className="mira-muted max-w-md mx-auto mb-8">
-          MIRA at your service. Speak or type — open apps, play music, search the web, or just chat.
+          Your intelligent assistant. Speak or type — open apps, play music, search the web, or just chat.
         </p>
         <button
           onClick={onVoice}
-          className="mb-10 inline-flex items-center gap-2 px-5 py-2.5 rounded-pill mira-elevated border mira-border mira-text hover:mira-hover transition-all"
+          className="mb-10 inline-flex items-center gap-2 px-5 py-2.5 rounded-pill glass-strong mira-text hover:scale-[1.03] active:scale-[0.97] transition-all duration-200"
         >
           <Volume2 size={14} className="mira-accent" />
           <span className="text-sm font-medium">Enter voice mode</span>
-          <span className="text-[9px] font-mono mira-muted ml-1 px-1.5 py-0.5 rounded-pill border mira-border">F11</span>
+          <span className="text-[9px] font-mono mira-muted ml-1 px-1.5 py-0.5 rounded-pill border" style={{borderColor: 'rgba(255,255,255,0.1)'}}>F11</span>
         </button>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 w-full">
           {prompts.map((s) => {
@@ -491,14 +508,18 @@ function EmptyState({ onPrompt, onVoice }: { onPrompt: (p: string) => void; onVo
               <button
                 key={s.label}
                 onClick={() => onPrompt(s.label)}
-                className="text-left px-4 py-3 rounded-mira mira-elevated border mira-border hover:mira-hover transition-all group flex items-start gap-3"
+                className="text-left px-4 py-3 rounded-mira border hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 group flex items-start gap-3"
+                style={{
+                  background: 'rgba(255,255,255,0.03)',
+                  borderColor: 'rgba(255,255,255,0.06)',
+                }}
               >
-                <div className="w-7 h-7 rounded-md mira-elevated border mira-border flex items-center justify-center flex-shrink-0 group-hover:mira-hover">
+                <div className="w-7 h-7 rounded-md glass-strong flex items-center justify-center flex-shrink-0">
                   <Icon size={12} className="mira-accent" />
                 </div>
                 <div className="min-w-0">
                   <div className="text-[9px] font-mono uppercase tracking-wider mira-muted mb-0.5">{s.tag}</div>
-                  <div className="text-sm mira-muted group-hover:mira-text leading-snug">{s.label}</div>
+                  <div className="text-sm mira-muted group-hover:mira-text leading-snug transition-colors">{s.label}</div>
                 </div>
               </button>
             );

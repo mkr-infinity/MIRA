@@ -52,6 +52,7 @@ import { AboutView } from "./AboutView";
 import { MiraLogo } from "./MiraLogo";
 import { cx } from "../lib/theme";
 import { tts } from "../lib/voice/tts";
+import { THEMES, type ThemeId } from "../lib/theme";
 
 type Tab = "general" | "providers" | "voice" | "skills" | "memory" | "projects" | "logs" | "data" | "about";
 
@@ -107,7 +108,7 @@ export function SettingsModal({
             transition={{ type: "spring", damping: 30, stiffness: 320 }}
             className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
           >
-            <div className="w-full max-w-4xl h-full max-h-[88vh] mira-elevated border mira-border rounded-2xl shadow-pop flex flex-col overflow-hidden">
+            <div className="w-full max-w-4xl h-full max-h-[88vh] glass-strong rounded-2xl shadow-pop flex flex-col overflow-hidden">
               <SettingsContent tab={tab} setTab={setTab} onClose={onClose} />
             </div>
           </motion.div>
@@ -144,17 +145,17 @@ function SettingsContent({
   const activeLabel = tabs.find((t) => t.id === tab)?.label;
   return (
     <>
-      <header className="h-16 flex items-center gap-3 px-5 border-b mira-border flex-shrink-0 bg-gradient-to-r from-transparent via-[color:var(--accent)]/3 to-transparent">
-        <MiraLogo size={32} />
+      <header className="h-16 flex items-center gap-3 px-5 border-b mira-border flex-shrink-0 glass">
+        <MiraLogo size={32} glow={true} />
         <div className="flex flex-col leading-tight">
-          <h1 className="font-display text-base font-semibold mira-text">MIRA Settings</h1>
+          <h1 className="font-display text-base font-semibold gradient-text">MIRA</h1>
           <span className="text-[10px] font-mono uppercase tracking-[0.2em] mira-muted">
             {activeLabel}
           </span>
         </div>
         <button
           onClick={onClose}
-          className="ml-auto p-2 rounded-lg hover:mira-hover mira-muted hover:mira-text"
+          className="ml-auto p-2 rounded-lg hover:mira-hover mira-muted hover:mira-text transition-colors"
         >
           <X size={16} />
         </button>
@@ -336,9 +337,33 @@ function GeneralTab() {
         accent="brand"
       >
         <Field label="Theme">
-          <div className="flex gap-2">
-            <ThemeButton active={settings.theme === "dark"} onClick={() => setTheme("dark")} icon={Moon} label="Dark" />
-            <ThemeButton active={settings.theme === "light"} onClick={() => setTheme("light")} icon={Sun} label="Light" />
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+            {THEMES.map((t) => (
+              <button
+                key={t.id}
+                onClick={() => setTheme(t.id)}
+                className={`relative flex flex-col items-center gap-1.5 p-3 rounded-xl border transition-all ${
+                  settings.theme === t.id
+                    ? "border-[var(--accent)] bg-[var(--accent-soft)] shadow-[0_0_12px_var(--accent-ring)]"
+                    : "mira-border mira-elevated hover:border-[var(--accent)]/40"
+                }`}
+              >
+                <div className="flex gap-0.5">
+                  {t.preview.map((c, i) => (
+                    <div
+                      key={i}
+                      className="w-4 h-4 rounded-full border border-white/10"
+                      style={{ background: c }}
+                    />
+                  ))}
+                </div>
+                <span className={`text-xs font-medium ${
+                  settings.theme === t.id ? "mira-accent" : "mira-muted"
+                }`}>
+                  {t.name}
+                </span>
+              </button>
+            ))}
           </div>
         </Field>
 
@@ -856,6 +881,7 @@ function ProviderCard({
                       key={m.id}
                       onClick={() => {
                         onUpdate({ model: m.id });
+                        if (!active) onActivate();
                         setModelPickerOpen(false);
                       }}
                       className={cx(

@@ -152,7 +152,7 @@ export type PersonalityId =
   | "custom";
 
 export interface AppSettings {
-  theme: "dark" | "light";
+  theme: "dark" | "light" | "cyberpunk" | "sakura" | "nordic" | "neon" | "earth";
   voiceEnabled: boolean;
   voiceAutoSpeak: boolean;
   voiceWakeWord: boolean;

@@ -6,8 +6,12 @@ export default {
     extend: {
       fontFamily: {
         sans: ["Inter", "system-ui", "sans-serif"],
-        display: ["Inter", "system-ui", "sans-serif"],
+        display: ["Space Grotesk", "Inter", "system-ui", "sans-serif"],
         mono: ["JetBrains Mono", "ui-monospace", "monospace"],
+        nunito: ["Nunito", "system-ui", "sans-serif"],
+        orbitron: ["Orbitron", "system-ui", "sans-serif"],
+        lora: ["Lora", "Georgia", "serif"],
+        jakarta: ["Plus Jakarta Sans", "system-ui", "sans-serif"],
       },
       colors: {
         // Vercel-inspired dark: true B&W with a thin accent for MIRA identity
