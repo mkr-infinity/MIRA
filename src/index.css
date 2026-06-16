@@ -218,6 +218,10 @@ html[data-theme="earth"] .mira-backdrop,
 html[data-theme="earth"] .jarvis-backdrop {
   background: rgba(15, 18, 8, 0.55);
 }
+html[data-theme="neon"] .mira-backdrop,
+html[data-theme="neon"] .jarvis-backdrop {
+  background: rgba(0, 0, 0, 0.7);
+}
 
 /* Toggle switch — track + thumb with hard-bounded dimensions */
 .mira-toggle,
@@ -332,9 +336,9 @@ html[data-theme="light"] .grid-bg {
 .orb-glow {
   background: radial-gradient(
     circle at center,
-    rgba(0, 212, 255, 0.95) 0%,
-    rgba(0, 212, 255, 0.55) 35%,
-    rgba(0, 212, 255, 0.15) 65%,
+    var(--accent) 0%,
+    var(--accent-soft) 35%,
+    var(--accent-faint) 65%,
     transparent 100%
   );
 }
@@ -354,6 +358,8 @@ html[data-theme="light"] .voice-bar { background: var(--accent); }
 html[data-theme="sakura"] .voice-bar { background: var(--accent); box-shadow: 0 0 6px rgba(255, 110, 180, 0.4); }
 html[data-theme="cyberpunk"] .voice-bar { background: var(--accent); box-shadow: 0 0 6px rgba(255, 45, 149, 0.4); }
 html[data-theme="earth"] .voice-bar { background: var(--accent); box-shadow: 0 0 6px rgba(139, 195, 74, 0.3); }
+html[data-theme="neon"] .voice-bar { background: var(--accent); box-shadow: 0 0 6px rgba(57, 255, 20, 0.4); }
+html[data-theme="nordic"] .voice-bar { background: var(--accent); box-shadow: 0 0 6px rgba(136, 192, 208, 0.4); }
 
 /* =========================================================
    MARKDOWN
@@ -555,6 +561,10 @@ html[data-theme="earth"] .glass {
   background: rgba(15, 18, 8, 0.6);
   border-color: rgba(139, 195, 74, 0.08);
 }
+html[data-theme="neon"] .glass {
+  background: rgba(0, 0, 0, 0.65);
+  border-color: rgba(57, 255, 20, 0.1);
+}
 
 .glass-strong {
   background: rgba(10, 10, 10, 0.82);
@@ -581,6 +591,10 @@ html[data-theme="nordic"] .glass-strong {
 html[data-theme="earth"] .glass-strong {
   background: rgba(15, 18, 8, 0.82);
   border-color: rgba(139, 195, 74, 0.1);
+}
+html[data-theme="neon"] .glass-strong {
+  background: rgba(0, 0, 0, 0.85);
+  border-color: rgba(57, 255, 20, 0.12);
 }
 
 .gradient-text {
