@@ -10,9 +10,9 @@ interface Props {
 
 export function MagneticGrid({
   lineCount = 24,
-  repulsionRadius = 150,
-  maxDisplacement = 40,
-  damping = 0.15,
+  repulsionRadius = 160,
+  maxDisplacement = 50,
+  damping = 0.12,
   className = "",
 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -45,13 +45,15 @@ export function MagneticGrid({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    let dpr = window.devicePixelRatio || 1;
+
     function resize() {
-      const dpr = window.devicePixelRatio || 1;
+      dpr = window.devicePixelRatio || 1;
       canvas!.width = window.innerWidth * dpr;
       canvas!.height = window.innerHeight * dpr;
       canvas!.style.width = window.innerWidth + "px";
       canvas!.style.height = window.innerHeight + "px";
-      ctx!.scale(dpr, dpr);
+      ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
     resize();
     window.addEventListener("resize", resize);
@@ -69,7 +71,6 @@ export function MagneticGrid({
     }
     window.addEventListener("mousemove", onMouse);
     window.addEventListener("mouseleave", onLeave);
-    document.addEventListener("mouseleave", onLeave);
 
     let running = true;
 
@@ -85,12 +86,6 @@ export function MagneticGrid({
       const accent = getComputedStyle(document.documentElement)
         .getPropertyValue("--accent")
         .trim() || "#00D4FF";
-      const alpha = getComputedStyle(document.documentElement)
-        .getPropertyValue("--bg")
-        .trim() === "#faf7f2" ? "0.12" : "0.06";
-
-      ctx!.strokeStyle = `${accent}${alpha}`;
-      ctx!.lineWidth = 1;
 
       const off = offsetsRef.current;
 
@@ -115,6 +110,9 @@ export function MagneticGrid({
         }
       }
 
+      ctx!.strokeStyle = accent + "18";
+      ctx!.lineWidth = 0.5;
+
       ctx!.beginPath();
       for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
@@ -137,6 +135,25 @@ export function MagneticGrid({
       }
       ctx!.stroke();
 
+      const active = mx > 0 && mx < w && my > 0 && my < h;
+      if (active) {
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            const disp = Math.abs(off[r][c]);
+            if (disp > 2) {
+              const x = c * spacingX + off[r][c];
+              const y = r * spacingY;
+              const alpha = Math.min(disp / maxDisplacement, 0.8);
+              const radius = 1.5 + disp * 0.08;
+              ctx!.beginPath();
+              ctx!.arc(x, y, radius, 0, Math.PI * 2);
+              ctx!.fillStyle = accent + Math.floor(alpha * 40).toString(16).padStart(2, "0");
+              ctx!.fill();
+            }
+          }
+        }
+      }
+
       frameRef.current = requestAnimationFrame(draw);
     }
 
@@ -154,8 +171,8 @@ export function MagneticGrid({
   return (
     <canvas
       ref={canvasRef}
-      className={`fixed inset-0 pointer-events-none -z-10 ${className}`}
-      style={{ opacity: 0.5 }}
+      className={`fixed inset-0 pointer-events-none ${className}`}
+      style={{ zIndex: 0, opacity: 0.6 }}
     />
   );
 }
