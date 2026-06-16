@@ -210,6 +210,10 @@ export interface AppSettings {
   notificationsEnabled?: boolean;
   // Plugins
   plugins?: PluginConfig[];
+  // Image generation
+  imageGenEnabled?: boolean;
+  imageGenProvider?: ProviderId;
+  imageGenModel?: string;
 }
 
 export interface ChatRequest {

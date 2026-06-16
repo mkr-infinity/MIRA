@@ -501,6 +501,15 @@ export function ChatView({
             >
               <Plus size={18} />
             </button>
+            {settings.imageGenEnabled && (
+              <button
+                onClick={() => setInput((v) => v ? `${v}\n/image ` : "/image ")}
+                className="p-2.5 rounded-xl hover:mira-hover mira-muted hover:mira-text transition-colors"
+                title="Generate an image"
+              >
+                <ImageIcon size={18} />
+              </button>
+            )}
             <textarea
               data-chat-input
               aria-label="Message MIRA"

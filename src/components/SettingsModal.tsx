@@ -464,6 +464,32 @@ function GeneralTab() {
         </Field>
       </Section>
 
+      {/* Image generation — cyan */}
+      <Section
+        icon={ImageIcon}
+        title="Image generation"
+        description="Toggle inline image generation in the chat."
+        accent="brand"
+      >
+        <ToggleRow
+          label="Enable image generation"
+          description="Show an image gen button in the chat input area."
+          checked={!!settings.imageGenEnabled}
+          onChange={(v) => updateSettings({ imageGenEnabled: v })}
+        />
+        {settings.imageGenEnabled && (
+          <Field label="Image model (optional)">
+            <input
+              value={settings.imageGenModel || ""}
+              onChange={(e) => updateSettings({ imageGenModel: e.target.value })}
+              placeholder="dall-e-3, stable-diffusion, etc."
+              className="w-full px-3 py-2 rounded-lg mira-elevated border mira-border mira-text font-mono text-sm focus:outline-none focus:border-cyan-500/50"
+            />
+            <Hint>Set a model ID for image generation. Leave empty to use the active chat model.</Hint>
+          </Field>
+        )}
+      </Section>
+
       {/* Personality — fuchsia */}
       <Section
         icon={Sparkles}

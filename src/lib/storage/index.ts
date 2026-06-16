@@ -237,6 +237,9 @@ export function defaultSettings(): AppSettings {
     customCSS: "",
     notificationsEnabled: true,
     plugins: [],
+    imageGenEnabled: false,
+    imageGenProvider: undefined,
+    imageGenModel: undefined,
   };
 }
 
