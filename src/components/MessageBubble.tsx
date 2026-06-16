@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useStore } from "../store";
-import { Copy, RefreshCw, Volume2, Check, ChevronDown, ChevronRight, Brain, Terminal } from "lucide-react";
+import { Copy, RefreshCw, Volume2, Check, ChevronDown, ChevronRight, Brain, Terminal, type LucideIcon } from "lucide-react";
 import { tts } from "../lib/voice/tts";
 import type { Message } from "../types";
 import ReactMarkdown from "react-markdown";
@@ -260,7 +260,7 @@ function ActionBtn({
   onClick,
   disabled,
 }: {
-  icon: React.ComponentType<{ size?: number }>;
+  icon: LucideIcon;
   label: string;
   onClick: () => void;
   disabled?: boolean;

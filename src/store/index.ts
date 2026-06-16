@@ -295,9 +295,10 @@ export const useStore = create<State & Actions>((set, get) => ({
     const activeProvider = settings.providers.find(
       (p) => p.id === settings.activeProviderId
     );
-    if (activeProvider && (conv.provider !== activeProvider.id || conv.model !== activeProvider.model)) {
+    if (activeProvider && conv && (conv.provider !== activeProvider.id || conv.model !== activeProvider.model)) {
+      const convId = conv.id;
       const synced = get().conversations.map((c) =>
-        c.id === conv.id
+        c.id === convId
           ? { ...c, provider: activeProvider.id, model: activeProvider.model }
           : c
       );
@@ -963,7 +964,7 @@ let saveTimer: number | null = null;
 function scheduleSave(_conversations: Conversation[]) {
   if (saveTimer) window.clearTimeout(saveTimer);
   saveTimer = window.setTimeout(() => {
-    const latest = get().conversations;
+    const latest = useStore.getState().conversations;
     storage.saveConversations(latest).catch((e) =>
       devlog("storage", `scheduleSave failed: ${e}`)
     );
