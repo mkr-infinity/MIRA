@@ -34,6 +34,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { isTauri } from "../lib/platform";
 import { metaFor } from "../lib/ai/providerMeta";
 import { THEMES } from "../lib/theme";
+import { MagneticGrid } from "./MagneticGrid";
 
 interface Props {
   onOpenSettings: (tab?: string) => void;
@@ -253,6 +254,7 @@ export function ChatView({
       onDragLeave={(e) => { if (e.currentTarget === e.target) setDragOver(false); }}
       onDrop={(e) => { e.preventDefault(); setDragOver(false); handleFiles(e.dataTransfer.files); }}
     >
+      <MagneticGrid lineCount={32} repulsionRadius={200} maxDisplacement={35} />
       {/* Drag-drop overlay */}
       <AnimatePresence>
         {dragOver && (
