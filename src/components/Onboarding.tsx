@@ -335,9 +335,14 @@ export function Onboarding() {
                 )}
                 {step === "voice" && (
                   <VoiceStep
-                    onTest={() => {
-                      tts.speak("Good day, sir. All systems are operational. I am ready when you are.", { onEnd: () => setVoiceTest("done") });
+                    onTest={async () => {
                       setVoiceTest("speaking");
+                      try {
+                        await tts.whenReady();
+                        tts.speak("Good day, sir. All systems are operational. I am ready when you are.", { onEnd: () => setVoiceTest("done") });
+                      } catch {
+                        setVoiceTest("done");
+                      }
                     }}
                     testState={voiceTest}
                   />
