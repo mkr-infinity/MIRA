@@ -540,9 +540,10 @@ function VersionChangelog({ version }: { version: string }) {
                       <span className="text-[10px] font-mono mira-muted">{rel.date}</span>
                     </div>
                     <ul className="text-xs mira-muted space-y-1.5 list-disc pl-5">
-                      {rel.items.map((it) => (
-                        <li key={it}>{it}</li>
-                      ))}
+                      {rel.items.map((it) => {
+                        const html = it.replace(/\*\*(.+?)\*\*/g, "<strong class='mira-text'>$1</strong>");
+                        return <li key={it} dangerouslySetInnerHTML={{ __html: html }} />;
+                      })}
                     </ul>
                   </div>
                 ))
