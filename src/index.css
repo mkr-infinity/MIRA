@@ -174,26 +174,26 @@ html[data-theme="earth"] {
 }
 
 html[data-theme="anime"] {
-  --bg: #1a1410;
-  --surface: #241e1a;
-  --elevated: #2e2824;
-  --hover: #3a322e;
-  --border: #4a3f3a;
-  --text: #fce8f0;
-  --muted: #d4a8b8;
-  --subtle: #8a6a7a;
+  --bg: #120c0a;
+  --surface: #1e1614;
+  --elevated: #2c201c;
+  --hover: #3a2a24;
+  --border: #4e3832;
+  --text: #ffe4ec;
+  --muted: #e0a0b8;
+  --subtle: #a06a7a;
   --accent: #ff7eb3;
-  --accent-faint: rgba(255, 126, 179, 0.08);
-  --accent-soft: rgba(255, 126, 179, 0.15);
-  --accent-ring: rgba(255, 126, 179, 0.4);
+  --accent-faint: rgba(255, 126, 179, 0.10);
+  --accent-soft: rgba(255, 126, 179, 0.20);
+  --accent-ring: rgba(255, 126, 179, 0.5);
   --danger: #ff6b8a;
   --warning: #ffb86c;
   --success: #6bcfa0;
   --font-sans: "Nunito", "Inter", system-ui, sans-serif;
   --font-display: "Space Grotesk", system-ui, sans-serif;
   --theme-radius: 18px;
-  --theme-shadow: 0 8px 32px -8px rgba(255, 126, 179, 0.2);
-  --theme-glow: rgba(255, 126, 179, 0.12);
+  --theme-shadow: 0 8px 40px -8px rgba(255, 126, 179, 0.25);
+  --theme-glow: rgba(255, 126, 179, 0.18);
 }
 
 /* Backward compat: html.dark = :root defaults */
@@ -719,10 +719,17 @@ html[data-theme="earth"] .gradient-text {
   background-clip: text;
 }
 html[data-theme="anime"] .gradient-text {
-  background: linear-gradient(135deg, #ff7eb3, #ffb86c, #d4a8b8);
+  background: linear-gradient(135deg, #ff7eb3, #ffb86c, #e8a0c8, #ff7eb3);
+  background-size: 200% 200%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  animation: shimmer 4s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
 }
 
 /* =========================================================
