@@ -1010,6 +1010,13 @@ export const useStore = create<State & Actions>((set, get) => ({
   },
 
   setSearchMessageQuery(q) {
+    set({ searchMessageQuery: q });
+    if (!q.trim()) {
+      set({ searchMessageResults: [] });
+      return;
+    }
+    get().searchInConversation();
+  },
 
   searchInConversation() {
     const { activeId, conversations, searchMessageQuery } = get();

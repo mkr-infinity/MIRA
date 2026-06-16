@@ -44,7 +44,7 @@ organizes work into **projects**, and keeps **every byte of data** on your machi
 
 <table>
 <tr>
-<td align="center" width="33%">
+<td align="center" width="25%">
 
 ### 🤖
 
@@ -54,7 +54,7 @@ OpenAI · Anthropic · Gemini
 Ollama · OpenRouter · Custom
 
 </td>
-<td align="center" width="34%">
+<td align="center" width="25%">
 
 ### 🎙️
 
@@ -64,7 +64,7 @@ Arc-reactor orb · STT/TTS
 F11 to enter · Wake word
 
 </td>
-<td align="center" width="33%">
+<td align="center" width="25%">
 
 ### 🖥️
 
@@ -74,9 +74,7 @@ Open apps · Play music
 Set volume · Lock · Notify
 
 </td>
-</tr>
-<tr>
-<td align="center">
+<td align="center" width="25%">
 
 ### 📁
 
@@ -87,6 +85,8 @@ Custom instructions
 Attached files
 
 </td>
+</tr>
+<tr>
 <td align="center">
 
 ### 🎨
@@ -106,6 +106,74 @@ Sakura · Nordic · Neon · Earth
 Long-term facts  
 Import `.md` files  
 Searchable library
+
+</td>
+<td align="center">
+
+### 🔍
+
+**Full-text Search**
+
+Search conversations  
+Highlight & navigate  
+`Ctrl+F` in chat
+
+</td>
+<td align="center">
+
+### 📦
+
+**Import / Export**
+
+JSON export all data  
+Import conversations  
+Memory merge
+
+</td>
+</tr>
+<tr>
+<td align="center">
+
+### 🖼️
+
+**Image Attachments**
+
+Drag & drop images  
+Paste from clipboard  
+Camera capture
+
+</td>
+<td align="center">
+
+### 🎛️
+
+**Custom CSS**
+
+Inject custom styles  
+Real-time preview  
+Reset anytime
+
+</td>
+<td align="center">
+
+### 🔌
+
+**Plugins**
+
+Load JS modules  
+Extend MIRA  
+URL-based
+
+</td>
+<td align="center">
+
+### 🔄
+
+**E2E Sync**
+
+End-to-end encrypted  
+Cross-device sync  
+Self-hostable relay
 
 </td>
 </tr>
@@ -244,6 +312,7 @@ Every component — the orb, sidebar, messages, settings — dynamically adapts 
 | `Ctrl + N` | New conversation |
 | `Ctrl + ,` | Open settings |
 | `Ctrl + /` | Focus chat input |
+| `Ctrl + F` | Search in conversation |
 
 <br/>
 
@@ -369,6 +438,19 @@ src/
 │   ├── desktop/               # Desktop control
 │   ├── storage/               # Persistence
 │   └── theme.ts               # Theme helpers
+├── components/
+│   ├── Sidebar.tsx            # Chat list
+│   ├── ChatView.tsx           # Main chat
+│   ├── VoiceMode.tsx          # Voice mode
+│   ├── Orb.tsx                # Arc-reactor
+│   ├── Onboarding.tsx         # First-run wizard
+│   ├── SettingsModal.tsx      # Settings
+│   ├── MessageBubble.tsx      # Messages
+│   ├── MiraLogo.tsx           # Animated logo
+│   ├── ThinkingAnimation.tsx  # Thinking indicator
+│   ├── ActivityLog.tsx        # Activity
+│   └── AboutView.tsx          # About
+│   └── plugins/               # Plugin loader
 ├── components/
 │   ├── Sidebar.tsx            # Chat list
 │   ├── ChatView.tsx           # Main chat
