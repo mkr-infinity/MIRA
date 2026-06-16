@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { useStore } from "../store";
 import { MiraOrb, VoiceWave } from "./Orb";
 import {
@@ -626,17 +626,37 @@ function EmptyState({ onPrompt, onVoice }: { onPrompt: (p: string) => void; onVo
   const hour = new Date().getHours();
   const greeting =
     hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
-  const { settings } = useStore();
+  const { settings, conversations, activeProjectId, projects } = useStore();
   const accent = settings.accentColor || "#00D4FF";
 
-  const prompts = [
-    { label: "Open Brave and play lofi music", icon: Volume2, tag: "desktop" },
-    { label: "Summarise the last conversation", icon: Sparkles, tag: "chat" },
-    { label: "Search the web for the latest AI news", icon: Globe, tag: "web" },
-    { label: "Write a Python script to rename files in /tmp", icon: Code, tag: "code" },
-    { label: "Remember I prefer dark themes and lo-fi", icon: Brain, tag: "memory" },
-    { label: "Set system volume to 40% and lock", icon: Settings, tag: "system" },
-  ];
+  // Dynamic suggestions based on context
+  const suggestions = useMemo(() => {
+    const base = [
+      { label: "Open Brave and play lofi music", icon: Volume2, tag: "desktop" },
+      { label: "Search the web for the latest AI news", icon: Globe, tag: "web" },
+      { label: "Write a Python script to rename files in /tmp", icon: Code, tag: "code" },
+      { label: "Remember I prefer dark themes and lo-fi", icon: Brain, tag: "memory" },
+      { label: "Set system volume to 40% and lock", icon: Settings, tag: "system" },
+    ];
+    // Add context-aware suggestions
+    if (conversations.length > 0) {
+      const lastConv = conversations[0];
+      const lastMsg = lastConv.messages[lastConv.messages.length - 1];
+      if (lastMsg) {
+        base.push({ label: `Continue: "${lastMsg.content.slice(0, 40)}…"`, icon: Sparkles, tag: "chat" });
+      }
+      base.push({ label: "Summarise the last conversation", icon: Sparkles, tag: "chat" });
+    }
+    if (activeProjectId) {
+      const proj = projects.find((p) => p.id === activeProjectId);
+      if (proj) {
+        base.push({ label: `Review ${proj.name} project files`, icon: FolderOpen, tag: "project" });
+      }
+    }
+    // Shuffle and pick 6
+    const shuffled = base.sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, 6);
+  }, [conversations, activeProjectId, projects]);
 
   return (
     <div className="min-h-full w-full flex flex-col items-center justify-center px-6 py-10 text-center relative overflow-hidden">
@@ -670,7 +690,7 @@ function EmptyState({ onPrompt, onVoice }: { onPrompt: (p: string) => void; onVo
           <span className="text-[9px] font-mono mira-muted ml-1 px-1.5 py-0.5 rounded-pill border" style={{borderColor: 'rgba(255,255,255,0.1)'}}>F11</span>
         </button>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 w-full">
-          {prompts.map((s) => {
+          {suggestions.map((s) => {
             const Icon = s.icon;
             return (
               <button
