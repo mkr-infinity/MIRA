@@ -53,6 +53,9 @@ html[data-theme="light"] {
   --success: #047857;
   --font-sans: "Nunito", system-ui, sans-serif;
   --font-display: "Plus Jakarta Sans", system-ui, sans-serif;
+  --theme-radius: 14px;
+  --theme-shadow: 0 4px 20px -6px rgba(194, 65, 12, 0.1);
+  --theme-glow: rgba(194, 65, 12, 0.08);
 }
 
 html[data-theme="cyberpunk"] {
@@ -73,6 +76,9 @@ html[data-theme="cyberpunk"] {
   --success: #00e676;
   --font-sans: "Orbitron", "Inter", system-ui, sans-serif;
   --font-display: "Orbitron", system-ui, sans-serif;
+  --theme-radius: 6px;
+  --theme-shadow: 0 0 24px rgba(255, 45, 149, 0.2), 0 4px 12px rgba(0, 0, 0, 0.5);
+  --theme-glow: rgba(255, 45, 149, 0.15);
 }
 
 html[data-theme="sakura"] {
@@ -93,6 +99,9 @@ html[data-theme="sakura"] {
   --success: #69f0ae;
   --font-sans: "Lora", Georgia, serif;
   --font-display: "Lora", Georgia, serif;
+  --theme-radius: 16px;
+  --theme-shadow: 0 8px 32px -8px rgba(255, 110, 180, 0.2);
+  --theme-glow: rgba(255, 110, 180, 0.12);
 }
 
 html[data-theme="nordic"] {
@@ -113,6 +122,9 @@ html[data-theme="nordic"] {
   --success: #a3be8c;
   --font-sans: "Plus Jakarta Sans", system-ui, sans-serif;
   --font-display: "Space Grotesk", system-ui, sans-serif;
+  --theme-radius: 8px;
+  --theme-shadow: 0 2px 16px -4px rgba(136, 192, 208, 0.12);
+  --theme-glow: rgba(136, 192, 208, 0.1);
 }
 
 html[data-theme="neon"] {
@@ -133,6 +145,9 @@ html[data-theme="neon"] {
   --success: #39ff14;
   --font-sans: "Orbitron", "Inter", system-ui, sans-serif;
   --font-display: "Orbitron", system-ui, sans-serif;
+  --theme-radius: 4px;
+  --theme-shadow: 0 0 20px rgba(57, 255, 20, 0.15), 0 0 40px rgba(57, 255, 20, 0.05);
+  --theme-glow: rgba(57, 255, 20, 0.1);
 }
 
 html[data-theme="earth"] {
@@ -153,6 +168,9 @@ html[data-theme="earth"] {
   --success: #66bb6a;
   --font-sans: "Nunito", system-ui, sans-serif;
   --font-display: "Plus Jakarta Sans", system-ui, sans-serif;
+  --theme-radius: 12px;
+  --theme-shadow: 0 4px 20px -4px rgba(139, 195, 74, 0.15);
+  --theme-glow: rgba(139, 195, 74, 0.1);
 }
 
 html[data-theme="anime"] {
@@ -173,6 +191,9 @@ html[data-theme="anime"] {
   --success: #6bcfa0;
   --font-sans: "Nunito", "Inter", system-ui, sans-serif;
   --font-display: "Space Grotesk", system-ui, sans-serif;
+  --theme-radius: 18px;
+  --theme-shadow: 0 8px 32px -8px rgba(255, 126, 179, 0.2);
+  --theme-glow: rgba(255, 126, 179, 0.12);
 }
 
 /* Backward compat: html.dark = :root defaults */
@@ -194,6 +215,9 @@ html[data-theme="dark"] {
   --success: #10b981;
   --font-sans: "Inter", system-ui, sans-serif;
   --font-display: "Space Grotesk", system-ui, sans-serif;
+  --theme-radius: 10px;
+  --theme-shadow: 0 4px 24px -8px rgba(0, 212, 255, 0.15);
+  --theme-glow: rgba(0, 212, 255, 0.12);
 }
 
 html, body, #root {
@@ -553,12 +577,20 @@ select:focus-visible {
 /* Subtle elevation utility */
 .mira-shadow,
 .jarvis-shadow {
-  box-shadow: 0 4px 24px -8px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--theme-shadow, 0 4px 24px -8px rgba(0, 0, 0, 0.4));
 }
 .mira-shadow-strong,
 .jarvis-shadow-strong {
   box-shadow: 0 12px 48px -12px rgba(0, 0, 0, 0.6),
               0 0 0 1px var(--border);
+}
+
+/* Theme-personality card — uses per-theme radius + shadow */
+.mira-card,
+.jarvis-card {
+  border-radius: var(--theme-radius, 10px);
+  box-shadow: var(--theme-shadow, none);
+  border: 1px solid var(--border);
 }
 
 .glass {
@@ -655,6 +687,19 @@ html[data-theme="sakura"] .gradient-text {
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
+/* Per-theme selection color personality */
+html[data-theme="cyberpunk"] ::selection { background: rgba(255, 45, 149, 0.3); }
+html[data-theme="neon"] ::selection { background: rgba(57, 255, 20, 0.25); }
+html[data-theme="sakura"] ::selection { background: rgba(255, 110, 180, 0.25); }
+html[data-theme="anime"] ::selection { background: rgba(255, 126, 179, 0.25); }
+html[data-theme="earth"] ::selection { background: rgba(139, 195, 74, 0.25); }
+
+/* Per-theme scrollbar personality */
+html[data-theme="cyberpunk"] ::-webkit-scrollbar-thumb { background: #ff2d9560; }
+html[data-theme="neon"] ::-webkit-scrollbar-thumb { background: #39ff1460; }
+html[data-theme="sakura"] ::-webkit-scrollbar-thumb { background: #ff6eb460; }
+html[data-theme="anime"] ::-webkit-scrollbar-thumb { background: #ff7eb360; }
+
 html[data-theme="nordic"] .gradient-text {
   background: linear-gradient(135deg, #88c0d0, #5e81ac);
   -webkit-background-clip: text;
