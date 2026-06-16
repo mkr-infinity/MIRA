@@ -52,7 +52,7 @@
 
 | Feature | Description |
 |---------|-------------|
-| **7 Themes** | Midnight, Daylight, Cyberpunk, Sakura, Nordic, Neon, Earth |
+| **8 Themes** | Anime (default), Midnight, Daylight, Cyberpunk, Sakura, Nordic, Neon, Earth |
 | **Custom CSS** | Inject your own styles in real-time |
 | **Accent Color** | Pick from 10 accent colours or theme default |
 | **Personality Presets** | Default, Concise, Friendly, Code Mentor, Therapist, Custom |
