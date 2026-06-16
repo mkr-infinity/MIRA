@@ -43,5 +43,9 @@ src-tauri/icons/*.icns
 # Claude AI config
 .claude/
 
+# Local planning docs (not for repo)
+TODO.md
+V2_PLAN.md
+
 # OS
 Thumbs.db
