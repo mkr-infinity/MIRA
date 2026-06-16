@@ -640,3 +640,28 @@ html[data-theme="earth"] .gradient-text {
   background-clip: text;
 }
 
+/* =========================================================
+   MOBILE OPTIMIZATIONS
+   ========================================================= */
+@media (max-width: 640px) {
+  /* Larger touch targets on mobile */
+  button, a, [role="button"] {
+    min-height: 36px;
+  }
+
+  /* Better scrolling on mobile */
+  .overflow-y-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Prevent horizontal overflow on mobile */
+  .markdown pre {
+    max-width: calc(100vw - 3rem);
+  }
+
+  /* Mobile-friendly input sizing */
+  input, textarea, select {
+    font-size: 16px; /* Prevent iOS zoom on focus */
+  }
+}
+
