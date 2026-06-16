@@ -193,7 +193,7 @@ export function defaultSettings(): AppSettings {
         id: "ollama",
         name: "Ollama (Local)",
         model: "",
-        enabled: false,
+        enabled: true,
         authType: "local",
         localEndpoint: "http://localhost:11434",
       },

@@ -206,8 +206,14 @@ export const useStore = create<State & Actions>((set, get) => ({
 
   async setActiveProvider(id) {
     const prev = get().settings.activeProviderId;
-    await get().updateSettings({ activeProviderId: id });
-    if (prev !== id) devlog("providers", `Active provider: ${prev} → ${id}`);
+    const settings = { ...get().settings };
+    settings.activeProviderId = id;
+    settings.providers = settings.providers.map((p) =>
+      p.id === id ? { ...p, enabled: true } : p
+    );
+    set({ settings });
+    await storage.saveSettings(settings);
+    if (prev !== id) devlog("providers", `Active provider: ${prev} → ${id} (enabled)`);
   },
 
   async setProviderConfig(id, patch) {
