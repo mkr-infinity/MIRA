@@ -193,7 +193,7 @@ function SettingsContent({
             </div>
           ))}
         </nav>
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 min-h-0 overflow-y-auto p-6" style={{ scrollBehavior: 'smooth', overscrollBehavior: 'contain' }}>
           <div className="max-w-2xl mx-auto">
             {tab === "general" && <GeneralTab />}
             {tab === "providers" && <ProvidersTab />}
@@ -1025,6 +1025,7 @@ function LogsTab() {
   const [source, setSource] = useState<string>("all");
   const [autoScroll, setAutoScroll] = useState(true);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  const [searchQuery, setSearchQuery] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
 
   const sources = useMemo(() => {
@@ -1094,6 +1095,16 @@ function LogsTab() {
     });
   }
 
+  const searched = useMemo(() => {
+    if (!searchQuery.trim()) return filtered;
+    const q = searchQuery.toLowerCase();
+    return filtered.filter((l) =>
+      l.message.toLowerCase().includes(q) ||
+      l.source.toLowerCase().includes(q) ||
+      l.level.toLowerCase().includes(q)
+    );
+  }, [filtered, searchQuery]);
+
   return (
     <div className="space-y-4">
       <div className="flex items-end justify-between gap-3">
@@ -1109,94 +1120,129 @@ function LogsTab() {
             <span>live</span>
           </span>
           <span className="text-xs mira-muted font-mono">
-            {filtered.length} / {logs.length}
+            {searched.length} / {logs.length}
           </span>
         </div>
       </div>
 
-      <Card>
-        <ToggleRow
-          label="Capture logs"
-          description="Mirror console output, AI events, voice and desktop actions, and every network call into this panel."
-          checked={settings.logsEnabled}
-          onChange={(v) => updateSettings({ logsEnabled: v })}
-        />
-        <div className="mt-3 pt-3 border-t mira-border">
-          <div className="text-[10px] uppercase tracking-[0.2em] mira-muted mb-2">What gets logged</div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 text-[11px]">
-            {[
-              { src: "boot", desc: "App startup" },
-              { src: "init", desc: "Store hydration" },
-              { src: "settings", desc: "Settings changes" },
-              { src: "providers", desc: "Provider swap/config" },
-              { src: "sendMessage", desc: "Chat turns" },
-              { src: "openai/anthropic/…", desc: "AI requests + tokens" },
-              { src: "fetch/xhr", desc: "Every network call" },
-              { src: "voice", desc: "STT/TTS events" },
-              { src: "desktop", desc: "OS commands" },
-              { src: "memory/skills/projects", desc: "CRUD actions" },
-              { src: "console", desc: "console.* output" },
-              { src: "errors", desc: "Provider + runtime" },
-            ].map((t) => (
-              <div key={t.src} className="flex items-center gap-1.5">
-                <code className="px-1 py-0.5 rounded font-mono text-[10px] mira-elevated mira-text">{t.src}</code>
-                <span className="mira-muted">{t.desc}</span>
-              </div>
-            ))}
+      <div className="rounded-mira border mira-border overflow-hidden">
+        <div className="flex items-center gap-2 px-4 py-2 mira-elevated border-b mira-border">
+          <Bug size={12} className="mira-accent" />
+          <span className="text-[10px] font-mono uppercase tracking-wider mira-muted">Log capture</span>
+        </div>
+        <div className="p-4 space-y-3">
+          <ToggleRow
+            label="Capture logs"
+            description="Mirror console output, AI events, voice and desktop actions, and every network call into this panel."
+            checked={settings.logsEnabled}
+            onChange={(v) => updateSettings({ logsEnabled: v })}
+          />
+          <div className="pt-3 border-t mira-border">
+            <div className="text-[10px] font-mono uppercase tracking-wider mira-muted mb-2">Sources</div>
+            <div className="flex flex-wrap gap-1.5 text-[11px]">
+              {[
+                { src: "boot", desc: "App startup" },
+                { src: "init", desc: "Store hydration" },
+                { src: "settings", desc: "Settings changes" },
+                { src: "providers", desc: "Provider swap/config" },
+                { src: "sendMessage", desc: "Chat turns" },
+                { src: "ai", desc: "AI requests + tokens" },
+                { src: "network", desc: "Every network call" },
+                { src: "voice", desc: "STT/TTS events" },
+                { src: "desktop", desc: "OS commands" },
+                { src: "data", desc: "CRUD actions" },
+                { src: "console", desc: "console.* output" },
+                { src: "errors", desc: "Provider + runtime" },
+              ].map((t) => (
+                <span
+                  key={t.src}
+                  className="px-2 py-1 rounded-pill text-[10px] font-mono border mira-border mira-elevated"
+                >
+                  {t.desc}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
-      </Card>
+      </div>
 
       <div className="flex items-center gap-2 flex-wrap">
-        {(["all", "info", "warn", "error", "debug"] as const).map((f) => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={cx(
-              "px-3 py-1.5 rounded-mira text-xs font-mono uppercase tracking-wider border transition-colors",
-              filter === f
-                ? "mira-elevated mira-text mira-border"
-                : "mira-muted hover:mira-text border-transparent"
-            )}
-          >
-            {f}
-            <span className="ml-1.5 mira-muted">
-              {f === "all" ? logs.length : logs.filter((l) => l.level === f).length}
-            </span>
-          </button>
-        ))}
+        <div className="relative flex-1 min-w-[160px] max-w-xs">
+          <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 mira-muted pointer-events-none" />
+          <input
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search logs…"
+            className="mira-input pl-8 text-xs h-9 font-mono"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="absolute right-2 top-1/2 -translate-y-1/2 mira-muted hover:mira-text p-1"
+            >
+              <X size={11} />
+            </button>
+          )}
+        </div>
+        <div className="flex items-center gap-1 flex-wrap">
+          {(["all", "info", "warn", "error", "debug"] as const).map((f) => {
+            const count = f === "all" ? logs.length : logs.filter((l) => l.level === f).length;
+            const colors: Record<string, string> = {
+              all: "border-cyan-500/30 text-cyan-300",
+              info: "border-blue-500/30 text-blue-300",
+              warn: "border-amber-500/30 text-amber-300",
+              error: "border-red-500/30 text-red-300",
+              debug: "border-gray-500/30 text-gray-300",
+            };
+            return (
+              <button
+                key={f}
+                onClick={() => setFilter(f)}
+                className={cx(
+                  "px-2.5 py-1.5 rounded-pill text-[10px] font-mono uppercase tracking-wider border transition-all",
+                  filter === f
+                    ? `${colors[f]} mira-elevated`
+                    : "mira-muted hover:mira-text border-transparent"
+                )}
+              >
+                {f}
+                <span className="ml-1 opacity-60">{count}</span>
+              </button>
+            );
+          })}
+        </div>
         {sources.length > 0 && (
           <select
             value={source}
             onChange={(e) => setSource(e.target.value)}
-            className="px-2 py-1.5 rounded-mira text-xs font-mono mira-elevated border mira-border mira-text focus:outline-none"
+            className="px-2 py-1.5 rounded-mira text-[10px] font-mono mira-elevated border mira-border mira-text focus:outline-none h-9"
           >
-            <option value="all">all sources ({logs.length})</option>
+            <option value="all">all sources</option>
             {sources.map((s) => (
               <option key={s} value={s}>
-                {s} ({logs.filter((l) => l.source === s).length})
+                {s}
               </option>
             ))}
           </select>
         )}
-        <div className="ml-auto flex items-center gap-2">
+        <div className="flex items-center gap-1 ml-auto">
           <button
             onClick={copyLogs}
-            className="px-3 py-1.5 rounded-mira mira-elevated mira-text border mira-border hover:mira-hover text-xs"
+            className="px-2.5 py-1.5 rounded-pill mira-elevated mira-text border mira-border hover:mira-hover text-[10px] font-mono"
             title="Copy filtered logs to clipboard"
           >
             Copy
           </button>
           <button
             onClick={exportLogs}
-            className="px-3 py-1.5 rounded-mira mira-elevated mira-text border mira-border hover:mira-hover text-xs"
+            className="px-2.5 py-1.5 rounded-pill mira-elevated mira-text border mira-border hover:mira-hover text-[10px] font-mono"
             title="Download all logs as .log"
           >
             Export
           </button>
           <button
             onClick={clearLogs}
-            className="px-3 py-1.5 rounded-mira mira-elevated mira-text border mira-border hover:mira-hover text-xs"
+            className="px-2.5 py-1.5 rounded-pill mira-elevated mira-text border mira-border hover:mira-hover text-[10px] font-mono"
             title="Clear log buffer"
           >
             Clear
@@ -1206,49 +1252,68 @@ function LogsTab() {
 
       <div
         ref={containerRef}
-        className="mira-bg mira-border border rounded-mira p-2 h-[480px] overflow-y-auto font-mono text-[11px] leading-relaxed"
+        className="mira-bg mira-border border rounded-mira overflow-hidden font-mono text-[11px] leading-relaxed"
       >
-        {filtered.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center mira-muted text-sm gap-2">
-            <Code size={20} className="mira-muted" />
+        {searched.length === 0 ? (
+          <div className="h-[400px] flex flex-col items-center justify-center mira-muted text-sm gap-2">
+            <Code size={24} className="mira-muted" />
             <div>No log entries match the current filters.</div>
             <div className="text-[10px] font-mono">
               {logs.length === 0 ? "Waiting for activity… send a message to see logs flow." : "Try clearing the filter."}
             </div>
           </div>
         ) : (
-          filtered.map((l) => {
-            const expanded = expandedIds.has(l.id);
-            const hasMeta = l.meta && Object.keys(l.meta).length > 0;
-            return (
-              <div key={l.id} className={cx("group rounded px-2 py-0.5 hover:mira-hover", expanded && "mira-elevated")}>
-                <div className="flex items-start gap-2">
-                  <span className="mira-muted flex-shrink-0 tabular-nums">
-                    {new Date(l.timestamp).toLocaleTimeString([], { hour12: false })}
-                  </span>
-                  <span className={cx("flex-shrink-0 w-10 uppercase font-bold tabular-nums", levelColor[l.level])}>
-                    {levelIcon[l.level]} {l.level}
-                  </span>
-                  <span className="mira-muted flex-shrink-0 font-semibold">[{l.source}]</span>
-                  <span className="mira-text break-all flex-1">{l.message}</span>
-                  {hasMeta && (
-                    <button
-                      onClick={() => toggleExpand(l.id)}
-                      className="mira-muted hover:mira-text flex-shrink-0 px-1"
-                      title={expanded ? "Hide details" : "Show details"}
-                    >
-                      <ChevronDown size={10} className={cx("transition-transform", expanded && "rotate-180")} />
-                    </button>
+          <div className="h-[400px] overflow-y-auto">
+            {searched.map((l) => {
+              const expanded = expandedIds.has(l.id);
+              const hasMeta = l.meta && Object.keys(l.meta).length > 0;
+              return (
+                <motion.div
+                  key={l.id}
+                  initial={{ opacity: 0, x: -4 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className={cx(
+                    "border-b mira-border last:border-b-0 transition-colors",
+                    expanded ? "mira-elevated" : "hover:mira-hover"
                   )}
-                </div>
-                {expanded && hasMeta && (
-                  <pre className="ml-[120px] mt-1 p-2 rounded mira-elevated text-[10px] mira-muted overflow-x-auto">
-{JSON.stringify(l.meta, null, 2)}
-                  </pre>
-                )}
-              </div>
-            );
-          })
+                >
+                  <button
+                    onClick={() => hasMeta && toggleExpand(l.id)}
+                    className="w-full text-left flex items-start gap-2 px-3 py-1.5"
+                  >
+                    <span className="mira-muted flex-shrink-0 tabular-nums pt-0.5">
+                      {new Date(l.timestamp).toLocaleTimeString([], { hour12: false })}
+                    </span>
+                    <span className={cx("flex-shrink-0 font-bold tabular-nums text-[10px] uppercase pt-0.5", levelColor[l.level])}>
+                      {levelIcon[l.level]}
+                    </span>
+                    <span className="mira-muted flex-shrink-0 font-semibold text-[10px] pt-0.5">[{l.source}]</span>
+                    <span className="mira-text break-all flex-1 text-[11px] leading-snug">{l.message}</span>
+                    {hasMeta && (
+                      <ChevronDown
+                        size={10}
+                        className={cx(
+                          "mira-muted flex-shrink-0 mt-1 transition-transform duration-200",
+                          expanded && "rotate-180"
+                        )}
+                      />
+                    )}
+                  </button>
+                  {expanded && hasMeta && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      className="overflow-hidden"
+                    >
+                      <pre className="ml-[140px] mr-3 mb-2 p-2 rounded mira-elevated text-[10px] mira-muted overflow-x-auto">
+                        {JSON.stringify(l.meta, null, 2)}
+                      </pre>
+                    </motion.div>
+                  )}
+                </motion.div>
+              );
+            })}
+          </div>
         )}
       </div>
     </div>
