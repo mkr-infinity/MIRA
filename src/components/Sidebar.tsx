@@ -246,8 +246,8 @@ export function Sidebar({
           title={newChatLabel}
           className="w-full flex items-center gap-2 px-3 py-2.5 rounded-mira border transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
           style={{
-            background: 'linear-gradient(135deg, rgba(0,212,255,0.12), rgba(0,119,255,0.06))',
-            borderColor: 'rgba(0,212,255,0.25)',
+            background: 'var(--accent-faint)',
+            borderColor: 'var(--accent-soft)',
             color: 'var(--text)',
           }}
         >

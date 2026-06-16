@@ -362,8 +362,8 @@ export function VoiceMode() {
               : "border-transparent text-white hover:scale-105"
           )}
           style={isListening ? { background: "var(--danger)" } : {
-            background: 'linear-gradient(135deg, #00D4FF, #0077FF)',
-            boxShadow: '0 0 40px rgba(0,212,255,0.4)',
+            background: 'var(--accent)',
+            boxShadow: `0 0 40px var(--accent-faint)`,
           }}
           title={isListening ? "Stop listening" : "Tap to speak"}
         >

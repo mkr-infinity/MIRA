@@ -2322,9 +2322,9 @@ function DataTab() {
                       height: `${Math.max(4, h)}%`,
                       background:
                         d.prompts > 0
-                          ? "linear-gradient(180deg, var(--accent) 0%, rgba(0,212,255,0.4) 100%)"
+                          ? "var(--accent)"
                           : "var(--border)",
-                      boxShadow: d.prompts > 0 ? "0 0 8px rgba(0,212,255,0.4)" : "none",
+                      boxShadow: d.prompts > 0 ? "0 0 8px var(--accent-faint)" : "none",
                     }}
                     title={`${d.label}: ${d.prompts} prompts, ${formatNum(d.tokens)} tokens`}
                   />
@@ -2366,7 +2366,7 @@ function DataTab() {
                         className="h-full rounded-full"
                         style={{
                           width: `${pct}%`,
-                          background: "linear-gradient(90deg, var(--accent), rgba(0,212,255,0.5))",
+                          background: "var(--accent)",
                         }}
                       />
                     </div>
