@@ -353,6 +353,7 @@ export function ChatView({
               <Plus size={18} />
             </button>
             <textarea
+              data-chat-input
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => {

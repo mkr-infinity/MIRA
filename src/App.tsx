@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useStore } from "./store";
 import { Sidebar } from "./components/Sidebar";
 import { ChatView } from "./components/ChatView";
@@ -51,6 +51,39 @@ export default function App() {
       localStorage.setItem(SIDEBAR_COLLAPSE_KEY, sidebarCollapsed ? "1" : "0");
     } catch {}
   }, [sidebarCollapsed]);
+
+  // Global keyboard shortcuts
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      const mod = e.ctrlKey || e.metaKey;
+      // Ctrl+N — new chat
+      if (mod && e.key === "n") {
+        e.preventDefault();
+        useStore.getState().newConversation();
+      }
+      // Ctrl+, — settings
+      if (mod && e.key === ",") {
+        e.preventDefault();
+        setSettingsTab("general");
+        setSettingsOpen(true);
+      }
+      // Escape — close modals/voice
+      if (e.key === "Escape") {
+        if (voiceMode) {
+          setVoiceMode(false);
+        } else if (settingsOpen) {
+          setSettingsOpen(false);
+        }
+      }
+      // Ctrl+/ — focus chat input
+      if (mod && e.key === "/") {
+        e.preventDefault();
+        document.querySelector<HTMLTextAreaElement>("[data-chat-input]")?.focus();
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [settingsOpen, voiceMode]);
 
   if (!ready) {
     return (
