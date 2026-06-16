@@ -116,17 +116,27 @@ export default function App() {
   }
 
   return (
-    <div className="h-full w-full flex mira-bg mira-text overflow-hidden">
-      <Sidebar
-        onOpenSettings={(tab) => {
-          setSettingsTab((tab as SettingsTab) || "general");
-          setSettingsOpen(true);
-        }}
-        onOpenVoiceMode={() => setVoiceMode(true)}
-        voiceMode={voiceMode}
-        collapsed={sidebarCollapsed}
-        onToggleCollapse={() => setSidebarCollapsed((v) => !v)}
-      />
+    <div className="h-full w-full flex mira-bg mira-text overflow-hidden relative">
+      {/* Mobile overlay backdrop when sidebar is open */}
+      {!sidebarCollapsed && (
+        <div
+          className="fixed inset-0 bg-black/50 z-30 md:hidden"
+          onClick={() => setSidebarCollapsed(true)}
+        />
+      )}
+      <div className={`${sidebarCollapsed ? "hidden md:block" : "fixed md:relative z-40 md:z-auto"} h-full`}>
+        <Sidebar
+          onOpenSettings={(tab) => {
+            setSettingsTab((tab as SettingsTab) || "general");
+            setSettingsOpen(true);
+            setSidebarCollapsed(true);
+          }}
+          onOpenVoiceMode={() => { setVoiceMode(true); setSidebarCollapsed(true); }}
+          voiceMode={voiceMode}
+          collapsed={sidebarCollapsed}
+          onToggleCollapse={() => setSidebarCollapsed((v) => !v)}
+        />
+      </div>
       <ChatView
         onOpenSettings={(tab) => {
           setSettingsTab((tab as SettingsTab) || "general");
