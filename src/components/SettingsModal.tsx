@@ -100,7 +100,12 @@ export function SettingsModal({
             transition={{ type: "spring", damping: 30, stiffness: 320 }}
             className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
           >
-            <div className="w-full max-w-4xl h-full max-h-[88vh] glass-strong rounded-2xl shadow-pop flex flex-col overflow-hidden">
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-label="Settings"
+              className="w-full max-w-4xl h-full max-h-[88vh] glass-strong rounded-2xl shadow-pop flex flex-col overflow-hidden"
+            >
               <SettingsContent tab={tab} setTab={setTab} onClose={onClose} />
             </div>
           </motion.div>
@@ -153,18 +158,20 @@ function SettingsContent({
         </button>
       </header>
       <div className="flex-1 flex min-h-0">
-        <nav className="w-52 border-r mira-border p-3 space-y-4 flex-shrink-0 overflow-y-auto">
+        <nav aria-label="Settings" className="w-52 border-r mira-border p-3 space-y-4 flex-shrink-0 overflow-y-auto">
           {Object.entries(grouped).map(([group, items]) => (
             <div key={group}>
               <div className="text-[9px] font-mono uppercase tracking-[0.25em] mira-muted px-2 mb-1.5">
                 {group}
               </div>
-              <div className="space-y-0.5">
+              <div role="tablist" aria-orientation="vertical" className="space-y-0.5">
                 {items.map((t) => {
                   const Icon = t.icon;
                   return (
                     <button
                       key={t.id}
+                      role="tab"
+                      aria-selected={tab === t.id}
                       onClick={() => setTab(t.id)}
                       className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-mira text-sm transition-all ${
                         tab === t.id

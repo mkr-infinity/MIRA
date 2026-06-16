@@ -305,7 +305,14 @@ export function Onboarding() {
     <div className="h-full w-full grid-bg mira-bg mira-text overflow-y-auto">
       <div className="min-h-full flex flex-col">
         {/* Progress */}
-        <div className="w-full h-1 mira-elevated">
+        <div
+          role="progressbar"
+          aria-valuenow={stepIdx + 1}
+          aria-valuemin={1}
+          aria-valuemax={STEPS.length}
+          aria-label={`Step ${stepIdx + 1} of ${STEPS.length}`}
+          className="w-full h-1 mira-elevated"
+        >
           <motion.div
             className="h-full mira-accent-bg"
             initial={{ width: 0 }}

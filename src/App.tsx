@@ -22,7 +22,7 @@ type SettingsTab =
   | "data"
   | "about";
 
-const SIDEBAR_COLLAPSE_KEY = "jarvis:sidebar-collapsed";
+const SIDEBAR_COLLAPSE_KEY = "mira:sidebar-collapsed";
 
 export default function App() {
   const { ready, settings, init, setVoiceMode, voiceMode } = useStore();

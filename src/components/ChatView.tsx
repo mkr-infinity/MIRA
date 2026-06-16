@@ -354,6 +354,7 @@ export function ChatView({
             </button>
             <textarea
               data-chat-input
+              aria-label="Message MIRA"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => {
