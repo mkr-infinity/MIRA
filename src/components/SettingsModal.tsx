@@ -33,6 +33,7 @@ import {
   Languages,
   Puzzle,
   Globe as GlobeIcon,
+  Download,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { ProviderId, ProviderConfig, Skill, Project, ProjectFile, PluginConfig } from "../types";
@@ -40,6 +41,7 @@ import { getAdapter } from "../lib/ai";
 import { findModelMeta, modelsForProvider, formatContextWindow, type ModelMeta } from "../lib/ai/models";
 import { detectAllLocalModels, type ProbeResult } from "../lib/localModels";
 import { parseSkillMarkdown, downloadSkillMarkdown } from "../lib/skills";
+import { SKILL_TEMPLATES, templateToSkill } from "../lib/skillTemplates";
 import { isTauri } from "../lib/platform";
 import { storage } from "../lib/storage";
 import { metaFor } from "../lib/ai/providerMeta";
@@ -1736,13 +1738,18 @@ function SkillsTab() {
         )}
       </div>
 
+      {filtered.length === 0 && !query && category === "all" && (
+        <TemplateGallery
+          onAdd={(t) => saveSkill(templateToSkill(t))}
+        />
+      )}
       {filtered.length === 0 ? (
         <div className="text-center py-10 text-sm mira-muted border border-dashed mira-border rounded-mira">
           {query
             ? `No skills match "${query}".`
             : category !== "all"
             ? `No skills in category "${category}".`
-            : "No skills yet. Hit New skill or import a folder of .md files."}
+            : "No skills yet. Start from a template above, hit New skill, or import a folder of .md files."}
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-3">
@@ -1767,8 +1774,18 @@ function SkillsTab() {
                       <h3 className="font-medium mira-text">{s.name}</h3>
                       {s.category && <Badge>{s.category}</Badge>}
                       {s.source === "imported" && <Badge>imported</Badge>}
+                      <span className="text-[9px] font-mono mira-muted">{s.prompt.length.toLocaleString()} chars</span>
                     </div>
                     <p className="text-xs mira-muted mt-0.5">{s.description}</p>
+                    {s.tags && s.tags.length > 0 && (
+                      <div className="flex gap-1 flex-wrap mt-1.5">
+                        {s.tags.map((t) => (
+                          <span key={t} className="px-1.5 py-0.5 rounded-pill text-[9px] font-mono mira-muted mira-elevated border mira-border">
+                            #{t}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   <Toggle checked={s.enabled} onChange={() => toggleSkill(s.id)} />
                 </div>
@@ -1778,6 +1795,28 @@ function SkillsTab() {
                     className="text-xs mira-muted hover:text-cyan-400 px-2 py-1"
                   >
                     Edit
+                  </button>
+                  <button
+                    onClick={() => {
+                      const copy: Skill = {
+                        ...s,
+                        id: `${s.id}-copy-${Math.random().toString(36).slice(2, 6)}`,
+                        name: `${s.name} (copy)`,
+                        source: "imported",
+                      };
+                      saveSkill(copy);
+                    }}
+                    className="text-xs mira-muted hover:text-cyan-400 px-2 py-1"
+                    title="Duplicate to iterate"
+                  >
+                    Duplicate
+                  </button>
+                  <button
+                    onClick={() => downloadSkillMarkdown(s)}
+                    className="text-xs mira-muted hover:text-cyan-400 px-2 py-1 flex items-center gap-1"
+                    title="Export as .md"
+                  >
+                    <Download size={12} /> Export
                   </button>
                   <button
                     onClick={() => removeSkill(s.id)}
@@ -3148,22 +3187,97 @@ function blankSkill(): Skill {
     enabled: true,
     icon: "sparkles",
     category: "custom",
+    tags: [],
   };
 }
 
-function SkillEditor({ skill, onClose, onSave }: { skill: Skill; onClose: () => void; onSave: (s: Skill) => void }) {
-  const [s, setS] = useState(skill);
+/** One-click starter skills, shown when the list is empty. */
+function TemplateGallery({ onAdd }: { onAdd: (t: (typeof SKILL_TEMPLATES)[number]) => void }) {
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm">
-      <div className="w-full max-w-lg p-6 rounded-2xl border mira-border mira-surface shadow-2xl">
-        <h2 className="font-display text-lg font-semibold mb-4">
-          {s.name ? `Edit ${s.name}` : "New skill"}
+    <div>
+      <h3 className="text-[10px] font-mono uppercase tracking-wider mira-muted mb-2">
+        Start from a template — one click to add
+      </h3>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        {SKILL_TEMPLATES.map((t) => {
+          const Icon = ICONS[t.icon] || Sparkles;
+          return (
+            <button
+              key={t.id}
+              onClick={() => onAdd(t)}
+              className="text-left p-3 rounded-mira border mira-border mira-elevated hover:mira-hover transition-all hover:scale-[1.01] group"
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center flex-shrink-0">
+                  <Icon size={14} className="text-cyan-400" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="text-sm font-medium mira-text truncate">{t.name}</div>
+                  <div className="text-[11px] mira-muted truncate">{t.description}</div>
+                </div>
+                <Plus size={13} className="mira-muted group-hover:text-cyan-400 flex-shrink-0" />
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function SkillEditor({ skill, onClose, onSave }: { skill: Skill; onClose: () => void; onSave: (s: Skill) => void }) {
+  const [s, setS] = useState<Skill>(skill);
+  const [tagsInput, setTagsInput] = useState((skill.tags || []).join(", "));
+  const isNew = !skill.name && !skill.prompt;
+  const valid = s.name.trim() && s.prompt.trim();
+
+  // Cmd/Ctrl+Enter saves, Escape cancels
+  useEffect(() => {
+    const h = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+      if (e.key === "Enter" && (e.ctrlKey || e.metaKey) && valid) onSave(s);
+    };
+    window.addEventListener("keydown", h);
+    return () => window.removeEventListener("keydown", h);
+  });
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm" onClick={onClose}>
+      <div
+        className="w-full max-w-2xl max-h-[85vh] overflow-y-auto p-6 rounded-2xl border mira-border mira-surface shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h2 className="font-display text-lg font-semibold mb-1">
+          {isNew ? "New skill" : `Edit ${s.name || "skill"}`}
         </h2>
-        <div className="space-y-3">
-          <Field label="Name">
+        <p className="text-xs mira-muted mb-4">
+          Enabled skills are injected into every conversation as behaviour instructions.
+        </p>
+
+        {isNew && (
+          <Field label="Start from a template (optional)">
+            <select
+              value=""
+              onChange={(e) => {
+                const t = SKILL_TEMPLATES.find((x) => x.id === e.target.value);
+                if (t) setS({ ...templateToSkill(t), id: s.id });
+              }}
+              className="w-full px-3 py-2 rounded-lg mira-elevated border mira-border mira-text focus:outline-none focus:border-cyan-500/50"
+            >
+              <option value="">— Blank skill —</option>
+              {SKILL_TEMPLATES.map((t) => (
+                <option key={t.id} value={t.id}>{t.name} · {t.category}</option>
+              ))}
+            </select>
+          </Field>
+        )}
+
+        <div className="space-y-3 mt-3">
+          <Field label="Name *">
             <input
               value={s.name}
               onChange={(e) => setS({ ...s, name: e.target.value })}
+              placeholder="e.g. Daily Standup Formatter"
               className="w-full px-3 py-2 rounded-lg mira-elevated border mira-border mira-text focus:outline-none focus:border-cyan-500/50"
             />
           </Field>
@@ -3171,48 +3285,94 @@ function SkillEditor({ skill, onClose, onSave }: { skill: Skill; onClose: () => 
             <input
               value={s.description}
               onChange={(e) => setS({ ...s, description: e.target.value })}
+              placeholder="One line shown on the card"
               className="w-full px-3 py-2 rounded-lg mira-elevated border mira-border mira-text focus:outline-none focus:border-cyan-500/50"
             />
           </Field>
-          <Field label="Prompt">
+          <Field label={`Prompt * — ${s.prompt.length.toLocaleString()} chars (injected verbatim)`}>
             <textarea
               value={s.prompt}
               onChange={(e) => setS({ ...s, prompt: e.target.value })}
-              rows={4}
-              className="w-full px-3 py-2 rounded-lg mira-elevated border mira-border mira-text focus:outline-none focus:border-cyan-500/50 resize-none"
+              rows={10}
+              placeholder={"What the model must do when this skill is active…"}
+              className="w-full px-3 py-2 rounded-lg mira-elevated border mira-border mira-text focus:outline-none focus:border-cyan-500/50 resize-y font-mono text-[13px] leading-relaxed"
             />
           </Field>
-          <div className="grid grid-cols-2 gap-2">
-            <Field label="Icon">
-              <select
-                value={s.icon}
-                onChange={(e) => setS({ ...s, icon: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg mira-elevated border mira-border mira-text focus:outline-none focus:border-cyan-500/50"
-              >
-                {Object.keys(ICONS).map((k) => (
-                  <option key={k} value={k}>{k}</option>
-                ))}
-              </select>
-            </Field>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <Field label="Category">
               <input
                 value={s.category || ""}
                 onChange={(e) => setS({ ...s, category: e.target.value })}
+                placeholder="custom"
+                className="w-full px-3 py-2 rounded-lg mira-elevated border mira-border mira-text focus:outline-none focus:border-cyan-500/50"
+              />
+            </Field>
+            <Field label="Tags (comma-separated)">
+              <input
+                value={tagsInput}
+                onChange={(e) => {
+                  setTagsInput(e.target.value);
+                  setS({
+                    ...s,
+                    tags: e.target.value.split(",").map((t) => t.trim().toLowerCase()).filter(Boolean).slice(0, 8),
+                  });
+                }}
+                placeholder="code, review"
                 className="w-full px-3 py-2 rounded-lg mira-elevated border mira-border mira-text focus:outline-none focus:border-cyan-500/50"
               />
             </Field>
           </div>
+          <Field label="Icon">
+            <div className="flex gap-1.5 flex-wrap">
+              {Object.keys(ICONS).map((k) => {
+                const Icon = ICONS[k];
+                const active = (s.icon || "sparkles") === k;
+                return (
+                  <button
+                    key={k}
+                    onClick={() => setS({ ...s, icon: k })}
+                    title={k}
+                    aria-label={`Icon ${k}`}
+                    className={cx(
+                      "w-9 h-9 rounded-lg border flex items-center justify-center transition-all",
+                      active
+                        ? "border-cyan-500/60 bg-cyan-500/15 text-cyan-400"
+                        : "mira-border mira-muted hover:mira-text hover:mira-hover"
+                    )}
+                  >
+                    <Icon size={15} />
+                  </button>
+                );
+              })}
+            </div>
+          </Field>
+
+          {s.prompt.trim() && (
+            <div className="rounded-mira border mira-border overflow-hidden">
+              <div className="px-3 py-1.5 mira-elevated border-b mira-border text-[10px] font-mono uppercase tracking-wider mira-muted">
+                What the model receives
+              </div>
+              <pre className="px-3 py-2 text-[11px] font-mono mira-muted whitespace-pre-wrap max-h-32 overflow-y-auto">{`# Active skills
+- ${s.name}: ${s.description || "(no description)"}
+${s.prompt}`}</pre>
+            </div>
+          )}
         </div>
-        <div className="flex justify-end gap-2 mt-6">
-          <button onClick={onClose} className="px-4 py-2 rounded-lg text-sm mira-muted hover:mira-hover">
-            Cancel
-          </button>
-          <button
-            onClick={() => onSave(s)}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-cyan-500 text-white text-sm font-medium hover:bg-cyan-400"
-          >
-            <Save size={14} /> Save
-          </button>
+
+        <div className="flex justify-between items-center gap-2 mt-6">
+          <span className="text-[10px] font-mono mira-muted">Esc to cancel · Ctrl+Enter to save</span>
+          <div className="flex gap-2">
+            <button onClick={onClose} className="px-4 py-2 rounded-lg text-sm mira-muted hover:mira-hover">
+              Cancel
+            </button>
+            <button
+              onClick={() => valid && onSave({ ...s, tags: (tagsInput.split(",").map((t) => t.trim().toLowerCase()).filter(Boolean)).slice(0, 8) })}
+              disabled={!valid}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-cyan-500 text-white text-sm font-medium hover:bg-cyan-400 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <Save size={14} /> Save
+            </button>
+          </div>
         </div>
       </div>
     </div>
