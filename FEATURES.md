@@ -32,7 +32,7 @@
 | **Projects** | Group conversations with custom instructions |
 | **File Attachments** | Attach reference files per project |
 | **Long-Term Memory** | Facts persist across sessions |
-| **Skills** | Import `.md` files as reusable prompt modules |
+| **Skills** | Author in-app (with 8 one-click starter templates), import `.md` folders (front-matter or header style), tag, duplicate, and export back to `.md` |
 
 <br/>
 
