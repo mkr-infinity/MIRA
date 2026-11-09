@@ -157,15 +157,6 @@ export type PersonalityId =
   | "therapist"
   | "custom";
 
-export interface PluginConfig {
-  id: string;
-  name: string;
-  enabled: boolean;
-  url: string;
-  description: string;
-  version: string;
-}
-
 export interface AppSettings {
   theme: "dark" | "light" | "cyberpunk" | "sakura" | "nordic" | "neon" | "earth" | "anime";
   voiceEnabled: boolean;
@@ -215,7 +206,6 @@ export interface AppSettings {
   // Desktop notifications on AI response
   notificationsEnabled?: boolean;
   // Plugins
-  plugins?: PluginConfig[];
   // Image generation
   imageGenEnabled?: boolean;
   imageGenProvider?: ProviderId;

@@ -291,7 +291,6 @@ export function defaultSettings(): AppSettings {
     customSystemPrompt: "",
     customCSS: "",
     notificationsEnabled: true,
-    plugins: [],
     imageGenEnabled: false,
     imageGenProvider: undefined,
     imageGenModel: undefined,
