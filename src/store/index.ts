@@ -341,27 +341,25 @@ export const useStore = create<State & Actions>((set, get) => ({
             ...c,
             messages: [...c.messages, userMsg, assistantMsg],
             updatedAt: Date.now(),
-            title: c.messages.length === 0 ? text.slice(0, 40) : c.title,
+            title: c.messages.length === 0 ? text.slice(0, 48) : c.title,
           }
         : c
     );
     set({ conversations: updated, isProcessing: true });
     await storage.saveConversations(updated);
 
-    if (conv.messages.length === 0) {
-      get().renameConversation(conv.id, text.slice(0, 48));
-    }
-
     tts.stop();
     set({ isSpeaking: false });
 
     const ac = new AbortController();
     abortControllers.set(conv.id, ac);
+    let timeoutFired = false;
 
     // Hard timeout: if the entire request takes > 120s, abort it
     const TIMEOUT_MS = 120_000;
     const timeoutId = setTimeout(() => {
       if (!ac.signal.aborted) {
+        timeoutFired = true;
         devlog("sendMessage", `Request timed out after ${TIMEOUT_MS}ms, aborting`);
         ac.abort();
       }
@@ -383,6 +381,8 @@ export const useStore = create<State & Actions>((set, get) => ({
         streaming: false,
         error: "no_provider",
       });
+      clearTimeout(timeoutId);
+      abortControllers.delete(conv.id);
       set({ isProcessing: false });
       return;
     }
@@ -392,6 +392,8 @@ export const useStore = create<State & Actions>((set, get) => ({
         streaming: false,
         error: "missing_key",
       });
+      clearTimeout(timeoutId);
+      abortControllers.delete(conv.id);
       set({ isProcessing: false });
       return;
     }
@@ -401,6 +403,8 @@ export const useStore = create<State & Actions>((set, get) => ({
         streaming: false,
         error: "not_signed_in",
       });
+      clearTimeout(timeoutId);
+      abortControllers.delete(conv.id);
       set({ isProcessing: false });
       return;
     }
@@ -478,6 +482,29 @@ export const useStore = create<State & Actions>((set, get) => ({
     let lastUsage: { promptTokens: number; completionTokens: number; totalTokens: number } | undefined;
     let lastLatencyMs = 0;
 
+    // UI patches are batched to one per animation frame instead of one per
+    // SSE token. Token bursts often arrive faster than 60fps; without this
+    // every token clones the whole conversations array and re-renders the
+    // chat — noticeable jank on low-end machines with long histories.
+    let uiPatchRaf: number | null = null;
+    const flushUiPatch = () => {
+      uiPatchRaf = null;
+      get().patchMessage(conv!.id, assistantMsg.id, {
+        content: accumulated,
+        reasoning: accumulatedReasoning,
+      });
+    };
+    const scheduleUiPatch = () => {
+      if (uiPatchRaf !== null) return;
+      uiPatchRaf = requestAnimationFrame(flushUiPatch);
+    };
+    const cancelUiPatch = () => {
+      if (uiPatchRaf !== null) {
+        cancelAnimationFrame(uiPatchRaf);
+        uiPatchRaf = null;
+      }
+    };
+
     const attempt = async (prov: ProviderConfig, model: string) => {
       const a = getAdapter(prov.id);
       const t0 = performance.now();
@@ -496,10 +523,11 @@ export const useStore = create<State & Actions>((set, get) => ({
         (chunk) => {
           if (chunk.content) accumulated += chunk.content;
           if (chunk.reasoning) accumulatedReasoning += chunk.reasoning;
-          get().patchMessage(conv!.id, assistantMsg.id, { content: accumulated, reasoning: accumulatedReasoning });
+          scheduleUiPatch();
         },
         ac.signal
       );
+      cancelUiPatch();
       lastLatencyMs = Math.round(performance.now() - t0);
       if (res.usage) lastUsage = res.usage;
       return res;
@@ -516,6 +544,11 @@ export const useStore = create<State & Actions>((set, get) => ({
     let lastCls: ReturnType<typeof classifyError> | null = null;
     let fellBack = false;
     let firstAttempt = true;
+    // Set when the user stops generation or the hard timeout fires — the
+    // chain walk and error classification are then skipped entirely and
+    // whatever streamed so far is kept as-is.
+    let stopped = false;
+    let timedOut = false;
 
     // Outer loop: try the current target, then walk the cycle.
     const tryOnce = async (prov: ProviderConfig, model: string) => {
@@ -530,24 +563,32 @@ export const useStore = create<State & Actions>((set, get) => ({
       usedProviderId = conv.provider;
       usedModel = conv.model;
     } catch (e: any) {
-      firstError = e;
-      firstCls = classifyError(e, provider.name);
-      lastError = e;
-      lastCls = firstCls;
-      firstAttempt = false;
+      cancelUiPatch();
+      if (ac.signal.aborted) {
+        stopped = true;
+        timedOut = timeoutFired;
+      } else {
+        firstError = e;
+        firstCls = classifyError(e, provider.name);
+        lastError = e;
+        lastCls = firstCls;
+        firstAttempt = false;
+      }
     }
 
     // Walk the cycle chain if we haven't already won.
-    if (!firstAttempt) {
+    if (!firstAttempt && !stopped) {
       for (const step of cycleChain) {
         const key = `${step.id}::${step.model}`;
         if (tried.has(key)) continue;
+        if (ac.signal.aborted) { stopped = true; break; }
         tried.add(key);
         // Surface the switch to the user
         const label = step.id === conv.provider
           ? `${provider.name} → ${step.model}`
           : `${step.provider.name} (${step.model})`;
         accumulated = "";
+        cancelUiPatch();
         get().patchMessage(conv!.id, assistantMsg.id, {
           content: `*${firstCls?.reason ? `${firstCls.reason} on ${provider.name} — ` : ""}Retrying with ${label}…*\n\n`,
           streaming: true,
@@ -567,11 +608,33 @@ export const useStore = create<State & Actions>((set, get) => ({
           fellBack = true;
           break;
         } catch (inner: any) {
+          cancelUiPatch();
+          if (ac.signal.aborted) { stopped = true; break; }
           lastError = inner;
           lastCls = classifyError(inner, step.provider.name);
           // continue to the next step
         }
       }
+    }
+
+    // User stopped generation (or the request timed out): keep whatever
+    // streamed so far, finalise quietly — no fake "network error".
+    if (stopped) {
+      cancelUiPatch();
+      get().patchMessage(conv!.id, assistantMsg.id, {
+        content: accumulated
+          ? accumulated
+          : `*${timedOut ? "Generation timed out." : "Generation stopped."}*`,
+        reasoning: accumulatedReasoning || undefined,
+        streaming: false,
+      });
+      clearTimeout(timeoutId);
+      abortControllers.delete(conv.id);
+      set({ isProcessing: false });
+      get().log("info", "sendMessage", `Turn ${timedOut ? "timed out" : "stopped"} on ${usedProvider.name}/${usedModel}`, {
+        chars: accumulated.length,
+      });
+      return;
     }
 
     // If nothing in the chain worked, surface the most recent error
@@ -697,7 +760,7 @@ export const useStore = create<State & Actions>((set, get) => ({
     set({ conversations: updated });
     await storage.saveConversations(updated);
     devlog("sendMessage", `Regenerating: "${lastUser.content.slice(0, 60)}…"`);
-    await get().sendMessage(lastUser.content);
+    await get().sendMessage(lastUser.content, lastUser.attachments);
   },
 
   setListening(b) {

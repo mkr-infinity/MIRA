@@ -58,20 +58,20 @@ export function Sidebar({
   collapsed,
   onToggleCollapse,
 }: Props) {
-  const {
-    conversations,
-    activeId,
-    newConversation,
-    setActive,
-    deleteConversation,
-    settings,
-    projects,
-    activeProjectId,
-    setActiveProject,
-    setTheme,
-    createProject,
-    deleteProject,
-  } = useStore();
+  // Narrowed selectors — the sidebar is always mounted, so a whole-store
+  // subscription would re-render it on every log entry and streaming token.
+  const conversations = useStore((s) => s.conversations);
+  const activeId = useStore((s) => s.activeId);
+  const settings = useStore((s) => s.settings);
+  const projects = useStore((s) => s.projects);
+  const activeProjectId = useStore((s) => s.activeProjectId);
+  const newConversation = useStore((s) => s.newConversation);
+  const setActive = useStore((s) => s.setActive);
+  const deleteConversation = useStore((s) => s.deleteConversation);
+  const setActiveProject = useStore((s) => s.setActiveProject);
+  const setTheme = useStore((s) => s.setTheme);
+  const createProject = useStore((s) => s.createProject);
+  const deleteProject = useStore((s) => s.deleteProject);
 
   const [query, setQuery] = useState("");
   const [userMenuOpen, setUserMenuOpen] = useState(false);
