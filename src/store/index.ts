@@ -117,6 +117,8 @@ interface Actions {
   clearLogs: () => void;
   clearError: (id: string) => void;
   patchMessage: (convId: string, msgId: string, patch: Partial<Message>) => void;
+  /** Append a local assistant-style note to the active conversation without an AI turn. */
+  addLocalNote: (content: string) => void;
   searchMessageQuery: string;
   searchMessageResults: string[];
   setSearchMessageQuery: (q: string) => void;
@@ -1118,6 +1120,23 @@ export const useStore = create<State & Actions>((set, get) => ({
       .map((m) => m.id);
     set({ searchMessageResults: results });
     devlog("search", `In-conversation search "${searchMessageQuery}": ${results.length} hits`);
+  },
+
+  addLocalNote(content) {
+    const { conversations, activeId } = get();
+    if (!activeId) return;
+    const note: Message = {
+      id: uid(),
+      role: "assistant",
+      content,
+      timestamp: Date.now(),
+    };
+    const updated = conversations.map((c) =>
+      c.id === activeId ? { ...c, messages: [...c.messages, note], updatedAt: Date.now() } : c
+    );
+    set({ conversations: updated });
+    scheduleSave(updated);
+    devlog("commands", `Local note appended (${content.length} chars)`);
   },
 
   patchMessage(convId, msgId, patch) {

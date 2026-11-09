@@ -34,6 +34,9 @@ import { tts } from "../lib/voice/tts";
 import { MessageBubble } from "./MessageBubble";
 import { motion, AnimatePresence } from "framer-motion";
 import { isTauri } from "../lib/platform";
+import { desktop } from "../lib/desktop";
+import type { ProviderId } from "../types";
+import { THEME_IDS, type ThemeId } from "../lib/theme";
 import { metaFor } from "../lib/ai/providerMeta";
 import { modelsForProvider } from "../lib/ai/models";
 import { THEMES } from "../lib/theme";
@@ -74,6 +77,10 @@ export function ChatView({
   const setActiveProject = useStore((s) => s.setActiveProject);
   const setSearchMessageQuery = useStore((s) => s.setSearchMessageQuery);
   const setProviderConfig = useStore((s) => s.setProviderConfig);
+  const customCommands = useStore((s) => s.customCommands);
+  const addLocalNote = useStore((s) => s.addLocalNote);
+  const updateSettings = useStore((s) => s.updateSettings);
+  const setActiveProvider = useStore((s) => s.setActiveProvider);
   const [input, setInput] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -239,10 +246,87 @@ export function ChatView({
     return () => window.removeEventListener("keydown", handler);
   }, [onOpenVoiceMode, searchOpen]);
 
+  /** Execute a user-defined slash command. Returns true when handled. */
+  function tryCustomCommand(msg: string): boolean {
+    if (!msg.startsWith("/")) return false;
+    const [triggerRaw, ...rest] = msg.slice(1).split(" ");
+    const trigger = triggerRaw.toLowerCase();
+    const arg = rest.join(" ").trim();
+    const cmd = customCommands.find((c) => c.enabled && c.trigger.toLowerCase() === trigger);
+    if (!cmd) return false;
+    const value = arg || cmd.value;
+    const run = async () => {
+      try {
+        switch (cmd.action) {
+          case "set_temperature": {
+            const t = parseFloat(value);
+            if (Number.isNaN(t) || t < 0 || t > 2) return addLocalNote(`Invalid temperature: ${value}`);
+            await updateSettings({ temperature: t });
+            addLocalNote(`Temperature set to ${t}.`);
+            break;
+          }
+          case "set_theme": {
+            if (!THEME_IDS.includes(value as ThemeId)) return addLocalNote(`Unknown theme "${value}" — themes: ${THEME_IDS.join(", ")}`);
+            await useStore.getState().setTheme(value as ThemeId);
+            addLocalNote(`Theme switched to ${value}.`);
+            break;
+          }
+          case "set_concise": {
+            const on = value === "" ? true : /^(on|true|yes|1)$/i.test(value);
+            await updateSettings({ personality: on ? "concise" : "default" });
+            addLocalNote(on ? "Concise personality on." : "Default personality restored.");
+            break;
+          }
+          case "set_voice": {
+            const on = /^(on|true|yes|1)$/i.test(value || "on");
+            await updateSettings({ voiceAutoSpeak: on });
+            addLocalNote(`Auto-speak ${on ? "enabled" : "disabled"}.`);
+            break;
+          }
+          case "switch_provider": {
+            const target = settings.providers.find((p) => p.id === value || p.name.toLowerCase() === value.toLowerCase());
+            if (!target) return addLocalNote(`Unknown provider "${value}" — available: ${settings.providers.map((p) => p.id).join(", ")}`);
+            await setActiveProvider(target.id as ProviderId);
+            addLocalNote(`Switched to ${target.name}.`);
+            break;
+          }
+          case "run_shell": {
+            const r = await desktop.runCommand(value);
+            addLocalNote(r.ok ? `$ ${value}\n\n\`\`\`\n${(r.message || "(no output)").slice(0, 2000)}\n\`\`\`` : `$ ${value}\n\n✗ ${r.message}`);
+            break;
+          }
+          case "set_focus": {
+            document.querySelector<HTMLTextAreaElement>("[data-chat-input]")?.focus();
+            break;
+          }
+          case "remind": {
+            const m = /^(\d+)\s*([mhd])\s+(.+)$/i.exec(value);
+            if (!m) return addLocalNote(`Reminder format: /${cmd.trigger} 10m take the pills`);
+            const mult = { m: 60_000, h: 3_600_000, d: 86_400_000 }[m[2].toLowerCase() as "m" | "h" | "d"];
+            const what = m[3];
+            addLocalNote(`Reminder set: I'll ping you in ${m[1]}${m[2]} — "${what}".`);
+            setTimeout(() => {
+              desktop.notify("MIRA reminder", what).catch(() => {});
+            }, Number(m[1]) * mult);
+            break;
+          }
+        }
+      } catch (e: any) {
+        addLocalNote(`Command failed: ${e?.message || e}`);
+      }
+    };
+    void run();
+    return true;
+  }
+
   function handleSend(text?: string) {
     let msg = (text ?? input).trim();
     if (!msg && pendingImages.length === 0) return;
     if (isProcessing) return;
+    if (tryCustomCommand(msg)) {
+      setInput("");
+      return;
+    }
     // Append image names to the message text
     if (pendingImages.length > 0) {
       const imageRefs = pendingImages.map((img) => `[Image: ${img.name}]`).join("\n");

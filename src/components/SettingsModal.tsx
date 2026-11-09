@@ -136,7 +136,7 @@ function SettingsContent({
     { id: "memory", label: "Memory", icon: Brain, group: "Workspace" },
     { id: "projects", label: "Projects", icon: Folder, group: "Workspace" },
     { id: "data", label: "Data", icon: Folder, group: "System" },
-    { id: "custom", label: "Custom CSS", icon: Code, group: "System" },
+    { id: "custom", label: "Customize", icon: Code, group: "System" },
     { id: "plugins", label: "Plugins", icon: Puzzle, group: "System" },
     { id: "logs", label: "Logs", icon: FileText, group: "System" },
     { id: "about", label: "About", icon: Coffee, group: "System" },
@@ -205,7 +205,12 @@ function SettingsContent({
             {tab === "projects" && <ProjectsTab />}
             {tab === "logs" && <LogsTab />}
             {tab === "data" && <DataTab />}
-            {tab === "custom" && <CustomCSSTab />}
+            {tab === "custom" && (
+              <>
+                <CustomCSSTab />
+                <CustomCommandsSection />
+              </>
+            )}
             {tab === "plugins" && <PluginsTab />}
             {tab === "about" && <AboutView />}
           </div>
@@ -2374,6 +2379,109 @@ function PluginsTab() {
               </button>
             </div>
           </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+const COMMAND_ACTIONS = [
+  { id: "set_temperature", label: "Set temperature", hint: "value = 0–2 (e.g. 0.7)" },
+  { id: "set_theme", label: "Switch theme", hint: "value = theme id (dark, light, cyberpunk, sakura, nordic, neon, earth, anime)" },
+  { id: "set_concise", label: "Toggle concise mode", hint: "no value needed (on/off optional)" },
+  { id: "set_voice", label: "Toggle auto-speak", hint: "on / off" },
+  { id: "switch_provider", label: "Switch provider", hint: "value = provider id (openai, groq, ollama…)" },
+  { id: "run_shell", label: "Run shell command", hint: "value = shell command to run" },
+  { id: "set_focus", label: "Focus chat input", hint: "no value needed" },
+  { id: "remind", label: "Set a reminder", hint: "value = 10m take the pills (10m/2h/1d + message)" },
+] as const;
+
+function CustomCommandsSection() {
+  const { customCommands, addCustomCommand, updateCustomCommand, removeCustomCommand } = useStore();
+  const [trigger, setTrigger] = useState("");
+  const [label, setLabel] = useState("");
+  const [action, setAction] = useState<string>("set_theme");
+  const [value, setValue] = useState("");
+
+  const add = async () => {
+    const t = trigger.trim().replace(/^\/+/, "").toLowerCase();
+    if (!t) return;
+    await addCustomCommand({ trigger: t, label: label.trim() || t, action: action as any, value: value.trim(), enabled: true });
+    setTrigger("");
+    setLabel("");
+    setValue("");
+  };
+
+  return (
+    <div className="space-y-4 mt-10">
+      <div>
+        <h2 className="font-display text-2xl font-semibold mb-1">Custom commands</h2>
+        <p className="text-sm mira-muted">
+          Type <span className="font-mono mira-text">/trigger</span> in the chat input to run your own
+          shortcuts locally — no AI round-trip. Empty value uses the stored one; trailing text overrides it.
+        </p>
+      </div>
+
+      <Card>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <Field label="Trigger (without /)">
+            <input value={trigger} onChange={(e) => setTrigger(e.target.value)} placeholder="dark" className="mira-input font-mono text-sm" />
+          </Field>
+          <Field label="Label (optional)">
+            <input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Switch to dark theme" className="mira-input text-sm" />
+          </Field>
+          <Field label="Action">
+            <select value={action} onChange={(e) => setAction(e.target.value)} className="mira-input text-sm">
+              {COMMAND_ACTIONS.map((a) => (
+                <option key={a.id} value={a.id}>{a.label}</option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Value">
+            <input value={value} onChange={(e) => setValue(e.target.value)} placeholder={COMMAND_ACTIONS.find((a) => a.id === action)?.hint} className="mira-input font-mono text-sm" />
+          </Field>
+        </div>
+        <p className="text-[11px] font-mono mira-muted mt-2">
+          {COMMAND_ACTIONS.find((a) => a.id === action)?.hint}
+        </p>
+        <div className="mt-3 flex justify-end">
+          <button
+            onClick={add}
+            disabled={!trigger.trim()}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-mira text-sm mira-accent-soft mira-accent border disabled:opacity-40"
+            style={{ borderColor: "var(--accent)" }}
+          >
+            <Plus size={13} />
+            Add command
+          </button>
+        </div>
+      </Card>
+
+      {customCommands.length > 0 && (
+        <div className="space-y-2">
+          {customCommands.map((c) => (
+            <div key={c.id} className="flex items-center gap-3 px-3 py-2.5 rounded-mira border mira-border mira-elevated">
+              <button
+                onClick={() => updateCustomCommand(c.id, { enabled: !c.enabled })}
+                className={`px-1.5 py-0.5 rounded font-mono text-[10px] border transition-opacity ${c.enabled ? "mira-accent-soft mira-accent" : "mira-muted opacity-60"}`}
+                aria-label={c.enabled ? "Disable command" : "Enable command"}
+              >
+                {c.enabled ? "on" : "off"}
+              </button>
+              <span className="font-mono text-sm mira-accent">/{c.trigger}</span>
+              <span className="text-xs mira-muted truncate flex-1">
+                {c.label} · {COMMAND_ACTIONS.find((a) => a.id === c.action)?.label}
+                {c.value ? ` · "${c.value.slice(0, 30)}"` : ""}
+              </span>
+              <button
+                onClick={() => removeCustomCommand(c.id)}
+                className="p-1.5 rounded-md mira-muted hover:text-red-400 transition-colors"
+                aria-label={`Delete command ${c.trigger}`}
+              >
+                <Trash2 size={13} />
+              </button>
+            </div>
+          ))}
         </div>
       )}
     </div>
