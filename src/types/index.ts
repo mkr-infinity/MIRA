@@ -222,12 +222,22 @@ export interface AppSettings {
   syncKey?: string;
 }
 
+/**
+ * Multimodal content part. A chat message's content is a plain string when
+ * text-only, or an array of parts when the user attached images. Adapters
+ * convert these into each provider's native shape.
+ */
+export type MessageContentPart =
+  | { type: "text"; text: string }
+  /** A `data:` URL (e.g. `data:image/png;base64,...`). */
+  | { type: "image"; dataUrl: string };
+
 export interface ChatRequest {
   provider: ProviderId;
   model: string;
   messages: Array<{
     role: "user" | "assistant" | "system" | "tool";
-    content: string;
+    content: string | MessageContentPart[];
     toolCallId?: string;
     toolCalls?: ToolCall[];
   }>;

@@ -1,6 +1,7 @@
 import type { ProviderAdapter, ChatRequest, ChatResponse, ProviderConfig } from "./base";
 import type { ToolCall } from "../../types";
 import { logProviderStart, logProviderDone, logProviderError } from "./devlog";
+import { toOpenAiMessages, contentLength } from "./base";
 
 const OPENAI_DEFAULT = "https://api.openai.com/v1";
 
@@ -25,7 +26,7 @@ export const openaiAdapter: ProviderAdapter = {
     const base = cfg.baseUrl || OPENAI_DEFAULT;
     const body: Record<string, unknown> = {
       model: req.model || cfg.model,
-      messages: req.messages,
+      messages: toOpenAiMessages(req.messages),
       temperature: req.temperature,
       max_tokens: req.maxTokens,
       stream: false,
@@ -67,13 +68,13 @@ export const openaiAdapter: ProviderAdapter = {
   async streamChat(req, cfg, onChunk, signal) {
     const t0 = performance.now();
     const base = cfg.baseUrl || OPENAI_DEFAULT;
-    const totalChars = (req.messages || []).reduce((s, m) => s + (m.content?.length || 0), 0);
+    const totalChars = (req.messages || []).reduce((s, m) => s + contentLength(m.content), 0);
     logProviderStart("openai", req.model || cfg.model, (req.messages || []).length, totalChars);
     let res: Response;
     try {
       const body: Record<string, unknown> = {
         model: req.model || cfg.model,
-        messages: req.messages,
+        messages: toOpenAiMessages(req.messages),
         temperature: req.temperature,
         max_tokens: req.maxTokens,
         stream: true,

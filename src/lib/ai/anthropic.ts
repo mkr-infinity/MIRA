@@ -1,7 +1,32 @@
 import type { ProviderAdapter, ChatRequest, ChatResponse, ProviderConfig } from "./base";
+import { parseDataUrl, contentLength, type MessageContentPart } from "./base";
 import { logProviderStart, logProviderDone, logProviderError } from "./devlog";
 
 const ANTHROPIC_DEFAULT = "https://api.anthropic.com/v1";
+
+/**
+ * Anthropic multimodal messages: image parts become
+ * `{type:"image",source:{type:"base64",...}}` content blocks.
+ */
+function toAnthropicMessages(
+  messages: ChatRequest["messages"]
+): Array<{ role: string; content: unknown }> {
+  return messages
+    .filter((m) => m.role !== "system")
+    .map((m) => {
+      if (typeof m.content === "string") return { role: m.role, content: m.content };
+      const blocks: Array<Record<string, unknown>> = [];
+      for (const p of m.content) {
+        if (p.type === "text") {
+          blocks.push({ type: "text", text: p.text });
+        } else {
+          const d = parseDataUrl(p.dataUrl);
+          if (d) blocks.push({ type: "image", source: { type: "base64", media_type: d.mime, data: d.data } });
+        }
+      }
+      return { role: m.role, content: blocks.length ? blocks : [{ type: "text", text: "(image unavailable)" }] };
+    });
+}
 
 export const anthropicAdapter: ProviderAdapter = {
   id: "anthropic",
@@ -9,9 +34,7 @@ export const anthropicAdapter: ProviderAdapter = {
   async chat(req, cfg) {
     const base = cfg.baseUrl || ANTHROPIC_DEFAULT;
     const systemMessages = req.messages.filter((m) => m.role === "system");
-    const conversationMessages = req.messages
-      .filter((m) => m.role !== "system")
-      .map((m) => ({ role: m.role, content: m.content }));
+    const conversationMessages = toAnthropicMessages(req.messages);
 
     const res = await fetch(`${base}/messages`, {
       method: "POST",
@@ -48,12 +71,10 @@ export const anthropicAdapter: ProviderAdapter = {
   async streamChat(req, cfg, onChunk, signal) {
     const t0 = performance.now();
     const base = cfg.baseUrl || ANTHROPIC_DEFAULT;
-    const totalChars = (req.messages || []).reduce((s, m) => s + (m.content?.length || 0), 0);
+    const totalChars = (req.messages || []).reduce((s, m) => s + contentLength(m.content), 0);
     logProviderStart("anthropic", req.model || cfg.model, (req.messages || []).length, totalChars);
     const systemMessages = req.messages.filter((m) => m.role === "system");
-    const conversationMessages = req.messages
-      .filter((m) => m.role !== "system")
-      .map((m) => ({ role: m.role, content: m.content }));
+    const conversationMessages = toAnthropicMessages(req.messages);
 
     const res = await fetch(`${base}/messages`, {
       method: "POST",

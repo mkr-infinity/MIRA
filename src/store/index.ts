@@ -424,14 +424,27 @@ export const useStore = create<State & Actions>((set, get) => ({
       desktopControlEnabled: settings.desktopControlEnabled,
     });
 
+    // Multimodal: user messages with image attachments become content parts
+    // so vision-capable models actually receive the images, in both replayed
+    // history and the fresh user message.
+    const toApiContent = (m: { content: string; attachments?: Message["attachments"] }) => {
+      const images = (m.attachments || []).filter(
+        (a) => a.type.startsWith("image/") && a.content
+      );
+      if (!images.length) return m.content;
+      return [
+        { type: "text" as const, text: m.content },
+        ...images.map((a) => ({ type: "image" as const, dataUrl: a.content! })),
+      ];
+    };
     const apiMessages = [
       { role: "system" as const, content: sysPrompt },
       ...conv.messages.map((m) => ({
         role: m.role as "user" | "assistant" | "system" | "tool",
-        content: m.content,
+        content: toApiContent(m),
         toolCallId: m.toolResults?.[0]?.toolCallId,
       })),
-      { role: "user" as const, content: text },
+      { role: "user" as const, content: toApiContent({ content: text, attachments }) },
     ];
 
     const adapter = getAdapter(conv.provider);
