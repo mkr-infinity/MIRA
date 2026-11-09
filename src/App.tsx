@@ -1,14 +1,24 @@
-import { useEffect, useState, useCallback } from "react";
+import { lazy, Suspense, useEffect, useState, useCallback } from "react";
 import { useStore } from "./store";
 import { Sidebar } from "./components/Sidebar";
 import { ChatView } from "./components/ChatView";
-import { SettingsModal } from "./components/SettingsModal";
-import { Onboarding } from "./components/Onboarding";
-import { VoiceMode } from "./components/VoiceMode";
 import { Loader2 } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import { installConsoleBridge } from "./lib/log";
 import { applyTheme } from "./lib/theme";
+
+// Heavy surfaces are code-split: the startup path only ships Sidebar +
+// ChatView. SettingsModal (~3.1k lines incl. AboutView) streams in
+// parallel at boot; VoiceMode and Onboarding load on first use.
+const SettingsModal = lazy(() =>
+  import("./components/SettingsModal").then((m) => ({ default: m.SettingsModal }))
+);
+const Onboarding = lazy(() =>
+  import("./components/Onboarding").then((m) => ({ default: m.Onboarding }))
+);
+const VoiceMode = lazy(() =>
+  import("./components/VoiceMode").then((m) => ({ default: m.VoiceMode }))
+);
 
 installConsoleBridge();
 
@@ -113,21 +123,16 @@ export default function App() {
   }, [settingsOpen, voiceMode]);
 
   if (!ready) {
-    return (
-      <div className="h-full w-full flex items-center justify-center mira-bg">
-        <div className="flex flex-col items-center gap-3">
-          <Loader2 size={28} className="animate-spin mira-accent" />
-          <div className="font-mono text-xs uppercase tracking-[0.3em] mira-muted">
-            Initialising MIRA
-          </div>
-        </div>
-      </div>
-    );
+    return <BootLoader />;
   }
 
   // First-run: show onboarding wizard
   if (!settings.onboardingComplete) {
-    return <Onboarding />;
+    return (
+      <Suspense fallback={<BootLoader />}>
+        <Onboarding />
+      </Suspense>
+    );
   }
 
   return (
@@ -161,14 +166,33 @@ export default function App() {
         sidebarCollapsed={sidebarCollapsed}
         onToggleSidebar={() => setSidebarCollapsed((v) => !v)}
       />
-      <SettingsModal
-        open={settingsOpen}
-        onClose={() => setSettingsOpen(false)}
-        initialTab={settingsTab}
-      />
+      <Suspense fallback={null}>
+        <SettingsModal
+          open={settingsOpen}
+          onClose={() => setSettingsOpen(false)}
+          initialTab={settingsTab}
+        />
+      </Suspense>
       <AnimatePresence>
-        {voiceMode && <VoiceMode />}
+        {voiceMode && (
+          <Suspense fallback={null}>
+            <VoiceMode />
+          </Suspense>
+        )}
       </AnimatePresence>
+    </div>
+  );
+}
+
+function BootLoader() {
+  return (
+    <div className="h-full w-full flex items-center justify-center mira-bg">
+      <div className="flex flex-col items-center gap-3">
+        <Loader2 size={28} className="animate-spin mira-accent" />
+        <div className="font-mono text-xs uppercase tracking-[0.3em] mira-muted">
+          Initialising MIRA
+        </div>
+      </div>
     </div>
   );
 }
