@@ -47,6 +47,8 @@ interface Props {
   onOpenVoiceMode: () => void;
   sidebarCollapsed?: boolean;
   onToggleSidebar?: () => void;
+  /** True while the background wake-word listener is running. */
+  wakeListening?: boolean;
 }
 
 export function ChatView({
@@ -54,6 +56,7 @@ export function ChatView({
   onOpenVoiceMode,
   sidebarCollapsed,
   onToggleSidebar,
+  wakeListening,
 }: Props) {
   // Narrowed selectors: subscribing to the whole store here would re-render
   // the entire chat on every log entry and every streaming token.
@@ -558,6 +561,18 @@ export function ChatView({
 
         {/* Top-right controls — single voice entry point + theme + settings */}
         <div className="flex items-center gap-1 flex-shrink-0">
+          {wakeListening && (
+            <span
+              className="hidden md:flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-mono mira-muted"
+              title={`Wake word active — say "${useStore.getState().settings.voiceWakeWordText || "hey mira"}" hands-free`}
+            >
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="absolute inline-flex h-full w-full rounded-full opacity-60 animate-ping bg-emerald-400" />
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-400" />
+              </span>
+              wake
+            </span>
+          )}
           <TopButton
             icon={Volume2}
             label="Voice mode (F11)"
