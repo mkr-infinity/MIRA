@@ -6,6 +6,8 @@ import { Loader2 } from "lucide-react";
 import { AnimatePresence, MotionConfig } from "framer-motion";
 import { installConsoleBridge } from "./lib/log";
 import { applyTheme } from "./lib/theme";
+import { WakeWordListener } from "./lib/voice/wake";
+import { stt } from "./lib/voice/stt";
 
 // Heavy surfaces are code-split: the startup path only ships Sidebar +
 // ChatView. SettingsModal (~3.1k lines incl. AboutView) streams in
@@ -38,6 +40,7 @@ const SIDEBAR_COLLAPSE_KEY = "mira:sidebar-collapsed";
 
 export default function App() {
   const { ready, settings, init, setVoiceMode, voiceMode } = useStore();
+  const [wakeActive, setWakeActive] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsTab, setSettingsTab] = useState<SettingsTab>("general");
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(() => {
@@ -47,6 +50,29 @@ export default function App() {
   useEffect(() => {
     init();
   }, [init]);
+
+  // Wake-word listening: when enabled (and not already inside voice mode,
+  // which runs its own STT), a continuous listener waits for the wake phrase.
+  // "…hey mira" enters voice mode; "…hey mira, open Brave" sends directly.
+  useEffect(() => {
+    if (!ready || !settings.voiceWakeWord || voiceMode || !stt.isSupported()) {
+      setWakeActive(false);
+      return;
+    }
+    const listener = new WakeWordListener(settings.voiceWakeWordText || "hey mira");
+    listener.start({
+      onWake: () => setVoiceMode(true),
+      onCommand: (text) => {
+        const t = text.trim();
+        if (t) useStore.getState().sendMessage(t);
+      },
+    });
+    setWakeActive(true);
+    return () => {
+      listener.stop();
+      setWakeActive(false);
+    };
+  }, [ready, settings.voiceWakeWord, settings.voiceWakeWordText, voiceMode, setVoiceMode]);
 
   // Notifications enabled but the browser prompt was never answered (e.g.
   // the setting predates the permission request, or the prompt was
@@ -186,6 +212,7 @@ export default function App() {
           onOpenVoiceMode={() => setVoiceMode(true)}
           sidebarCollapsed={sidebarCollapsed}
           onToggleSidebar={() => setSidebarCollapsed((v) => !v)}
+          wakeListening={wakeActive}
         />
         <Suspense fallback={null}>
           <SettingsModal
