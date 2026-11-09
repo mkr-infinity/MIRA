@@ -96,6 +96,8 @@ interface Actions {
   sendMessage: (text: string, attachments?: Message["attachments"]) => Promise<void>;
   stopGeneration: () => void;
   regenerate: () => Promise<void>;
+  /** Replace a user message's content and resend, discarding everything after it. */
+  editMessageAndResend: (msgId: string, newContent: string) => Promise<void>;
   setListening: (b: boolean) => void;
   setSpeaking: (b: boolean) => void;
   setVoiceTranscript: (s: string) => void;
@@ -788,6 +790,23 @@ export const useStore = create<State & Actions>((set, get) => ({
     await storage.saveConversations(updated);
     devlog("sendMessage", `Regenerating: "${lastUser.content.slice(0, 60)}…"`);
     await get().sendMessage(lastUser.content, lastUser.attachments);
+  },
+
+  async editMessageAndResend(msgId, newContent) {
+    const { activeId, conversations } = get();
+    const conv = conversations.find((c) => c.id === activeId);
+    if (!conv || !newContent.trim()) return;
+    const idx = conv.messages.findIndex((m) => m.id === msgId);
+    if (idx === -1) return;
+    const original = conv.messages[idx];
+    const trimmed = conv.messages.slice(0, idx);
+    const updated = conversations.map((c) =>
+      c.id === conv.id ? { ...c, messages: trimmed, updatedAt: Date.now() } : c
+    );
+    set({ conversations: updated });
+    await storage.saveConversations(updated);
+    devlog("sendMessage", `Editing message ${msgId} — resending (${newContent.length} chars)`);
+    await get().sendMessage(newContent, original.attachments);
   },
 
   setListening(b) {
