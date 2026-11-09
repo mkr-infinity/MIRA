@@ -98,6 +98,19 @@ export const storage = {
         }
       }
     }
+    // Migration: append built-in providers that ship in later versions so
+    // existing users get them without resetting their settings.
+    for (const d of defaultSettings().providers) {
+      if (!s.providers.some((p) => p.id === d.id)) {
+        s.providers.push({ ...d });
+        changed = true;
+      }
+    }
+    // Migration: keep activeProviderId pointing at a provider that exists.
+    if (!s.providers.some((p) => p.id === s.activeProviderId)) {
+      (s as any).activeProviderId = s.providers[0]?.id || "openai";
+      changed = true;
+    }
     // Migration: normalize theme — any invalid value falls back to "anime".
     // Note: "anime" must be in the valid list, otherwise every startup
     // flags it invalid and rewrites settings.json needlessly.
@@ -204,6 +217,46 @@ export function defaultSettings(): AppSettings {
         name: "OpenRouter",
         apiKey: "",
         model: "anthropic/claude-3.5-sonnet",
+        enabled: false,
+        authType: "api_key",
+      },
+      {
+        id: "groq",
+        name: "Groq",
+        apiKey: "",
+        model: "llama-3.3-70b-versatile",
+        enabled: false,
+        authType: "api_key",
+      },
+      {
+        id: "deepseek",
+        name: "DeepSeek",
+        apiKey: "",
+        model: "deepseek-chat",
+        enabled: false,
+        authType: "api_key",
+      },
+      {
+        id: "mistral",
+        name: "Mistral",
+        apiKey: "",
+        model: "mistral-small-latest",
+        enabled: false,
+        authType: "api_key",
+      },
+      {
+        id: "xai",
+        name: "xAI (Grok)",
+        apiKey: "",
+        model: "grok-3-mini",
+        enabled: false,
+        authType: "api_key",
+      },
+      {
+        id: "together",
+        name: "Together AI",
+        apiKey: "",
+        model: "meta-llama/Llama-3.3-70B-Instruct-Turbo",
         enabled: false,
         authType: "api_key",
       },

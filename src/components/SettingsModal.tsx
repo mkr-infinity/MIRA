@@ -68,6 +68,8 @@ const ICONS: Record<string, any> = {
   file: FileText,
 };
 
+const OPENAI_COMPATIBLE_BASEURL_IDS = new Set<string>(["openai", "openrouter", "groq", "deepseek", "mistral", "xai", "together"]);
+
 const ACCENT_COLORS = ["#00D4FF", "#8B5CF6", "#F59E0B", "#10B981", "#EC4899", "#3B82F6", "#C2410C", "#84CC16", "#A855F7", "#F43F5E"];
 
 export function SettingsModal({
@@ -950,7 +952,7 @@ function ProviderCard({
             )}
           </div>
 
-          {(provider.id === "openai" || provider.id === "openrouter") && (
+          {OPENAI_COMPATIBLE_BASEURL_IDS.has(provider.id) && (
             <div>
               <div className="text-[10px] uppercase tracking-[0.2em] mira-muted mb-1.5">Custom base URL (optional)</div>
               <input

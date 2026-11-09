@@ -97,7 +97,7 @@ const providerMeta: Record<string, {
   },
 };
 
-const PROVIDER_ORDER: ProviderId[] = ["openai", "anthropic", "gemini", "openrouter", "custom", "ollama"];
+const PROVIDER_ORDER: ProviderId[] = ["openai", "anthropic", "gemini", "groq", "deepseek", "mistral", "xai", "together", "openrouter", "custom", "ollama"];
 
 export function Onboarding() {
   const settings = useStore((s) => s.settings);
