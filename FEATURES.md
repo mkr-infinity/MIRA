@@ -77,7 +77,9 @@
 |---------|-------------|
 | **Plugin System** | Load JS modules from URLs to extend MIRA |
 | **Image Generation** | Inline image generation via `/image` command |
-| **Custom Providers** | Add any OpenAI-compatible endpoint |
+| **Custom Providers** | Add any OpenAI-compatible endpoint (base URL, auth header, extra headers) |
+| **Custom Slash Commands** | Define local shortcuts — theme/temperature/provider switches, shell runs, reminders |
+| **Markdown Export** | Download any conversation as `.md` from the sidebar |
 
 <br/>
 
@@ -85,7 +87,9 @@
 
 | Feature | Description |
 |---------|-------------|
-| **Desktop Control** | Open apps, set volume, play music, lock, notify |
+| **Desktop Control** | Open apps, set volume, play music, lock, notify, run shell commands |
+| **File Management** | Read, create, edit, append, list and delete files — sandboxed to your home directory |
+| **Web Browsing** | The assistant can search the web and read pages (not just open them) |
 | **Notifications** | Desktop notification when MIRA replies |
 | **Keyboard Shortcuts** | `F11` voice, `Ctrl+N` new chat, `Ctrl+,` settings, `Ctrl+F` search |
 

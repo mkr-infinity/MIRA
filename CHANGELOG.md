@@ -6,8 +6,14 @@
 
 ### 🚀 New Features
 
-- **File operations** — MIRA can now read, create, edit, append, list and delete files on the user's machine (sandboxed to the home directory, path-traversal protected, folders refused for deletion). Six new Rust commands + tool definitions + parser support; file contents and listings flow back into the conversation as proper blockquotes
-- **Five new built-in providers** — Groq, DeepSeek, Mistral, xAI (Grok) and Together AI join OpenAI/Anthropic/Gemini/Ollama/OpenRouter (11 total). All ride a shared, battle-tested OpenAI-compatible adapter factory (streaming, tool calls, usage, vision); existing installs gain them automatically via a settings migration
+- **11 built-in AI providers** — Groq, DeepSeek, Mistral, xAI (Grok) and Together AI added via a shared OpenAI-compatible adapter factory; existing installs get them through a settings migration; optional custom base URL for every OpenAI-compatible provider
+- **Full desktop file management** — read, create, edit, append, list and delete files (home-directory sandbox with lexical `..` traversal protection; folder deletion deliberately refused); file contents and listings flow back into the conversation
+- **Web browsing** — `web_search` (top results as text) and `read_web_page` (readable page text) so the assistant can actually read the web, with a curl-backed fallback for CORS-blocked sites
+- **Custom slash commands** — user-defined local shortcuts (`/trigger`): temperature, theme, personality, voice, provider switching, shell runs, reminders; managed under Settings → Customize
+- **Quick model switcher** — click the header model badge to switch models without leaving the chat
+- **Markdown export** — download any conversation as a clean `.md` from the sidebar
+- **Jump-to-latest pill** while streaming; live window title; word-boundary conversation titles
+- **About redesign** — accent hero with live system panel (OS, kernel, CPU, RAM, uptime)
 
 - **Vision** — attached images are now actually sent to multimodal models (previously only the file name reached the API): OpenAI-compatible parts, Anthropic content blocks, Gemini `inline_data`, Ollama `images`; sent images render as thumbnails in the user's bubble
 
