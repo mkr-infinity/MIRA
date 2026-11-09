@@ -17,6 +17,10 @@
 
 - **Vision** — attached images are now actually sent to multimodal models (previously only the file name reached the API): OpenAI-compatible parts, Anthropic content blocks, Gemini `inline_data`, Ollama `images`; sent images render as thumbnails in the user's bubble
 
+### 🚀 New Features (skills upgrade)
+
+- **Skills 2.0** — unified .md parser (front-matter **and** `# Skill:` header styles) with **stable ids** (re-importing a file now updates instead of duplicating — was a random-id bug), `tags` support, round-trip `.md` export, **8 one-click starter templates** (Code Reviewer, Meeting Summariser, Email Polisher, Standup Notes, Bug Report Writer, Language Tutor, Data Analyser, Shell Helper), rebuilt editor (template picker, icon grid, tags input, live "what the model receives" preview, validation, keyboard shortcuts) and richer cards (tag chips, char counts, duplicate + export)
+
 ### 🚀 New Features (wave 3)
 
 - **Syntax-highlighted code blocks** — Prism (14 languages + aliases) with a theme-tuned token palette; safe fallback for unknown languages
