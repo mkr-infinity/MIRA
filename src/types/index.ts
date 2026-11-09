@@ -4,6 +4,11 @@ export type ProviderId =
   | "gemini"
   | "ollama"
   | "openrouter"
+  | "groq"
+  | "deepseek"
+  | "mistral"
+  | "xai"
+  | "together"
   | "custom";
 
 export interface ProviderConfig {
