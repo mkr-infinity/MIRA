@@ -30,6 +30,5 @@ export function getAdapter(id: ProviderId): ProviderAdapter {
   return adapters[id] || openaiAdapter;
 }
 
-export const allAdapters: ProviderAdapter[] = Object.values(adapters);
 
 export type { ChatRequest, ChatResponse, ProviderConfig, ProviderAdapter };
