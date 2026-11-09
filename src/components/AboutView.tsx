@@ -17,7 +17,14 @@ import {
   GitBranch,
   ChevronDown,
   Database,
+  Cpu,
+  MemoryStick,
+  Clock3,
+  Laptop,
+  RefreshCw,
 } from "lucide-react";
+import { isTauri } from "../lib/platform";
+import { desktop } from "../lib/desktop";
 import { motion, AnimatePresence } from "framer-motion";
 import { MiraLogo } from "./MiraLogo";
 
@@ -67,6 +74,151 @@ function AnimatedCounter({ value, suffix = "" }: { value: number; suffix?: strin
   return <>{display}{suffix}</>;
 }
 
+/** Accent-lit hero: logo, wordmark, version pill, one-line pitch. */
+function Hero({ version, accent }: { version: string; accent: string }) {
+  return (
+    <div className="relative overflow-hidden rounded-mira border mira-border mira-elevated">
+      <div
+        className="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-56 rounded-full blur-[90px] pointer-events-none opacity-25"
+        style={{ background: accent }}
+      />
+      <div className="relative px-6 pt-7 pb-6 text-center">
+        <div className="flex justify-center mb-3">
+          <MiraLogo size={72} glow />
+        </div>
+        <h2 className="font-display text-3xl font-bold gradient-text tracking-tight">
+          MIRA
+        </h2>
+        <div className="mt-2.5 flex items-center justify-center gap-2">
+          <span
+            className="px-2.5 py-1 rounded-pill text-[11px] font-mono font-semibold mira-accent-soft mira-accent border"
+            style={{ borderColor: `${accent}55` }}
+          >
+            v{version}
+          </span>
+          <span className="px-2.5 py-1 rounded-pill text-[11px] font-mono mira-elevated mira-muted border mira-border">
+            MIT
+          </span>
+        </div>
+        <p className="text-sm mira-muted mt-3 max-w-sm mx-auto leading-relaxed">
+          MKR Intelligent Responsive Assistant — a private, offline-capable AI
+          companion that can actually run your desktop.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+interface SystemInfoData {
+  os?: string;
+  osName?: string | null;
+  osVersion?: string | null;
+  kernel?: string | null;
+  arch?: string;
+  hostname?: string | null;
+  cpus?: number;
+  totalMemoryGb?: number;
+  usedMemoryGb?: number;
+  uptimeSecs?: number;
+  platform?: string;
+}
+
+function formatUptime(secs: number): string {
+  const d = Math.floor(secs / 86400);
+  const h = Math.floor((secs % 86400) / 3600);
+  const m = Math.floor((secs % 3600) / 60);
+  if (d > 0) return `${d}d ${h}h`;
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
+}
+
+/** Live machine read-out — real data from the Rust system_info command,
+ *  with graceful browser fallbacks when running outside Tauri. */
+function SystemPanel() {
+  const [info, setInfo] = useState<SystemInfoData | null>(null);
+  const [refreshedAt, setRefreshedAt] = useState(0);
+
+  useEffect(() => {
+    let alive = true;
+    if (isTauri()) {
+      desktop
+        .systemInfo()
+        .then((r) => {
+          if (alive && r.ok) setInfo((r.data as SystemInfoData) || null);
+        })
+        .catch(() => {});
+    } else {
+      setInfo({
+        os: navigator.platform || "web",
+        osName: "Browser",
+        arch: /arm|aarch/i.test(navigator.userAgent) ? "aarch64" : "x86_64",
+        cpus: navigator.hardwareConcurrency || undefined,
+        totalMemoryGb: (navigator as any).deviceMemory,
+        platform: "web",
+      });
+    }
+    return () => {
+      alive = false;
+    };
+  }, [refreshedAt]);
+
+  const tiles: Array<{ icon: any; label: string; value: string }> = [
+    { icon: Laptop, label: "OS", value: info?.osName ? `${info.osName}${info.osVersion ? " " + info.osVersion : ""}` : info?.os || "…" },
+    { icon: Cpu, label: "CPU cores", value: info?.cpus != null ? String(info.cpus) : "…" },
+    {
+      icon: MemoryStick,
+      label: "Memory",
+      value: info?.totalMemoryGb != null ? `${info.usedMemoryGb ?? "?"} / ${info.totalMemoryGb} GB` : info?.totalMemoryGb != null ? "…" : "—",
+    },
+    { icon: Globe2, label: "Kernel", value: info?.kernel || info?.platform || "—" },
+    { icon: Database, label: "Arch", value: info?.arch || "…" },
+    { icon: Clock3, label: "Uptime", value: info?.uptimeSecs != null ? formatUptime(info.uptimeSecs) : "—" },
+  ];
+
+  return (
+    <div className="rounded-mira border mira-border overflow-hidden">
+      <div className="flex items-center gap-2 px-4 py-2 mira-elevated border-b mira-border">
+        <Cpu size={12} className="mira-accent" />
+        <span className="text-[10px] font-mono uppercase tracking-wider mira-muted">
+          Your system
+        </span>
+        <span className="flex-1" />
+        <button
+          onClick={() => {
+            setInfo(null);
+            setRefreshedAt((n) => n + 1);
+          }}
+          className="p-1 rounded mira-muted hover:mira-text transition-colors"
+          aria-label="Refresh system information"
+          title="Refresh"
+        >
+          <RefreshCw size={11} />
+        </button>
+      </div>
+      <div className="p-3 grid grid-cols-2 sm:grid-cols-3 gap-2">
+        {tiles.map((t) => {
+          const Icon = t.icon;
+          return (
+            <div key={t.label} className="px-3 py-2.5 rounded-mira mira-surface/40 border mira-border">
+              <div className="flex items-center gap-1.5 text-[9px] font-mono uppercase tracking-wider mira-muted">
+                <Icon size={10} />
+                {t.label}
+              </div>
+              {info ? (
+                <div className="text-sm font-mono mira-text mt-1 truncate" title={t.value}>
+                  {t.value}
+                </div>
+              ) : (
+                <div className="h-4 w-16 rounded mira-elevated animate-pulse mt-1.5" />
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export function AboutView() {
   const { settings } = useStore();
   const [profile, setProfile] = useState<GhProfile | null>(null);
@@ -92,8 +244,12 @@ export function AboutView() {
   const forks = repo?.forks_count ?? 0;
   const openIssues = repo?.open_issues_count ?? 0;
 
+  const accent = settings.accentColor || "#00D4FF";
+
   return (
     <div className="space-y-5">
+      <Hero version={settings.version || "2.1.1"} accent={accent} />
+
       {/* Terminal-style header */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
@@ -146,6 +302,14 @@ export function AboutView() {
       <div className="grid grid-cols-1 gap-3">
         <DeveloperCard profile={profile} loading={loading} stars={stars} forks={forks} issues={openIssues} />
       </div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.12 }}
+      >
+        <SystemPanel />
+      </motion.div>
 
       <motion.div
         initial={{ opacity: 0, y: 10 }}
