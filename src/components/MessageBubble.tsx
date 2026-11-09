@@ -8,6 +8,7 @@ import remarkGfm from "remark-gfm";
 import { MiraLogo } from "./MiraLogo";
 import { ThinkingAnimation } from "./ThinkingAnimation";
 import { ActivityLog } from "./ActivityLog";
+import { highlightToHtml } from "../lib/highlight";
 
 function CodeBlock({ className, children }: { className?: string; children?: React.ReactNode }) {
   const [copied, setCopied] = useState(false);
@@ -32,7 +33,11 @@ function CodeBlock({ className, children }: { className?: string; children?: Rea
         </button>
       </div>
       <pre className="overflow-x-auto p-4 text-sm font-mono leading-relaxed mira-text">
-        <code>{code}</code>
+        <code
+          dangerouslySetInnerHTML={{
+            __html: highlightToHtml(code, lang) ?? code.replace(/&/g, "&amp;").replace(/</g, "&lt;"),
+          }}
+        />
       </pre>
     </div>
   );
