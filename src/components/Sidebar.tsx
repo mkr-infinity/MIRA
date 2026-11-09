@@ -465,13 +465,19 @@ export function Sidebar({
                 <div
                   key={c.id}
                   className={cx(
-                    "group flex flex-col gap-1 px-3 py-2 rounded-lg cursor-pointer transition-colors",
+                    "group relative flex flex-col gap-1 px-3 py-2 rounded-lg cursor-pointer transition-colors overflow-hidden",
                     c.id === activeId
                       ? "mira-elevated mira-text"
                       : "mira-muted hover:mira-hover"
                   )}
                   onClick={() => setActive(c.id)}
                 >
+                  {c.id === activeId && (
+                    <span
+                      className="absolute left-0 top-1.5 bottom-1.5 w-[2.5px] rounded-full"
+                      style={{ background: "var(--accent)" }}
+                    />
+                  )}
                   <div className="flex items-center gap-2 min-w-0">
                     <MessageSquare size={14} className="flex-shrink-0" />
                     <span className="text-sm truncate flex-1">{c.title}</span>
