@@ -207,13 +207,21 @@ pub async fn lock() -> CommandResult {
 #[tauri::command]
 pub async fn system_info() -> CommandResult {
     use sysinfo::System;
-    let sys = System::new();
+    // System::new() leaves the CPU list empty (cpus would report 0);
+    // new_all() populates hardware, processes and memory in one shot.
+    let sys = System::new_all();
+    let gib = |bytes: u64| (bytes as f64 / 1024.0 / 1024.0 / 1024.0 * 10.0).round() / 10.0;
     let info = serde_json::json!({
         "os": std::env::consts::OS,
+        "osName": System::name(),
+        "osVersion": System::os_version(),
+        "kernel": System::kernel_version(),
         "arch": std::env::consts::ARCH,
         "hostname": System::host_name(),
         "cpus": sys.cpus().len(),
-        "uptime_secs": System::uptime(),
+        "totalMemoryGb": gib(sys.total_memory()),
+        "usedMemoryGb": gib(sys.used_memory()),
+        "uptimeSecs": System::uptime(),
     });
     CommandResult::ok("OK").with_data(info)
 }
