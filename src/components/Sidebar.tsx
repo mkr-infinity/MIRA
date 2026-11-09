@@ -125,8 +125,40 @@ export function Sidebar({
       : conversations;
     if (!query.trim()) return scoped;
     const q = query.toLowerCase();
-    return scoped.filter((c) => c.title.toLowerCase().includes(q));
+    // Search titles AND message content — a match anywhere surfaces the chat.
+    return scoped.filter(
+      (c) =>
+        c.title.toLowerCase().includes(q) ||
+        c.messages.some((m) => m.content.toLowerCase().includes(q))
+    );
   }, [conversations, activeProjectId, query]);
+
+  /** First message snippet around the query, with the match position, per chat. */
+  const snippets = useMemo(() => {
+    const map = new Map<string, { before: string; match: string; after: string; count: number }>();
+    const q = query.trim().toLowerCase();
+    if (q.length < 2) return map;
+    for (const c of filteredConvs) {
+      for (const m of c.messages) {
+        const lower = m.content.toLowerCase();
+        const idx = lower.indexOf(q);
+        if (idx === -1) continue;
+        let count = 0;
+        let from = 0;
+        while (lower.indexOf(q, from) !== -1 && count < 99) {
+          count++;
+          from = lower.indexOf(q, from) + q.length;
+        }
+        const start = Math.max(0, idx - 40);
+        const before = (start > 0 ? "…" : "") + m.content.slice(start, idx).replace(/\s+/g, " ");
+        const match = m.content.slice(idx, idx + q.length);
+        const after = m.content.slice(idx + q.length, idx + q.length + 60).replace(/\s+/g, " ") + (m.content.length > idx + q.length + 60 ? "…" : "");
+        map.set(c.id, { before, match, after, count });
+        break;
+      }
+    }
+    return map;
+  }, [filteredConvs, query]);
 
   const groups: Record<string, typeof conversations> = {};
   for (const c of filteredConvs) {
@@ -433,37 +465,53 @@ export function Sidebar({
                 <div
                   key={c.id}
                   className={cx(
-                    "group flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer transition-colors",
+                    "group flex flex-col gap-1 px-3 py-2 rounded-lg cursor-pointer transition-colors",
                     c.id === activeId
                       ? "mira-elevated mira-text"
                       : "mira-muted hover:mira-hover"
                   )}
                   onClick={() => setActive(c.id)}
                 >
-                  <MessageSquare size={14} className="flex-shrink-0" />
-                  <span className="text-sm truncate flex-1">{c.title}</span>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      deleteConversation(c.id);
-                    }}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity p-1 mira-danger"
-                    title="Delete"
-              aria-label="Delete"
-                  >
-                    <Trash2 size={12} />
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      downloadConversationMarkdown(c);
-                    }}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity p-1 mira-muted hover:mira-text"
-                    title="Export as Markdown"
-                    aria-label="Export conversation as Markdown"
-                  >
-                    <Download size={12} />
-                  </button>
+                  <div className="flex items-center gap-2 min-w-0">
+                    <MessageSquare size={14} className="flex-shrink-0" />
+                    <span className="text-sm truncate flex-1">{c.title}</span>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteConversation(c.id);
+                      }}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity p-1 mira-danger"
+                      title="Delete"
+                      aria-label="Delete"
+                    >
+                      <Trash2 size={12} />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        downloadConversationMarkdown(c);
+                      }}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity p-1 mira-muted hover:mira-text"
+                      title="Export as Markdown"
+                      aria-label="Export conversation as Markdown"
+                    >
+                      <Download size={12} />
+                    </button>
+                  </div>
+                  {(() => {
+                    const snip = snippets.get(c.id);
+                    if (!snip) return null;
+                    return (
+                      <div className="mt-1 text-[11px] mira-muted leading-snug line-clamp-2">
+                        {snip.before}
+                        <mark className="rounded-sm px-0.5 mira-accent-soft mira-accent">{snip.match}</mark>
+                        {snip.after}
+                        {snip.count > 1 && (
+                          <span className="ml-1.5 text-[9px] font-mono opacity-70">×{snip.count}</span>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </div>
               ))}
             </div>
