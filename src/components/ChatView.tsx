@@ -91,6 +91,7 @@ export function ChatView({
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
   const [modelMenuOpen, setModelMenuOpen] = useState(false);
+  const [showJumpDown, setShowJumpDown] = useState(false);
   const [pendingImages, setPendingImages] = useState<Array<{ name: string; type: string; size: number; content: string }>>([]);
 
   // Auto-grow the composer with its content (capped at max-h-32 = 128px)
@@ -178,6 +179,21 @@ export function ChatView({
     const el = messagesEndRef.current;
     if (!el) return;
     el.scrollIntoView({ block: "end" });
+    setShowJumpDown(false);
+  }, [activeId]);
+
+  // Floating "jump to latest" appears when reading far from the bottom —
+  // especially useful while a response is streaming in.
+  useEffect(() => {
+    const scroller = scrollRef.current;
+    if (!scroller) return;
+    const onScroll = () => {
+      const dist = scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight;
+      setShowJumpDown(dist > 300);
+    };
+    scroller.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => scroller.removeEventListener("scroll", onScroll);
   }, [activeId]);
 
   useEffect(() => {
@@ -652,6 +668,24 @@ export function ChatView({
           </div>
         )}
       </div>
+
+      {/* Jump to latest */}
+      <AnimatePresence>
+        {showJumpDown && (
+          <motion.button
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 8 }}
+            transition={{ duration: 0.15 }}
+            onClick={() => messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" })}
+            className="absolute bottom-40 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 px-3.5 py-1.5 rounded-pill glass-strong border mira-border shadow-pop text-xs mira-text hover:scale-[1.04] transition-transform"
+            aria-label="Scroll to latest message"
+          >
+            <ChevronDown size={13} className="mira-accent" />
+            {isProcessing ? "Streaming…" : "Jump to latest"}
+          </motion.button>
+        )}
+      </AnimatePresence>
 
       {/* Voice waveform */}
       <AnimatePresence>
