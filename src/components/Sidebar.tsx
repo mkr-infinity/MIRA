@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useStore } from "../store";
+import { downloadConversationMarkdown } from "../lib/markdown";
 import {
   Plus,
   MessageSquare,
   Trash2,
+  Download,
   Search,
   Folder,
   FolderOpen,
@@ -450,6 +452,17 @@ export function Sidebar({
               aria-label="Delete"
                   >
                     <Trash2 size={12} />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      downloadConversationMarkdown(c);
+                    }}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity p-1 mira-muted hover:mira-text"
+                    title="Export as Markdown"
+                    aria-label="Export conversation as Markdown"
+                  >
+                    <Download size={12} />
                   </button>
                 </div>
               ))}
