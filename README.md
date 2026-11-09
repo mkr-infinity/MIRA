@@ -13,7 +13,7 @@ No telemetry. No accounts. No cloud. Just you and your AI.
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue?style=flat-square&labelColor=000)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.6-3178C6?style=flat-square&logo=typescript&labelColor=000)](https://www.typescriptlang.org)
 [![React](https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react&labelColor=000)](https://react.dev)
-[![Vite](https://img.shields.io/badge/Vite-6-646CFF?style=flat-square&logo=vite&labelColor=000)](https://vitejs.dev)
+[![Vite](https://img.shields.io/badge/Vite-5-646CFF?style=flat-square&logo=vite&labelColor=000)](https://vitejs.dev)
 [![Tauri](https://img.shields.io/badge/Tauri-2-FFC131?style=flat-square&logo=tauri&labelColor=000)](https://tauri.app)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square&labelColor=000)](CONTRIBUTING.md)
 
@@ -50,7 +50,7 @@ npm install
 npm run dev
 ```
 
-Open **http://localhost:5173** in your browser and follow the onboarding wizard — it walks you through picking an AI provider, pasting your API key, and testing voice in about 60 seconds.
+Open **http://localhost:1420** in your browser and follow the onboarding wizard — it walks you through picking an AI provider, pasting your API key, and testing voice in about 60 seconds.
 
 <br/>
 
@@ -115,9 +115,10 @@ npm run tauri:build
 
 ```bash
 # Web (browser)
-npm run dev              # Development server at localhost:5173
+npm run dev              # Development server at localhost:1420
 npm run build            # Production build → dist/
 npm run preview          # Preview the production build
+npm run typecheck        # Static type checking (tsc --noEmit)
 
 # Desktop (requires Rust ≥1.77)
 npm run tauri:dev        # Hot-reload desktop app
@@ -149,7 +150,7 @@ Contributions are welcome! Whether it's fixing a bug, adding a feature, or impro
 1. Fork the repo
 2. Create a branch (`git checkout -b feat/my-thing`)
 3. Make your changes
-4. Run `npx tsc --noEmit` and `npm run build` to verify
+4. Run `npm run typecheck` to verify
 5. Open a pull request
 
 > See [CONTRIBUTING.md](./CONTRIBUTING.md) for the full guide.
