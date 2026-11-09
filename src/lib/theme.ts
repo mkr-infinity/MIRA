@@ -3,6 +3,29 @@
 
 export type ThemeId = "dark" | "light" | "cyberpunk" | "sakura" | "nordic" | "neon" | "earth" | "anime";
 
+export const THEME_IDS = ["dark", "light", "cyberpunk", "sakura", "nordic", "neon", "earth", "anime"] as const;
+
+export function isThemeId(v: unknown): v is ThemeId {
+  return typeof v === "string" && (THEME_IDS as readonly string[]).includes(v);
+}
+
+/** Themes that need tailwind's `light` class / light `color-scheme` (native scrollbars, form controls). */
+const LIGHT_SCHEME_THEMES: ReadonlySet<string> = new Set(["light"]);
+
+/**
+ * Apply a theme to the document in one place so <main.tsx> (pre-React),
+ * <App.tsx> (on settings change) and <store.setTheme> never drift apart.
+ * Safe to call repeatedly and before React mounts.
+ */
+export function applyTheme(t: ThemeId) {
+  const root = document.documentElement;
+  root.setAttribute("data-theme", t);
+  const isLight = LIGHT_SCHEME_THEMES.has(t);
+  root.classList.toggle("dark", !isLight);
+  root.classList.toggle("light", isLight);
+  root.style.colorScheme = isLight ? "light" : "dark";
+}
+
 export interface ThemeMeta {
   id: ThemeId;
   name: string;

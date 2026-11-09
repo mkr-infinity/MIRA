@@ -19,6 +19,7 @@ import { buildSystemPrompt } from "../lib/mira";
 import { isTauri } from "../lib/platform";
 import { devlog } from "../lib/log";
 import type { ThemeId } from "../lib/theme";
+import { applyTheme } from "../lib/theme";
 import { parseAndExecuteToolCalls, DESKTOP_TOOL_DEFS } from "../lib/desktop";
 
 function uid() {
@@ -188,10 +189,7 @@ export const useStore = create<State & Actions>((set, get) => ({
     const settings = { ...get().settings, theme: t };
     set({ settings });
     await storage.saveSettings(settings);
-    const root = document.documentElement;
-    root.setAttribute("data-theme", t);
-    root.classList.toggle("dark", t === "dark" || t === "cyberpunk" || t === "neon");
-    root.classList.toggle("light", t === "light" || t === "earth" || t === "nordic" || t === "sakura");
+    applyTheme(t);
     try { localStorage.setItem("mira:initial-theme", t); } catch {}
     devlog("settings", `Theme → ${t}`);
   },
