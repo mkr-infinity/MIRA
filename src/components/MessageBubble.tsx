@@ -1,6 +1,6 @@
 import { memo, useEffect, useState } from "react";
 import { useStore } from "../store";
-import { Copy, RefreshCw, Volume2, Check, ChevronDown, ChevronRight, Brain, Terminal, type LucideIcon } from "lucide-react";
+import { Copy, RefreshCw, Volume2, Check, ChevronDown, ChevronRight, Brain, Terminal, Pencil, X, type LucideIcon } from "lucide-react";
 import { tts } from "../lib/voice/tts";
 import type { Message, ProviderId } from "../types";
 import ReactMarkdown from "react-markdown";
@@ -84,6 +84,7 @@ export const MessageBubble = memo(function MessageBubble({ message }: { message:
   const isUser = message.role === "user";
   const isProcessing = useStore((s) => s.isProcessing);
   const regenerate = useStore((s) => s.regenerate);
+  const editMessageAndResend = useStore((s) => s.editMessageAndResend);
   const settings = useStore((s) => s.settings);
   const isSpeaking = useStore((s) => s.isSpeaking);
   // Provider/model actually used by the active conversation (single primitive
@@ -97,6 +98,8 @@ export const MessageBubble = memo(function MessageBubble({ message }: { message:
       ? [undefined, undefined]
       : (convMeta.split("|") as [ProviderId, string]);
   const [copied, setCopied] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState("");
   const [showReasoning, setShowReasoning] = useState(message.streaming || false);
 
   useEffect(() => {
@@ -208,6 +211,48 @@ export const MessageBubble = memo(function MessageBubble({ message }: { message:
           )}
           {message.streaming && !message.content ? (
             <ThinkingAnimation />
+          ) : isUser && editing ? (
+            <div className="w-full">
+              <textarea
+                autoFocus
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Escape") setEditing(false);
+                  if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+                    const next = draft.trim();
+                    if (next) {
+                      setEditing(false);
+                      void editMessageAndResend(message.id, next);
+                    }
+                  }
+                }}
+                rows={Math.min(10, Math.max(2, draft.split("\n").length))}
+                className="w-full bg-transparent border rounded-lg px-2 py-1.5 text-sm mira-text resize-none focus:outline-none"
+                style={{ borderColor: `${accent}55` }}
+              />
+              <div className="flex items-center justify-end gap-2 mt-1.5">
+                <button
+                  onClick={() => setEditing(false)}
+                  className="px-2 py-1 rounded-md text-xs mira-muted hover:mira-text flex items-center gap-1"
+                >
+                  <X size={11} /> Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    const next = draft.trim();
+                    if (!next || isProcessing) return;
+                    setEditing(false);
+                    void editMessageAndResend(message.id, next);
+                  }}
+                  disabled={!draft.trim() || isProcessing}
+                  className="px-2.5 py-1 rounded-md text-xs text-white disabled:opacity-40"
+                  style={{ background: accent }}
+                >
+                  Save &amp; resend
+                </button>
+              </div>
+            </div>
           ) : isUser ? (
             <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
           ) : (
@@ -266,6 +311,17 @@ export const MessageBubble = memo(function MessageBubble({ message }: { message:
                 disabled={isProcessing}
               />
             </>
+          )}
+          {isUser && (
+            <ActionBtn
+              icon={Pencil}
+              label="Edit & resend"
+              onClick={() => {
+                setDraft(message.content);
+                setEditing(true);
+              }}
+              disabled={isProcessing}
+            />
           )}
           <span className="ml-1 text-[9px] font-mono mira-muted select-none">
             {formatTime(message.timestamp)}
