@@ -9,7 +9,7 @@
 | **Multi-Provider AI** | OpenAI, Anthropic, Gemini, Ollama, OpenRouter, Groq, DeepSeek, Mistral, xAI, Together AI, Custom — 11 built-in |
 | **Auto-Fallback** | Rotate across providers when one fails |
 | **Streaming Responses** | Real-time token-by-token output |
-| **Tool Calling** | Desktop control, web search, memory, and more |
+| **Tool Calling** | Desktop control, file editing (home-sandboxed read/write/append/list/delete), web search, memory, and more |
 
 <br/>
 

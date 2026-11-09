@@ -173,6 +173,56 @@ export const desktop = {
     }
   },
 
+  // ---- File operations (home-directory sandbox enforced by the Rust layer) ----
+
+  /** Read a UTF-8 text file. Paths are relative to the user's home directory. */
+  async readFile(path: string): Promise<DesktopCommandResult> {
+    if (isTauri()) {
+      return tauriInvoke<DesktopCommandResult>("read_file", { path });
+    }
+    return { ok: false, message: "File reading requires the desktop build" };
+  },
+
+  /** Create or overwrite a text file (parent folders are created). */
+  async writeFile(path: string, content: string): Promise<DesktopCommandResult> {
+    if (isTauri()) {
+      return tauriInvoke<DesktopCommandResult>("write_file", { path, content });
+    }
+    return { ok: false, message: "File writing requires the desktop build" };
+  },
+
+  /** Append text to the end of a file (created if missing). */
+  async appendFile(path: string, content: string): Promise<DesktopCommandResult> {
+    if (isTauri()) {
+      return tauriInvoke<DesktopCommandResult>("append_file", { path, content });
+    }
+    return { ok: false, message: "File writing requires the desktop build" };
+  },
+
+  /** Create a folder, including missing parents. */
+  async createFolder(path: string): Promise<DesktopCommandResult> {
+    if (isTauri()) {
+      return tauriInvoke<DesktopCommandResult>("create_folder", { path });
+    }
+    return { ok: false, message: "Folder creation requires the desktop build" };
+  },
+
+  /** List a directory: [{ name, isDir, size }], folders first. */
+  async listDir(path: string): Promise<DesktopCommandResult> {
+    if (isTauri()) {
+      return tauriInvoke<DesktopCommandResult>("list_dir", { path });
+    }
+    return { ok: false, message: "Directory listing requires the desktop build" };
+  },
+
+  /** Delete a single file (folders refused). */
+  async deleteFile(path: string): Promise<DesktopCommandResult> {
+    if (isTauri()) {
+      return tauriInvoke<DesktopCommandResult>("delete_file", { path });
+    }
+    return { ok: false, message: "File deletion requires the desktop build" };
+  },
+
   async clipboardWrite(text: string): Promise<DesktopCommandResult> {
     try {
       if (isTauri()) {
@@ -185,6 +235,11 @@ export const desktop = {
     }
   },
 };
+
+/** Un-escape \n, \t, \" and \\ inside an inline tool-call string argument. */
+function unescapeString(s: string): string {
+  return s.replace(/\\(n|t|"|\\)/g, (_, c) => (c === "n" ? "\n" : c === "t" ? "\t" : c));
+}
 
 /**
  * Parse a message for inline tool call patterns like `open_app("Brave")`
@@ -226,7 +281,39 @@ export async function parseAndExecuteToolCalls(text: string): Promise<string[]> 
     { pattern: `clipboard_read\(\)`, fn: () => desktop.clipboardRead() },
     { pattern: `shutdown\(\)`, fn: () => desktop.shutdown() },
     { pattern: `lock\(\)`, fn: () => desktop.lock() },
-    { pattern: `remember\(["']([^"']+)["']\)`, fn: async (content) => {
+    {
+    pattern: `read_file\(["']([^"']+)["']\)`,
+    fn: async (p) => {
+      const r = await desktop.readFile(p);
+      if (!r.ok) return r;
+      const content = (r.data as any)?.content || "";
+      const preview = content.length > 4000
+        ? content.slice(0, 4000) + "\n… (truncated, " + content.length + " chars total)"
+        : content;
+      return { ok: true, message: `Read ${p} (${content.length} chars):\n${preview}` };
+    },
+  },
+  {
+    pattern: `write_file\(["']([^"']+)["'],\s*(?:"((?:\\.|[^"\\])*)"|'((?:\\.|[^'\\])*)')\)`,
+    fn: async (p, dq, sq) => desktop.writeFile(p, unescapeString(dq ?? sq ?? "")),
+  },
+  {
+    pattern: `append_file\(["']([^"']+)["'],\s*(?:"((?:\\.|[^"\\])*)"|'((?:\\.|[^'\\])*)')\)`,
+    fn: async (p, dq, sq) => desktop.appendFile(p, unescapeString(dq ?? sq ?? "")),
+  },
+  { pattern: `create_folder\(["']([^"']+)["']\)`, fn: (p) => desktop.createFolder(p) },
+  {
+    pattern: `list_dir\(["']([^"']+)["']\)`,
+    fn: async (p) => {
+      const r = await desktop.listDir(p);
+      if (!r.ok) return r;
+      const entries = ((r.data as any)?.entries || []) as Array<{ name: string; isDir: boolean; size: number }>;
+      const lines = entries.slice(0, 100).map((e) => `${e.isDir ? "[dir] " : "[file] "}${e.name}`);
+      return { ok: true, message: `${p}:\n${lines.join("\n")}` };
+    },
+  },
+  { pattern: `delete_file\(["']([^"']+)["']\)`, fn: (p) => desktop.deleteFile(p) },
+  { pattern: `remember\(["']([^"']+)["']\)`, fn: async (content) => {
         try {
           const { useStore } = await import("../../store");
           await useStore.getState().addMemory({ content, source: "auto", tags: [] });
@@ -373,6 +460,70 @@ export const DESKTOP_TOOL_DEFS = [
       type: "object" as const,
       properties: { command: { type: "string", description: "Shell command to run (bash/sh on Linux/macOS, cmd on Windows)" } },
       required: ["command"],
+    },
+  },
+  {
+    name: "read_file",
+    description:
+      "Read a UTF-8 text file. Paths are relative to the user's home directory (e.g. 'Desktop/notes.md', 'Documents/projects/app/main.tsx') or absolute inside it. The content is returned to you in the result.",
+    parameters: {
+      type: "object" as const,
+      properties: { path: { type: "string", description: "Home-relative or absolute-inside-home path" } },
+      required: ["path"],
+    },
+  },
+  {
+    name: "write_file",
+    description:
+      "Create or overwrite a text file inside the user's home directory. Parent folders are created automatically. Use \\n for newlines; the content is written verbatim after unescaping.",
+    parameters: {
+      type: "object" as const,
+      properties: {
+        path: { type: "string", description: "Home-relative or absolute-inside-home path" },
+        content: { type: "string", description: "Full file content to write" },
+      },
+      required: ["path", "content"],
+    },
+  },
+  {
+    name: "append_file",
+    description: "Append text to the end of a file inside the user's home directory (created if missing).",
+    parameters: {
+      type: "object" as const,
+      properties: {
+        path: { type: "string" },
+        content: { type: "string", description: "Text to append" },
+      },
+      required: ["path", "content"],
+    },
+  },
+  {
+    name: "create_folder",
+    description: "Create a folder (including missing parents) inside the user's home directory.",
+    parameters: {
+      type: "object" as const,
+      properties: { path: { type: "string" } },
+      required: ["path"],
+    },
+  },
+  {
+    name: "list_dir",
+    description:
+      "List the entries of a directory inside the user's home directory. Returns names with [dir]/[file] markers.",
+    parameters: {
+      type: "object" as const,
+      properties: { path: { type: "string", description: "Use '' or '.' for the home directory itself" } },
+      required: ["path"],
+    },
+  },
+  {
+    name: "delete_file",
+    description:
+      "Delete a single file inside the user's home directory. Folders are refused. Confirm with the user for anything not clearly temporary.",
+    parameters: {
+      type: "object" as const,
+      properties: { path: { type: "string" } },
+      required: ["path"],
     },
   },
   {
