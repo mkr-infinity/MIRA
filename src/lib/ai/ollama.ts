@@ -1,7 +1,31 @@
 import type { ProviderAdapter, ChatRequest, ChatResponse, ProviderConfig } from "./base";
+import { parseDataUrl, contentToText, contentLength, type MessageContentPart } from "./base";
 import { logProviderStart, logProviderDone, logProviderError } from "./devlog";
 
 const OLLAMA_DEFAULT = "http://localhost:11434";
+
+/**
+ * Ollama multimodal messages: images ride along as a raw-base64 `images`
+ * array on each message (llava, llama3.2-vision, qwen2.5-vision, …).
+ */
+function toOllamaMessages(
+  messages: ChatRequest["messages"]
+): Array<{ role: string; content: string; images?: string[] }> {
+  return messages.map((m) => {
+    const images =
+      typeof m.content === "string"
+        ? undefined
+        : m.content
+            .filter((p): p is Extract<MessageContentPart, { type: "image" }> => p.type === "image")
+            .map((p) => parseDataUrl(p.dataUrl)?.data)
+            .filter((d): d is string => !!d);
+    return {
+      role: m.role,
+      content: contentToText(m.content),
+      ...(images && images.length ? { images } : {}),
+    };
+  });
+}
 
 export const ollamaAdapter: ProviderAdapter = {
   id: "ollama",
@@ -13,7 +37,7 @@ export const ollamaAdapter: ProviderAdapter = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         model: req.model || cfg.model,
-        messages: req.messages,
+        messages: toOllamaMessages(req.messages),
         stream: false,
         options: {
           temperature: req.temperature,
@@ -32,14 +56,14 @@ export const ollamaAdapter: ProviderAdapter = {
   async streamChat(req, cfg, onChunk, signal) {
     const t0 = performance.now();
     const base = cfg.baseUrl || cfg.localEndpoint || OLLAMA_DEFAULT;
-    const totalChars = (req.messages || []).reduce((s, m) => s + (m.content?.length || 0), 0);
+    const totalChars = (req.messages || []).reduce((s, m) => s + contentLength(m.content), 0);
     logProviderStart("ollama", req.model || cfg.model, (req.messages || []).length, totalChars);
     const res = await fetch(`${base}/api/chat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         model: req.model || cfg.model,
-        messages: req.messages,
+        messages: toOllamaMessages(req.messages),
         stream: true,
         options: {
           temperature: req.temperature,

@@ -1,5 +1,6 @@
 import type { ProviderAdapter, ChatRequest, ChatResponse, ProviderConfig } from "./base";
 import { logProviderStart, logProviderDone, logProviderError } from "./devlog";
+import { toOpenAiMessages, contentLength } from "./base";
 
 function buildHeaders(cfg: ProviderConfig): Record<string, string> {
   const headers: Record<string, string> = {
@@ -31,7 +32,7 @@ export const customAdapter: ProviderAdapter = {
       headers: buildHeaders(cfg),
       body: JSON.stringify({
         model: req.model || cfg.model,
-        messages: req.messages,
+        messages: toOpenAiMessages(req.messages),
         temperature: req.temperature,
         max_tokens: req.maxTokens,
         stream: false,
@@ -58,7 +59,7 @@ export const customAdapter: ProviderAdapter = {
     if (!base) {
       throw new Error("Custom provider requires a base URL");
     }
-    const totalChars = (req.messages || []).reduce((s, m) => s + (m.content?.length || 0), 0);
+    const totalChars = (req.messages || []).reduce((s, m) => s + contentLength(m.content), 0);
     logProviderStart("custom", req.model || cfg.model, (req.messages || []).length, totalChars);
     let res: Response;
     try {
@@ -67,7 +68,7 @@ export const customAdapter: ProviderAdapter = {
         headers: buildHeaders(cfg),
         body: JSON.stringify({
           model: req.model || cfg.model,
-          messages: req.messages,
+          messages: toOpenAiMessages(req.messages),
           temperature: req.temperature,
           max_tokens: req.maxTokens,
           stream: true,

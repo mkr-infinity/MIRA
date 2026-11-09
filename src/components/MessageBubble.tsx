@@ -184,6 +184,23 @@ export const MessageBubble = memo(function MessageBubble({ message }: { message:
             borderColor: 'var(--border)',
           }}
         >
+          {/* Sent image attachments — visible in the bubble so the user can
+              confirm what the model actually received. */}
+          {isUser && message.attachments?.some((a) => a.type.startsWith("image/") && a.content) && (
+            <div className="flex flex-wrap gap-1.5 mb-2">
+              {message.attachments
+                .filter((a) => a.type.startsWith("image/") && a.content)
+                .map((a, i) => (
+                  <img
+                    key={i}
+                    src={a.content}
+                    alt={a.name}
+                    className="max-h-32 rounded-lg border"
+                    style={{ borderColor: `${accent}40` }}
+                  />
+                ))}
+            </div>
+          )}
           {message.streaming && !message.content ? (
             <ThinkingAnimation />
           ) : isUser ? (

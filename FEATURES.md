@@ -41,7 +41,7 @@
 | Feature | Description |
 |---------|-------------|
 | **Full-Text Search** | Search within conversations (`Ctrl+F`) |
-| **Image Attachments** | Drag & drop, paste from clipboard, or camera capture |
+| **Image Attachments** | Drag & drop, paste from clipboard, or camera capture — sent to vision-capable models (OpenAI, Anthropic, Gemini, Ollama, OpenRouter, custom) |
 | **Context Suggestions** | Smart prompts based on recent activity |
 | **Markdown Rendering** | Code blocks, tables, LaTeX, and more |
 | **Regenerate** | Retry the last assistant response |

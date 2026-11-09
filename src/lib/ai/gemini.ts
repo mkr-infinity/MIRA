@@ -1,8 +1,36 @@
 import type { ProviderAdapter, ChatRequest, ChatResponse, ProviderConfig } from "./base";
+import { parseDataUrl, contentLength } from "./base";
 import { logProviderStart, logProviderDone, logProviderError } from "./devlog";
 
 const GEMINI_DEFAULT =
   "https://generativelanguage.googleapis.com/v1beta/models";
+
+/**
+ * Gemini multimodal contents: image parts become `inline_data` entries.
+ */
+function toGeminiContents(
+  messages: ChatRequest["messages"]
+): Array<{ role: string; parts: Array<Record<string, unknown>> }> {
+  return messages
+    .filter((m) => m.role !== "system")
+    .map((m) => {
+      let parts: Array<Record<string, unknown>>;
+      if (typeof m.content === "string") {
+        parts = [{ text: m.content }];
+      } else {
+        parts = [];
+        for (const p of m.content) {
+          if (p.type === "text") {
+            parts.push({ text: p.text });
+          } else {
+            const d = parseDataUrl(p.dataUrl);
+            if (d) parts.push({ inline_data: { mime_type: d.mime, data: d.data } });
+          }
+        }
+      }
+      return { role: m.role === "assistant" ? "model" : "user", parts };
+    });
+}
 
 export const geminiAdapter: ProviderAdapter = {
   id: "gemini",
@@ -11,12 +39,7 @@ export const geminiAdapter: ProviderAdapter = {
     const model = req.model || cfg.model;
     const url = `${GEMINI_DEFAULT}/${model}:generateContent?key=${cfg.apiKey}`;
     const systemMessages = req.messages.filter((m) => m.role === "system");
-    const contents = req.messages
-      .filter((m) => m.role !== "system")
-      .map((m) => ({
-        role: m.role === "assistant" ? "model" : "user",
-        parts: [{ text: m.content }],
-      }));
+    const contents = toGeminiContents(req.messages);
 
     const res = await fetch(url, {
       method: "POST",
@@ -50,16 +73,11 @@ export const geminiAdapter: ProviderAdapter = {
   async streamChat(req, cfg, onChunk, signal) {
     const t0 = performance.now();
     const model = req.model || cfg.model;
-    const totalChars = (req.messages || []).reduce((s, m) => s + (m.content?.length || 0), 0);
+    const totalChars = (req.messages || []).reduce((s, m) => s + contentLength(m.content), 0);
     logProviderStart("gemini", model, (req.messages || []).length, totalChars);
     const url = `${GEMINI_DEFAULT}/${model}:streamGenerateContent?key=${cfg.apiKey}&alt=sse`;
     const systemMessages = req.messages.filter((m) => m.role === "system");
-    const contents = req.messages
-      .filter((m) => m.role !== "system")
-      .map((m) => ({
-        role: m.role === "assistant" ? "model" : "user",
-        parts: [{ text: m.content }],
-      }));
+    const contents = toGeminiContents(req.messages);
 
     const res = await fetch(url, {
       method: "POST",
