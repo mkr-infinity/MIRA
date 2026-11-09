@@ -1061,7 +1061,17 @@ export const useStore = create<State & Actions>((set, get) => ({
 
   exportConversations() {
     const { conversations, memory, skills, projects, settings } = get();
-    const data = { conversations, memory, skills, projects, settings, exportedAt: Date.now() };
+    // SECURITY: never write credentials to disk. API keys are stripped from
+    // the export; everything else about the provider config survives so an
+    // import restores preferences but not secrets.
+    const sanitizedSettings = {
+      ...settings,
+      providers: settings.providers.map(({ apiKey, ...rest }) => {
+        void apiKey;
+        return rest;
+      }),
+    };
+    const data = { conversations, memory, skills, projects, settings: sanitizedSettings, exportedAt: Date.now() };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -1082,7 +1092,11 @@ export const useStore = create<State & Actions>((set, get) => ({
         const text = await input.files[0].text();
         const data = JSON.parse(text);
         if (data.conversations) {
-          const merged = [...data.conversations, ...get().conversations];
+          // Merge with dedupe by id — re-importing the same file no longer
+          // duplicates every conversation.
+          const seen = new Set(get().conversations.map((c) => c.id));
+          const incoming = data.conversations.filter((c: Conversation) => !seen.has(c.id));
+          const merged = [...incoming, ...get().conversations];
           set({ conversations: merged });
           await storage.saveConversations(merged);
         }
@@ -1090,7 +1104,8 @@ export const useStore = create<State & Actions>((set, get) => ({
           await get().importSkills(data.skills);
         }
         if (data.memory) {
-          const merged = [...data.memory, ...get().memory];
+          const seen = new Set(get().memory.map((m: { id: string }) => m.id));
+          const merged = [...data.memory.filter((m: { id: string }) => !seen.has(m.id)), ...get().memory];
           set({ memory: merged });
           await storage.saveMemory(merged);
         }
