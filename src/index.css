@@ -868,3 +868,15 @@ html[data-theme="light"] .markdown .token.property,
 html[data-theme="light"] .markdown .token.variable,
 html[data-theme="light"] .markdown .token.builtin,
 html[data-theme="light"] .markdown .token.type { color: #0e7490; }
+
+
+/* =========================================================
+   CHAT POLISH — bubble hovers, active-row accents
+   ========================================================= */
+.mira-bubble-assistant {
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+.mira-bubble-assistant:hover {
+  border-color: var(--accent-ring) !important;
+  box-shadow: 0 4px 20px -10px var(--accent-ring);
+}

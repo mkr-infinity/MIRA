@@ -111,7 +111,10 @@ export const MessageBubble = memo(function MessageBubble({ message }: { message:
   const accent = settings.accentColor || "#00D4FF";
 
   return (
-    <div id={`msg-${message.id}`} className={`flex gap-3 ${isUser ? "justify-end" : "justify-start"} group`}>
+    <div
+      id={`msg-${message.id}`}
+      className={`flex gap-3 ${isUser ? "justify-end" : "justify-start"} group animate-fade-up`}
+    >
       {!isUser && (
         <div className="flex-shrink-0 mt-1">
           <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden glass-strong">
@@ -176,17 +179,18 @@ export const MessageBubble = memo(function MessageBubble({ message }: { message:
 
         {/* Bubble */}
         <div
-          className={`px-4 py-3 rounded-2xl w-full ${
+          className={`mira-bubble px-4 py-3 rounded-2xl w-full ${
             isUser
               ? "rounded-tr-sm text-sm"
-              : "rounded-tl-sm border"
+              : "rounded-tl-sm border mira-bubble-assistant"
           }`}
           style={isUser ? {
-            background: `${accent}18`,
+            background: `linear-gradient(135deg, ${accent}22, ${accent}0e)`,
             borderWidth: 1,
             borderStyle: "solid",
-            borderColor: `${accent}30`,
+            borderColor: `${accent}33`,
             color: "var(--text)",
+            boxShadow: `0 2px 12px -6px ${accent}30`,
           } : {
             background: 'var(--surface)',
             borderColor: 'var(--border)',
