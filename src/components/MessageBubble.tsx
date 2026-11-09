@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import { useStore } from "../store";
 import { Copy, RefreshCw, Volume2, Check, ChevronDown, ChevronRight, Brain, Terminal, type LucideIcon } from "lucide-react";
 import { tts } from "../lib/voice/tts";
-import type { Message } from "../types";
+import type { Message, ProviderId } from "../types";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { MiraLogo } from "./MiraLogo";
@@ -70,12 +70,28 @@ function formatTime(ts: number) {
   return new Date(ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
-export function MessageBubble({ message }: { message: Message }) {
+// Memoised so that a streaming patch to one message does not re-render every
+// other bubble: patchMessage keeps unchanged message objects referentially
+// identical, and store reads below are narrowed to individual slices so log
+// entries and other unrelated state changes never re-render the chat.
+export const MessageBubble = memo(function MessageBubble({ message }: { message: Message }) {
   const isUser = message.role === "user";
-  const { isProcessing, regenerate, settings, isSpeaking, conversations, activeId } = useStore();
+  const isProcessing = useStore((s) => s.isProcessing);
+  const regenerate = useStore((s) => s.regenerate);
+  const settings = useStore((s) => s.settings);
+  const isSpeaking = useStore((s) => s.isSpeaking);
+  // Provider/model actually used by the active conversation (single primitive
+  // selector so it only triggers re-renders when the value itself changes).
+  const convMeta = useStore((s) => {
+    const c = s.conversations.find((c) => c.id === s.activeId);
+    return c ? `${c.provider}|${c.model}` : "";
+  });
+  const [convProvider, convModel] =
+    convMeta === ""
+      ? [undefined, undefined]
+      : (convMeta.split("|") as [ProviderId, string]);
   const [copied, setCopied] = useState(false);
   const [showReasoning, setShowReasoning] = useState(message.streaming || false);
-  const conv = conversations.find((c) => c.id === activeId);
 
   useEffect(() => {
     if (message.streaming) setShowReasoning(true);
@@ -139,8 +155,8 @@ export function MessageBubble({ message }: { message: Message }) {
         {!isUser && (
           <div className="w-full px-1">
             <ActivityLog
-              providerId={message.provider || conv?.provider}
-              model={message.model || conv?.model}
+              providerId={message.provider || convProvider}
+              model={message.model || convModel}
               isProcessing={message.streaming}
               usage={message.usage}
               latencyMs={message.latencyMs}
@@ -252,7 +268,7 @@ export function MessageBubble({ message }: { message: Message }) {
       )}
     </div>
   );
-}
+});
 
 function ActionBtn({
   icon: Icon,

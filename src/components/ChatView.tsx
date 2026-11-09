@@ -49,27 +49,27 @@ export function ChatView({
   sidebarCollapsed,
   onToggleSidebar,
 }: Props) {
-  const {
-    conversations,
-    activeId,
-    settings,
-    isProcessing,
-    isListening,
-    isSpeaking,
-    voiceTranscript,
-    sendMessage,
-    stopGeneration,
-    setListening,
-    setSpeaking,
-    setVoiceTranscript,
-    setTheme,
-    setActiveProject,
-    activeProjectId,
-    projects,
-    searchMessageQuery,
-    searchMessageResults,
-    setSearchMessageQuery,
-  } = useStore();
+  // Narrowed selectors: subscribing to the whole store here would re-render
+  // the entire chat on every log entry and every streaming token.
+  const conversations = useStore((s) => s.conversations);
+  const activeId = useStore((s) => s.activeId);
+  const settings = useStore((s) => s.settings);
+  const isProcessing = useStore((s) => s.isProcessing);
+  const isListening = useStore((s) => s.isListening);
+  const isSpeaking = useStore((s) => s.isSpeaking);
+  const voiceTranscript = useStore((s) => s.voiceTranscript);
+  const activeProjectId = useStore((s) => s.activeProjectId);
+  const projects = useStore((s) => s.projects);
+  const searchMessageQuery = useStore((s) => s.searchMessageQuery);
+  const searchMessageResults = useStore((s) => s.searchMessageResults);
+  const sendMessage = useStore((s) => s.sendMessage);
+  const stopGeneration = useStore((s) => s.stopGeneration);
+  const setListening = useStore((s) => s.setListening);
+  const setSpeaking = useStore((s) => s.setSpeaking);
+  const setVoiceTranscript = useStore((s) => s.setVoiceTranscript);
+  const setTheme = useStore((s) => s.setTheme);
+  const setActiveProject = useStore((s) => s.setActiveProject);
+  const setSearchMessageQuery = useStore((s) => s.setSearchMessageQuery);
   const [input, setInput] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -671,7 +671,10 @@ function EmptyState({ onPrompt, onVoice }: { onPrompt: (p: string) => void; onVo
   const hour = new Date().getHours();
   const greeting =
     hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
-  const { settings, conversations, activeProjectId, projects } = useStore();
+  const settings = useStore((s) => s.settings);
+  const conversations = useStore((s) => s.conversations);
+  const activeProjectId = useStore((s) => s.activeProjectId);
+  const projects = useStore((s) => s.projects);
   const accent = settings.accentColor || "#00D4FF";
 
   // Dynamic suggestions based on context
