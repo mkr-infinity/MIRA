@@ -125,28 +125,13 @@ export function cx(...parts: Array<string | false | null | undefined>): string {
   return parts.filter(Boolean).join(" ");
 }
 
-// Get current theme ID from the DOM
-export function getCurrentTheme(): ThemeId {
-  return (document.documentElement.getAttribute("data-theme") as ThemeId) || "anime";
-}
-
-// Get metadata for a theme
-export function themeMeta(id: ThemeId): ThemeMeta {
-  return THEMES.find((t) => t.id === id) || THEMES[0];
-}
-
-// Get current accent color from CSS custom property (reads live computed value)
+// Get accent color from CSS custom property (reads live computed value)
 export function getAccentColor(): string {
   try {
     return getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#00D4FF";
   } catch {
     return "#00D4FF";
   }
-}
-
-// Get current theme metadata
-export function getCurrentThemeMeta(): ThemeMeta {
-  return themeMeta(getCurrentTheme());
 }
 
 // Convert hex to rgba

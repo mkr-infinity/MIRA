@@ -6,9 +6,6 @@ interface Props {
   size?: number;
 }
 
-// Backward-compat alias
-export { MiraOrb as JarvisOrb };
-
 export function MiraOrb({ state, size = 180 }: Props) {
   const isActive = state !== "idle";
   const accent = getAccentColor();

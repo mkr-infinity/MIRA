@@ -16,6 +16,15 @@ export interface OpenAiCompatibleConfig {
   defaultBaseUrl: string;
   /** Extra static headers (e.g. OpenRouter's X-Title). */
   extraHeaders?: Record<string, string>;
+  /** True for the native OpenAI API — enables reasoning-model quirks. */
+  openaiNative?: boolean;
+}
+
+/** OpenAI reasoning models reject `temperature`, `max_tokens` and (older
+ *  builds) the `system` role — they want `max_completion_tokens` and user-role
+ *  instructions. */
+function isReasoningModel(model: string): boolean {
+  return /^(o[134](-|$)|gpt-5)/.test(model.trim().toLowerCase());
 }
 
 /** Render a ToolCall array to inline text (e.g. `open_app("Brave")`) */
@@ -45,13 +54,24 @@ export function createOpenAiCompatibleAdapter(spec: OpenAiCompatibleConfig): Pro
 
     async chat(req, cfg) {
       const base = cfg.baseUrl || spec.defaultBaseUrl;
+      const reasoning = !!spec.openaiNative && isReasoningModel(req.model || cfg.model);
+      const messages = reasoning
+        ? req.messages.map((m) =>
+            m.role === "system"
+              ? { ...m, role: "user" as const, content: `Instructions:\n${m.content}` }
+              : m
+          )
+        : req.messages;
       const body: Record<string, unknown> = {
         model: req.model || cfg.model,
-        messages: toOpenAiMessages(req.messages),
-        temperature: req.temperature,
-        max_tokens: req.maxTokens,
+        messages: toOpenAiMessages(messages),
         stream: false,
       };
+      if (reasoning) body.max_completion_tokens = req.maxTokens;
+      else {
+        body.temperature = req.temperature;
+        body.max_tokens = req.maxTokens;
+      }
       if (req.tools?.length) body.tools = req.tools;
       const res = await fetch(`${base}/chat/completions`, {
         method: "POST",
@@ -90,14 +110,25 @@ export function createOpenAiCompatibleAdapter(spec: OpenAiCompatibleConfig): Pro
       logProviderStart(spec.id, req.model || cfg.model, (req.messages || []).length, totalChars);
       let res: Response;
       try {
+        const reasoning = !!spec.openaiNative && isReasoningModel(req.model || cfg.model);
+        const messages = reasoning
+          ? req.messages.map((m) =>
+              m.role === "system"
+                ? { ...m, role: "user" as const, content: `Instructions:\n${m.content}` }
+                : m
+            )
+          : req.messages;
         const body: Record<string, unknown> = {
           model: req.model || cfg.model,
-          messages: toOpenAiMessages(req.messages),
-          temperature: req.temperature,
-          max_tokens: req.maxTokens,
+          messages: toOpenAiMessages(messages),
           stream: true,
-          stream_options: { include_usage: true },
         };
+        if (reasoning) body.max_completion_tokens = req.maxTokens;
+        else {
+          body.temperature = req.temperature;
+          body.max_tokens = req.maxTokens;
+          body.stream_options = { include_usage: true };
+        }
         if (req.tools?.length) body.tools = req.tools as ToolDefinition[];
         res = await fetch(`${base}/chat/completions`, {
           method: "POST",
