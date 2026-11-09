@@ -39,6 +39,7 @@ import type { ProviderId, ProviderConfig, Skill, Project, ProjectFile, PluginCon
 import { getAdapter } from "../lib/ai";
 import { findModelMeta, modelsForProvider, formatContextWindow, type ModelMeta } from "../lib/ai/models";
 import { detectAllLocalModels, type ProbeResult } from "../lib/localModels";
+import { parseSkillMarkdown, downloadSkillMarkdown } from "../lib/skills";
 import { isTauri } from "../lib/platform";
 import { storage } from "../lib/storage";
 import { metaFor } from "../lib/ai/providerMeta";
@@ -1831,52 +1832,6 @@ function CategoryChip({
       <span className={cx("text-[9px]", active ? "mira-accent" : "opacity-60")}>{count}</span>
     </button>
   );
-}
-
-function parseSkillMarkdown(filename: string, content: string): Skill | null {
-  // Expected format (front-matter style):
-  // # Skill: Name
-  // icon: search
-  // category: research
-  // description: Short description
-  //
-  // <prompt body>
-  const lines = content.split("\n");
-  let name = filename.replace(/\.md$/i, "");
-  let icon = "sparkles";
-  let category = "imported";
-  let description = "";
-  let promptStart = 0;
-  for (let i = 0; i < lines.length; i++) {
-    const l = lines[i].trim();
-    if (i === 0 && l.startsWith("#")) {
-      name = l.replace(/^#+\s*(?:Skill:\s*)?/i, "").trim() || name;
-      continue;
-    }
-    const m = l.match(/^(icon|description|category):\s*(.+)$/i);
-    if (m) {
-      const key = m[1].toLowerCase();
-      if (key === "icon") icon = m[2].trim();
-      else if (key === "description") description = m[2].trim();
-      else if (key === "category") category = m[2].trim();
-      continue;
-    }
-    if (l === "" && promptStart === 0) {
-      promptStart = i + 1;
-      break;
-    }
-  }
-  const prompt = lines.slice(promptStart).join("\n").trim();
-  if (!prompt) return null;
-  return {
-    id: Math.random().toString(36).slice(2),
-    name,
-    description: description || prompt.slice(0, 100),
-    prompt,
-    enabled: true,
-    icon,
-    category,
-  };
 }
 
 function MemoryTab() {

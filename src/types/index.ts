@@ -129,6 +129,7 @@ export interface Skill {
   category?: string;
   source?: "builtin" | "imported";
   sourcePath?: string;
+  tags?: string[];
 }
 
 export interface ProjectMemoryItem {
