@@ -213,9 +213,6 @@ export interface AppSettings {
   // Voice profiles
   voiceProfiles?: Array<{ id: string; name: string; voiceName: string; rate: number; pitch: number }>;
   // E2E sync
-  syncEnabled?: boolean;
-  syncEndpoint?: string;
-  syncKey?: string;
 }
 
 /**
