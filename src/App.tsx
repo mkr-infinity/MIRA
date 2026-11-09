@@ -48,6 +48,14 @@ export default function App() {
     init();
   }, [init]);
 
+  // Reflect the active conversation in the window title
+  const activeTitle = useStore(
+    (s) => s.conversations.find((c) => c.id === s.activeId)?.title
+  );
+  useEffect(() => {
+    document.title = activeTitle ? `${activeTitle} · MIRA` : "MIRA — Personal AI Assistant";
+  }, [activeTitle]);
+
   useEffect(() => {
     const t = settings.theme || "anime";
     applyTheme(t);
