@@ -17,6 +17,21 @@
 
 - **Vision** — attached images are now actually sent to multimodal models (previously only the file name reached the API): OpenAI-compatible parts, Anthropic content blocks, Gemini `inline_data`, Ollama `images`; sent images render as thumbnails in the user's bubble
 
+### 🚀 New Features (wave 3)
+
+- **Syntax-highlighted code blocks** — Prism (14 languages + aliases) with a theme-tuned token palette; safe fallback for unknown languages
+- **Edit & resend** — hover your message → pencil → edit inline; conversation truncates and re-sends with attachments preserved
+- **Global search** — sidebar search now matches message content with highlighted snippets and hit counts
+- **UI polish** — gradient user bubbles, accent hover on assistant bubbles, active-conversation accent bar, fade-up message entrance
+
+### 🔒 Security & Privacy
+
+- **Exports no longer leak API keys** — plaintext provider keys were written into every JSON export; now stripped. Imports dedupe by id.
+
+### 🐛 Fixes
+
+- **Notification permission** — reply notifications silently never fired when the browser prompt had been missed (e.g. settings from older versions); now requested once at boot
+
 ### ⚡ Performance
 
 - **Streaming render batching** — AI response tokens now flush to the UI once per animation frame instead of per-token, eliminating per-token array clones of the whole conversation store (the biggest source of jank on low-end machines)
