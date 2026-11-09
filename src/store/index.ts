@@ -26,6 +26,16 @@ function uid() {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
 }
 
+/** Clean, word-boundary conversation title from the first user message. */
+function makeTitle(text: string): string {
+  const cleaned = text.replace(/\s+/g, " ").trim().replace(/^\/+/, "");
+  if (!cleaned) return "New conversation";
+  if (cleaned.length <= 48) return cleaned;
+  const cut = cleaned.slice(0, 48);
+  const lastSpace = cut.lastIndexOf(" ");
+  return (lastSpace > 20 ? cut.slice(0, lastSpace) : cut).trimEnd() + "…";
+}
+
 export interface ErrorLog {
   id: string;
   timestamp: number;
@@ -343,7 +353,7 @@ export const useStore = create<State & Actions>((set, get) => ({
             ...c,
             messages: [...c.messages, userMsg, assistantMsg],
             updatedAt: Date.now(),
-            title: c.messages.length === 0 ? text.slice(0, 48) : c.title,
+            title: c.messages.length === 0 ? makeTitle(text) : c.title,
           }
         : c
     );
