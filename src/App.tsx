@@ -3,7 +3,7 @@ import { useStore } from "./store";
 import { Sidebar } from "./components/Sidebar";
 import { ChatView } from "./components/ChatView";
 import { Loader2 } from "lucide-react";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, MotionConfig } from "framer-motion";
 import { installConsoleBridge } from "./lib/log";
 import { applyTheme } from "./lib/theme";
 
@@ -136,51 +136,56 @@ export default function App() {
   }
 
   return (
-    <div className="h-full w-full flex mira-bg mira-text overflow-hidden relative">
-      {/* Mobile overlay backdrop when sidebar is open */}
-      {!sidebarCollapsed && (
-        <div
-          className="fixed inset-0 bg-black/50 z-30 md:hidden"
-          onClick={() => setSidebarCollapsed(true)}
-        />
-      )}
-      <div className={`${sidebarCollapsed ? "hidden md:block" : "fixed md:relative z-40 md:z-auto"} h-full`}>
-        <Sidebar
+    // reducedMotion="user" makes every framer-motion transition follow the
+    // OS "reduce motion" setting (transform/layout animations are skipped,
+    // opacity still plays).
+    <MotionConfig reducedMotion="user">
+      <div className="h-full w-full flex mira-bg mira-text overflow-hidden relative">
+        {/* Mobile overlay backdrop when sidebar is open */}
+        {!sidebarCollapsed && (
+          <div
+            className="fixed inset-0 bg-black/50 z-30 md:hidden"
+            onClick={() => setSidebarCollapsed(true)}
+          />
+        )}
+        <div className={`${sidebarCollapsed ? "hidden md:block" : "fixed md:relative z-40 md:z-auto"} h-full`}>
+          <Sidebar
+            onOpenSettings={(tab) => {
+              setSettingsTab((tab as SettingsTab) || "general");
+              setSettingsOpen(true);
+              setSidebarCollapsed(true);
+            }}
+            onOpenVoiceMode={() => { setVoiceMode(true); setSidebarCollapsed(true); }}
+            voiceMode={voiceMode}
+            collapsed={sidebarCollapsed}
+            onToggleCollapse={() => setSidebarCollapsed((v) => !v)}
+          />
+        </div>
+        <ChatView
           onOpenSettings={(tab) => {
             setSettingsTab((tab as SettingsTab) || "general");
             setSettingsOpen(true);
-            setSidebarCollapsed(true);
           }}
-          onOpenVoiceMode={() => { setVoiceMode(true); setSidebarCollapsed(true); }}
-          voiceMode={voiceMode}
-          collapsed={sidebarCollapsed}
-          onToggleCollapse={() => setSidebarCollapsed((v) => !v)}
+          onOpenVoiceMode={() => setVoiceMode(true)}
+          sidebarCollapsed={sidebarCollapsed}
+          onToggleSidebar={() => setSidebarCollapsed((v) => !v)}
         />
+        <Suspense fallback={null}>
+          <SettingsModal
+            open={settingsOpen}
+            onClose={() => setSettingsOpen(false)}
+            initialTab={settingsTab}
+          />
+        </Suspense>
+        <AnimatePresence>
+          {voiceMode && (
+            <Suspense fallback={null}>
+              <VoiceMode />
+            </Suspense>
+          )}
+        </AnimatePresence>
       </div>
-      <ChatView
-        onOpenSettings={(tab) => {
-          setSettingsTab((tab as SettingsTab) || "general");
-          setSettingsOpen(true);
-        }}
-        onOpenVoiceMode={() => setVoiceMode(true)}
-        sidebarCollapsed={sidebarCollapsed}
-        onToggleSidebar={() => setSidebarCollapsed((v) => !v)}
-      />
-      <Suspense fallback={null}>
-        <SettingsModal
-          open={settingsOpen}
-          onClose={() => setSettingsOpen(false)}
-          initialTab={settingsTab}
-        />
-      </Suspense>
-      <AnimatePresence>
-        {voiceMode && (
-          <Suspense fallback={null}>
-            <VoiceMode />
-          </Suspense>
-        )}
-      </AnimatePresence>
-    </div>
+    </MotionConfig>
   );
 }
 

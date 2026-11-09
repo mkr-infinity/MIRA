@@ -158,6 +158,7 @@ export function Sidebar({
               onClick={onToggleCollapse}
               className="w-9 h-9 flex items-center justify-center rounded-lg mira-elevated hover:mira-hover transition-colors"
               title="Open sidebar"
+              aria-label="Open sidebar"
             >
               <PanelLeftOpen size={16} className="mira-accent" />
             </button>
@@ -167,6 +168,7 @@ export function Sidebar({
               onClick={handleNewChat}
               className="w-9 h-9 flex items-center justify-center rounded-lg mira-elevated hover:mira-hover transition-colors"
               title="New chat"
+              aria-label="New chat"
             >
               <Plus size={16} />
             </button>
@@ -177,6 +179,7 @@ export function Sidebar({
                 voiceMode ? "mira-elevated" : "mira-elevated hover:mira-hover"
               )}
               title="Voice mode (F11)"
+              aria-label="Voice mode (F11)"
             >
               <Volume2 size={16} />
             </button>
@@ -185,6 +188,7 @@ export function Sidebar({
               onClick={() => onOpenSettings("general")}
               className="w-9 h-9 flex items-center justify-center rounded-lg mira-elevated hover:mira-hover transition-colors"
               title="Settings"
+              aria-label="Settings"
             >
               <Settings size={16} />
             </button>
@@ -198,6 +202,7 @@ export function Sidebar({
           onClick={onToggleCollapse}
           className="w-8 h-8 flex items-center justify-center rounded-lg mira-elevated hover:mira-hover transition-colors"
           title="Hide sidebar (ChatGPT-style)"
+          aria-label="Hide sidebar"
         >
           <PanelLeftClose size={15} className="mira-accent" />
         </button>
@@ -214,6 +219,7 @@ export function Sidebar({
           onClick={onToggleCollapse}
           className="w-7 h-7 flex items-center justify-center rounded-md mira-muted hover:mira-text transition-colors"
           title="Hide sidebar"
+          aria-label="Hide sidebar"
         >
           <ChevronLeft size={14} />
         </button>
@@ -249,6 +255,7 @@ export function Sidebar({
         <button
           onClick={handleNewChat}
           title={newChatLabel}
+          aria-label={newChatLabel}
           className="w-full flex items-center gap-2 px-3 py-2.5 rounded-mira border transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
           style={{
             background: 'var(--accent-faint)',
@@ -284,6 +291,7 @@ export function Sidebar({
             onClick={() => setProjectsCollapsed((v) => !v)}
             className="flex items-center gap-1 mira-muted hover:mira-text transition-colors"
             title={projectsCollapsed ? "Expand" : "Collapse"}
+            aria-label={projectsCollapsed ? "Expand projects" : "Collapse projects"}
           >
             <motion.span
               animate={{ rotate: projectsCollapsed ? -90 : 0 }}
@@ -302,6 +310,7 @@ export function Sidebar({
             }
             className="mira-muted hover:mira-text p-1 -m-1 rounded"
             title="New project"
+              aria-label="New project"
           >
             <Plus size={13} />
           </button>
@@ -438,6 +447,7 @@ export function Sidebar({
                     }}
                     className="opacity-0 group-hover:opacity-100 transition-opacity p-1 mira-danger"
                     title="Delete"
+              aria-label="Delete"
                   >
                     <Trash2 size={12} />
                   </button>
@@ -592,6 +602,7 @@ function ProjectRow({
             : "opacity-0 group-hover/proj:opacity-100"
         )}
         title="Project actions"
+              aria-label="Project actions"
       >
         <MoreHorizontal size={12} />
       </button>
