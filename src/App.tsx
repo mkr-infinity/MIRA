@@ -48,6 +48,15 @@ export default function App() {
     init();
   }, [init]);
 
+  // Notifications enabled but the browser prompt was never answered (e.g.
+  // the setting predates the permission request, or the prompt was
+  // dismissed) — ask once at boot so replies can actually notify.
+  useEffect(() => {
+    if (!ready || !settings.notificationsEnabled) return;
+    if (typeof Notification === "undefined" || Notification.permission !== "default") return;
+    void Notification.requestPermission().catch(() => {});
+  }, [ready, settings.notificationsEnabled]);
+
   // Reflect the active conversation in the window title
   const activeTitle = useStore(
     (s) => s.conversations.find((c) => c.id === s.activeId)?.title
