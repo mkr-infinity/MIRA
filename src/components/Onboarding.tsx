@@ -100,7 +100,10 @@ const providerMeta: Record<string, {
 const PROVIDER_ORDER: ProviderId[] = ["openai", "anthropic", "gemini", "openrouter", "custom", "ollama"];
 
 export function Onboarding() {
-  const { settings, updateSettings, setActiveProvider, setProviderConfig } = useStore();
+  const settings = useStore((s) => s.settings);
+  const updateSettings = useStore((s) => s.updateSettings);
+  const setActiveProvider = useStore((s) => s.setActiveProvider);
+  const setProviderConfig = useStore((s) => s.setProviderConfig);
   const [step, setStep] = useState<Step>("welcome");
   const [selectedProvider, setSelectedProvider] = useState<ProviderId | null>(null);
   const [apiKey, setApiKey] = useState("");

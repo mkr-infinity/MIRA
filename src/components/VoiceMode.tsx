@@ -11,20 +11,20 @@ import { devlog } from "../lib/log";
 type Status = "idle" | "listening" | "thinking" | "speaking" | "denied" | "unsupported";
 
 export function VoiceMode() {
-  const {
-    voiceMode,
-    setVoiceMode,
-    isListening,
-    isProcessing,
-    isSpeaking,
-    voiceTranscript,
-    setListening,
-    setVoiceTranscript,
-    setSpeaking,
-    sendMessage,
-    stopGeneration,
-    settings,
-  } = useStore();
+  // Narrowed selectors — VoiceMode polls TTS state on an interval, so a
+  // whole-store subscription would compound with unrelated store churn.
+  const voiceMode = useStore((s) => s.voiceMode);
+  const setVoiceMode = useStore((s) => s.setVoiceMode);
+  const isListening = useStore((s) => s.isListening);
+  const isProcessing = useStore((s) => s.isProcessing);
+  const isSpeaking = useStore((s) => s.isSpeaking);
+  const voiceTranscript = useStore((s) => s.voiceTranscript);
+  const setListening = useStore((s) => s.setListening);
+  const setVoiceTranscript = useStore((s) => s.setVoiceTranscript);
+  const setSpeaking = useStore((s) => s.setSpeaking);
+  const sendMessage = useStore((s) => s.sendMessage);
+  const stopGeneration = useStore((s) => s.stopGeneration);
+  const settings = useStore((s) => s.settings);
 
   const [permError, setPermError] = useState<string | null>(null);
   const [sttSupported] = useState(() => stt.isSupported());
