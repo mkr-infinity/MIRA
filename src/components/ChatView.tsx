@@ -22,6 +22,8 @@ import {
   Search,
   ChevronUp,
   ChevronDown,
+  ChevronRight,
+  Check,
   X,
   Image as ImageIcon,
   Paperclip,
@@ -33,6 +35,7 @@ import { MessageBubble } from "./MessageBubble";
 import { motion, AnimatePresence } from "framer-motion";
 import { isTauri } from "../lib/platform";
 import { metaFor } from "../lib/ai/providerMeta";
+import { modelsForProvider } from "../lib/ai/models";
 import { THEMES } from "../lib/theme";
 import { MagneticGrid } from "./MagneticGrid";
 
@@ -70,6 +73,7 @@ export function ChatView({
   const setTheme = useStore((s) => s.setTheme);
   const setActiveProject = useStore((s) => s.setActiveProject);
   const setSearchMessageQuery = useStore((s) => s.setSearchMessageQuery);
+  const setProviderConfig = useStore((s) => s.setProviderConfig);
   const [input, setInput] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -79,6 +83,7 @@ export function ChatView({
   const [searchIdx, setSearchIdx] = useState(0);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
+  const [modelMenuOpen, setModelMenuOpen] = useState(false);
   const [pendingImages, setPendingImages] = useState<Array<{ name: string; type: string; size: number; content: string }>>([]);
 
   // Auto-grow the composer with its content (capped at max-h-32 = 128px)
@@ -248,6 +253,25 @@ export function ChatView({
     setPendingImages([]);
   }
 
+  // Models offered by the quick switcher: live-fetched cache first, then
+  // the curated catalog, deduped, current model pinned on top.
+  const switcherModels = useMemo(() => {
+    const pid = resolvedProvider?.id;
+    if (!pid) return [];
+    const seen = new Set<string>();
+    const list: string[] = [];
+    const push = (m: string) => {
+      if (m && !seen.has(m) && list.length < 40) {
+        seen.add(m);
+        list.push(m);
+      }
+    };
+    push(resolvedProvider?.model || "");
+    for (const m of settings.providerModels?.[pid] || []) push(m);
+    for (const m of modelsForProvider(pid)) push(m.id);
+    return list;
+  }, [resolvedProvider?.id, resolvedProvider?.model, settings.providerModels]);
+
   const orbState = isProcessing
     ? "thinking"
     : isSpeaking
@@ -331,40 +355,106 @@ export function ChatView({
 
         <div className="flex-1" />
 
-        {/* Current model badge — shows active provider + model */}
-        <button
-          onClick={() => onOpenSettings("providers")}
-          title="Open providers"
-          className="hidden md:flex items-center gap-2 px-2.5 py-1 rounded-md border hover:scale-[1.02] transition-all duration-200 group flex-shrink-0"
-          style={{
-            background: 'rgba(255,255,255,0.03)',
-            borderColor: 'rgba(255,255,255,0.08)',
-          }}
-        >
-          <span className="relative flex h-1.5 w-1.5">
-            <span
-              className={`absolute inline-flex h-full w-full rounded-full opacity-60 animate-ping ${
-                isProcessing ? "bg-amber-400" : "bg-cyan-400"
-              }`}
-            />
-            <span
-              className={`relative inline-flex rounded-full h-1.5 w-1.5 ${
-                isProcessing ? "bg-amber-400" : "bg-cyan-400"
-              }`}
-            />
-          </span>
-          <span className="flex flex-col items-start leading-none">
-            <span className="text-[8.5px] font-mono uppercase tracking-[0.18em] mira-muted">
-              {providerName}
+        {/* Current model badge — click for the quick model switcher */}
+        <div className="relative hidden md:block flex-shrink-0">
+          <button
+            onClick={() => setModelMenuOpen((v) => !v)}
+            title="Switch model"
+            aria-label="Switch model"
+            aria-expanded={modelMenuOpen}
+            className="flex items-center gap-2 px-2.5 py-1 rounded-md border hover:scale-[1.02] transition-all duration-200 group"
+            style={{
+              background: 'rgba(255,255,255,0.03)',
+              borderColor: 'rgba(255,255,255,0.08)',
+            }}
+          >
+            <span className="relative flex h-1.5 w-1.5">
+              <span
+                className={`absolute inline-flex h-full w-full rounded-full opacity-60 animate-ping ${
+                  isProcessing ? "bg-amber-400" : "bg-cyan-400"
+                }`}
+              />
+              <span
+                className={`relative inline-flex rounded-full h-1.5 w-1.5 ${
+                  isProcessing ? "bg-amber-400" : "bg-cyan-400"
+                }`}
+              />
             </span>
-            <span
-              className="text-[11px] font-mono font-medium truncate max-w-[180px] group-hover:opacity-80 transition-opacity"
-              style={{ color: modelName === "No model selected" ? 'var(--muted)' : 'var(--text)' }}
-            >
-              {modelName}
+            <span className="flex flex-col items-start leading-none">
+              <span className="text-[8.5px] font-mono uppercase tracking-[0.18em] mira-muted">
+                {providerName}
+              </span>
+              <span
+                className="text-[11px] font-mono font-medium truncate max-w-[180px] group-hover:opacity-80 transition-opacity"
+                style={{ color: modelName === "No model selected" ? 'var(--muted)' : 'var(--text)' }}
+              >
+                {modelName}
+              </span>
             </span>
-          </span>
-        </button>
+            <ChevronRight
+              size={11}
+              className={`mira-muted transition-transform ${modelMenuOpen ? "rotate-90" : ""}`}
+            />
+          </button>
+          <AnimatePresence>
+            {modelMenuOpen && (
+              <>
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setModelMenuOpen(false)}
+                />
+                <motion.div
+                  initial={{ opacity: 0, y: -4, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -4, scale: 0.98 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute right-0 top-full mt-1.5 z-50 w-72 rounded-mira border mira-border glass-strong shadow-pop overflow-hidden"
+                >
+                  <div className="px-3 py-2 border-b mira-border flex items-center justify-between">
+                    <span className="text-[10px] font-mono uppercase tracking-wider mira-muted">
+                      {providerName} models
+                    </span>
+                    <button
+                      onClick={() => {
+                        setModelMenuOpen(false);
+                        onOpenSettings("providers");
+                      }}
+                      className="text-[10px] font-mono mira-accent hover:underline"
+                    >
+                      settings
+                    </button>
+                  </div>
+                  <div className="max-h-64 overflow-y-auto py-1">
+                    {switcherModels.length <= 1 && !switcherModels[0] ? (
+                      <div className="px-3 py-3 text-xs mira-muted">
+                        No models cached yet — pick one in Settings → Providers.
+                      </div>
+                    ) : (
+                      switcherModels.map((m) => (
+                        <button
+                          key={m}
+                          onClick={() => {
+                            if (resolvedProvider && m !== resolvedProvider.model) {
+                              setProviderConfig(resolvedProvider.id, { model: m });
+                            }
+                            setModelMenuOpen(false);
+                          }}
+                          className="w-full flex items-center gap-2 px-3 py-1.5 text-left hover:mira-hover transition-colors"
+                        >
+                          <Check
+                            size={12}
+                            className={`flex-shrink-0 ${m === resolvedProvider?.model ? "mira-accent" : "opacity-0"}`}
+                          />
+                          <span className="text-xs font-mono mira-text truncate">{m}</span>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
+        </div>
 
         {/* Top-right controls — single voice entry point + theme + settings */}
         <div className="flex items-center gap-1 flex-shrink-0">
