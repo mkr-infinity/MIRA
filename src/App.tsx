@@ -8,6 +8,7 @@ import { VoiceMode } from "./components/VoiceMode";
 import { Loader2 } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import { installConsoleBridge } from "./lib/log";
+import { applyTheme } from "./lib/theme";
 
 installConsoleBridge();
 
@@ -38,14 +39,8 @@ export default function App() {
   }, [init]);
 
   useEffect(() => {
-    const root = document.documentElement;
     const t = settings.theme || "anime";
-    root.setAttribute("data-theme", t);
-    // Backward compat: also toggle dark/light classes
-    const isDark = t === "dark" || t === "cyberpunk" || t === "neon" || t === "anime";
-    const isLight = t === "light" || t === "earth" || t === "nordic" || t === "sakura";
-    root.classList.toggle("dark", isDark);
-    root.classList.toggle("light", isLight);
+    applyTheme(t);
     try { localStorage.setItem("mira:initial-theme", t); } catch {}
   }, [settings.theme]);
 

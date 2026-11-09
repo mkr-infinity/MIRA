@@ -7,6 +7,7 @@ import type { Conversation, AppSettings, MemoryItem, Skill, Project, ProjectMemo
  */
 
 import { isTauri } from "../platform";
+import { THEME_IDS } from "../theme";
 
 const DIR_NAME = "MIRA";
 
@@ -97,9 +98,10 @@ export const storage = {
         }
       }
     }
-    // Migration: normalize theme — old "dark" → "dark", old "light" → "light",
-    // any invalid value → "dark"
-    const validThemes = ["dark", "light", "cyberpunk", "sakura", "nordic", "neon", "earth"];
+    // Migration: normalize theme — any invalid value falls back to "anime".
+    // Note: "anime" must be in the valid list, otherwise every startup
+    // flags it invalid and rewrites settings.json needlessly.
+    const validThemes = THEME_IDS as readonly string[];
     if (!validThemes.includes(s.theme)) {
       (s as any).theme = "anime";
       changed = true;
