@@ -397,3 +397,164 @@ pub async fn list_running_apps(limit: Option<usize>) -> CommandResult {
     #[allow(unreachable_code)]
     CommandResult::err("list_running_apps not supported on this OS")
 }
+
+// ---------------------------------------------------------------------------
+// File operations — sandboxed to the user's home directory. These let MIRA
+// read, create, edit and organise files anywhere under the user's profile
+// (Desktop, Documents, Downloads, projects, …) without shell round-trips.
+// ---------------------------------------------------------------------------
+
+/// Resolve a user-supplied path against the home directory and verify it
+/// cannot escape the sandbox. Normalises `.` and `..` lexically (no
+/// filesystem access, no symlink resolution) so the prefix comparison is
+/// trustworthy even for paths that don't exist yet.
+fn ensure_in_home(raw: &str) -> Result<std::path::PathBuf, String> {
+    use std::path::{Component, Path, PathBuf};
+    let home = dirs::home_dir()
+        .ok_or_else(|| "Could not resolve the home directory".to_string())?;
+    let base = Path::new(raw);
+    let joined = if base.is_absolute() {
+        PathBuf::from(raw)
+    } else {
+        home.join(raw)
+    };
+
+    let mut prefix = PathBuf::new();
+    let mut stack: Vec<std::ffi::OsString> = Vec::new();
+    for comp in joined.components() {
+        match comp {
+            Component::Prefix(p) => prefix.push(p.as_os_str()),
+            Component::RootDir => prefix.push(std::path::MAIN_SEPARATOR.to_string()),
+            Component::CurDir => {}
+            Component::ParentDir => {
+                if stack.is_empty() {
+                    return Err("Path escapes the home directory sandbox".to_string());
+                }
+                stack.pop();
+            }
+            Component::Normal(c) => stack.push(c.to_os_string()),
+        }
+    }
+    let mut normalized = prefix;
+    for part in &stack {
+        normalized.push(part);
+    }
+    if !normalized.starts_with(&home) {
+        return Err("Only paths inside your home directory are allowed".to_string());
+    }
+    Ok(normalized)
+}
+
+/// Read a UTF-8 text file from the user's home directory.
+#[tauri::command]
+pub async fn read_file(path: String) -> CommandResult {
+    let p = match ensure_in_home(&path) {
+        Ok(p) => p,
+        Err(e) => return CommandResult::err(e),
+    };
+    match std::fs::read(&p) {
+        Ok(bytes) => match String::from_utf8(bytes) {
+            Ok(text) => CommandResult::ok(format!("Read {} ({} chars)", p.display(), text.len()))
+                .with_data(serde_json::json!({ "path": p.display().to_string(), "content": text })),
+            Err(_) => CommandResult::err("File is not valid UTF-8 text (binary file)"),
+        },
+        Err(e) => CommandResult::err(format!("Could not read {}: {}", p.display(), e)),
+    }
+}
+
+/// Create or overwrite a text file inside the user's home directory.
+/// Missing parent folders are created automatically.
+#[tauri::command]
+pub async fn write_file(path: String, content: String) -> CommandResult {
+    let p = match ensure_in_home(&path) {
+        Ok(p) => p,
+        Err(e) => return CommandResult::err(e),
+    };
+    if let Some(parent) = p.parent() {
+        if let Err(e) = std::fs::create_dir_all(parent) {
+            return CommandResult::err(format!("Could not create parent folder: {}", e));
+        }
+    }
+    match std::fs::write(&p, content) {
+        Ok(_) => CommandResult::ok(format!("Wrote {}", p.display())),
+        Err(e) => CommandResult::err(format!("Could not write {}: {}", p.display(), e)),
+    }
+}
+
+/// Append text to the end of a file (created if missing).
+#[tauri::command]
+pub async fn append_file(path: String, content: String) -> CommandResult {
+    use std::io::Write;
+    let p = match ensure_in_home(&path) {
+        Ok(p) => p,
+        Err(e) => return CommandResult::err(e),
+    };
+    match std::fs::OpenOptions::new().create(true).append(true).open(&p) {
+        Ok(mut f) => match f.write_all(content.as_bytes()) {
+            Ok(_) => CommandResult::ok(format!("Appended to {}", p.display())),
+            Err(e) => CommandResult::err(format!("Could not append to {}: {}", p.display(), e)),
+        },
+        Err(e) => CommandResult::err(format!("Could not open {}: {}", p.display(), e)),
+    }
+}
+
+/// Create a folder (and any missing parents) inside the user's home directory.
+#[tauri::command]
+pub async fn create_folder(path: String) -> CommandResult {
+    let p = match ensure_in_home(&path) {
+        Ok(p) => p,
+        Err(e) => return CommandResult::err(e),
+    };
+    match std::fs::create_dir_all(&p) {
+        Ok(_) => CommandResult::ok(format!("Created folder {}", p.display())),
+        Err(e) => CommandResult::err(format!("Could not create folder {}: {}", p.display(), e)),
+    }
+}
+
+/// List a directory's entries (name, type, size), folders first.
+#[tauri::command]
+pub async fn list_dir(path: String) -> CommandResult {
+    let p = match ensure_in_home(&path) {
+        Ok(p) => p,
+        Err(e) => return CommandResult::err(e),
+    };
+    match std::fs::read_dir(&p) {
+        Ok(entries) => {
+            let mut items: Vec<serde_json::Value> = Vec::new();
+            for e in entries.flatten().take(500) {
+                let name = e.file_name().to_string_lossy().to_string();
+                let is_dir = e.file_type().map(|t| t.is_dir()).unwrap_or(false);
+                let size = e.metadata().map(|m| m.len()).unwrap_or(0);
+                items.push(serde_json::json!({ "name": name, "isDir": is_dir, "size": size }));
+            }
+            items.sort_by(|a, b| {
+                let a_dir = a["isDir"].as_bool().unwrap_or(false);
+                let b_dir = b["isDir"].as_bool().unwrap_or(false);
+                b_dir.cmp(&a_dir).then(
+                    a["name"].as_str().unwrap_or("").cmp(b["name"].as_str().unwrap_or("")),
+                )
+            });
+            CommandResult::ok(format!("{} item(s) in {}", items.len(), p.display()))
+                .with_data(serde_json::json!({ "path": p.display().to_string(), "entries": items }))
+        }
+        Err(e) => CommandResult::err(format!("Could not list {}: {}", p.display(), e)),
+    }
+}
+
+/// Delete a single file inside the user's home directory. Folders are
+/// deliberately refused — recursive deletion is too dangerous to expose
+/// as a tool the model can call on its own.
+#[tauri::command]
+pub async fn delete_file(path: String) -> CommandResult {
+    let p = match ensure_in_home(&path) {
+        Ok(p) => p,
+        Err(e) => return CommandResult::err(e),
+    };
+    if p.is_dir() {
+        return CommandResult::err("Refusing to delete a folder — files only");
+    }
+    match std::fs::remove_file(&p) {
+        Ok(_) => CommandResult::ok(format!("Deleted {}", p.display())),
+        Err(e) => CommandResult::err(format!("Could not delete {}: {}", p.display(), e)),
+    }
+}
