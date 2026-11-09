@@ -289,6 +289,7 @@ export function ChatView({
             onClick={onToggleSidebar}
             className="p-1.5 rounded-md mira-muted hover:mira-text hover:mira-hover transition-colors flex-shrink-0"
             title={sidebarCollapsed ? "Show sidebar" : "Hide sidebar"}
+            aria-label={sidebarCollapsed ? "Show sidebar" : "Hide sidebar"}
           >
             {sidebarCollapsed ? <PanelLeftOpen size={15} /> : <PanelLeftClose size={15} />}
           </button>
@@ -386,6 +387,7 @@ export function ChatView({
             onClick={() => onOpenSettings("general")}
             className="p-2 rounded-lg hover:mira-hover mira-muted hover:mira-text transition-colors"
             title="Settings"
+            aria-label="Settings"
           >
             <Settings size={16} />
           </button>
@@ -424,6 +426,7 @@ export function ChatView({
                 }}
                 disabled={searchMessageResults.length === 0}
                 className="p-1 rounded mira-muted hover:mira-text disabled:opacity-30"
+                aria-label="Previous match"
               >
                 <ChevronUp size={14} />
               </button>
@@ -435,12 +438,14 @@ export function ChatView({
                 }}
                 disabled={searchMessageResults.length === 0}
                 className="p-1 rounded mira-muted hover:mira-text disabled:opacity-30"
+                aria-label="Next match"
               >
                 <ChevronDown size={14} />
               </button>
               <button
                 onClick={() => { setSearchOpen(false); setSearchMessageQuery(""); }}
                 className="p-1 rounded mira-muted hover:mira-text"
+                aria-label="Close search"
               >
                 <X size={14} />
               </button>
@@ -498,6 +503,7 @@ export function ChatView({
                 <button
                   onClick={() => setPendingImages((prev) => prev.filter((_, j) => j !== i))}
                   className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  aria-label="Remove image"
                 >
                   <X size={10} />
                 </button>
@@ -527,6 +533,7 @@ export function ChatView({
               onClick={() => fileRef.current?.click()}
               className="p-2.5 rounded-xl hover:mira-hover mira-muted hover:mira-text transition-colors"
               title="Attach"
+              aria-label="Attach file"
             >
               <Plus size={18} />
             </button>
@@ -535,6 +542,7 @@ export function ChatView({
                 onClick={() => setInput((v) => v ? `${v}\n/image ` : "/image ")}
                 className="p-2.5 rounded-xl hover:mira-hover mira-muted hover:mira-text transition-colors"
                 title="Generate an image"
+                aria-label="Generate an image"
               >
                 <ImageIcon size={18} />
               </button>
@@ -543,6 +551,7 @@ export function ChatView({
               onClick={captureCamera}
               className="p-2.5 rounded-xl hover:mira-hover mira-muted hover:mira-text transition-colors"
               title="Capture from camera"
+              aria-label="Capture from camera"
             >
               <Camera size={18} />
             </button>
@@ -593,6 +602,7 @@ export function ChatView({
                   : "hover:mira-hover mira-muted hover:text-cyan-400"
               }`}
               title={isListening ? "Stop listening" : "Voice input (push-to-talk)"}
+              aria-label={isListening ? "Stop listening" : "Voice input"}
             >
               {isListening ? <MicOff size={18} /> : <Mic size={18} />}
             </button>
@@ -601,6 +611,7 @@ export function ChatView({
                 onClick={stopGeneration}
                 className="p-2.5 rounded-xl bg-red-500/20 text-red-400 hover:bg-red-500/30"
                 title="Stop"
+                aria-label="Stop generating"
               >
                 <Square size={18} />
               </button>
@@ -614,6 +625,7 @@ export function ChatView({
                   boxShadow: input.trim() ? `0 0 20px ${accent}60` : 'none',
                 }}
                 title="Send"
+                aria-label="Send message"
               >
                 <Send size={18} />
               </button>
@@ -661,6 +673,7 @@ function TopButton({
           : "mira-muted hover:mira-hover hover:mira-text"
       }`}
       title={label}
+      aria-label={label}
     >
       <Icon size={16} />
     </button>

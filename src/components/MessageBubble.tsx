@@ -25,6 +25,7 @@ function CodeBlock({ className, children }: { className?: string; children?: Rea
             setTimeout(() => setCopied(false), 1500);
           }}
           className="flex items-center gap-1 text-[10px] font-mono mira-muted hover:mira-text transition-colors"
+          aria-label="Copy code"
         >
           {copied ? <Check size={11} /> : <Copy size={11} />}
           <span>{copied ? "copied" : "copy"}</span>
@@ -120,7 +121,7 @@ export const MessageBubble = memo(function MessageBubble({ message }: { message:
                 <Brain size={10} />
                 Thinking…
               </span>
-              <button onClick={() => setShowReasoning(!showReasoning)} className="text-amber-400/50 hover:text-amber-400 transition-colors">
+              <button onClick={() => setShowReasoning(!showReasoning)} aria-label={showReasoning ? "Hide reasoning" : "Show reasoning"} className="text-amber-400/50 hover:text-amber-400 transition-colors">
                 {showReasoning ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
               </button>
             </div>
@@ -136,6 +137,7 @@ export const MessageBubble = memo(function MessageBubble({ message }: { message:
             <button
               onClick={() => setShowReasoning(!showReasoning)}
               className="mb-1.5 flex items-center gap-2 px-3 py-1 rounded-lg border border-amber-500/15 bg-amber-500/[0.03] hover:bg-amber-500/[0.07] transition-colors text-left"
+              aria-label={showReasoning ? "Hide reasoning" : "View reasoning"}
             >
               <Brain size={10} className="text-amber-400/50" />
               <span className="text-[10px] font-mono uppercase tracking-wider text-amber-300/50">
@@ -287,6 +289,7 @@ function ActionBtn({
       disabled={disabled}
       title={label}
       className="p-1.5 rounded-md mira-muted hover:mira-text hover:mira-elevated transition-all disabled:opacity-30"
+      aria-label={label}
     >
       <Icon size={12} />
     </button>

@@ -721,7 +721,7 @@ export const useStore = create<State & Actions>((set, get) => ({
       try {
         new Notification("MIRA replied", {
           body: stripMarkdown(finalContent).slice(0, 120),
-          icon: "/favicon.ico",
+          icon: "/mira.svg",
         });
       } catch {}
     }
