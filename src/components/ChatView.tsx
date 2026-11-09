@@ -74,11 +74,20 @@ export function ChatView({
   const scrollRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchIdx, setSearchIdx] = useState(0);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
   const [pendingImages, setPendingImages] = useState<Array<{ name: string; type: string; size: number; content: string }>>([]);
+
+  // Auto-grow the composer with its content (capped at max-h-32 = 128px)
+  useEffect(() => {
+    const el = inputRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = Math.min(el.scrollHeight, 128) + "px";
+  }, [input]);
 
   const captureCamera = useCallback(async () => {
     try {
@@ -556,6 +565,7 @@ export function ChatView({
               <Camera size={18} />
             </button>
             <textarea
+              ref={inputRef}
               data-chat-input
               aria-label="Message MIRA"
               value={input}
