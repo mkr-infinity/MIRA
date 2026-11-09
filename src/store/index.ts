@@ -695,7 +695,7 @@ export const useStore = create<State & Actions>((set, get) => ({
     if (finalContent && settings.desktopControlEnabled) {
       try {
         toolResults = await parseAndExecuteToolCalls(finalContent);
-        const toolPattern = /\b(?:open_app|open_url|play_music|search_web|set_volume|notify|type_text|open_folder|list_running_apps|run_command|clipboard_write|clipboard_read|remember|read_file|write_file|append_file|create_folder|list_dir|delete_file)\s*\((?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|[^)])*\)\s*/g;
+        const toolPattern = /\b(?:open_app|open_url|play_music|search_web|set_volume|notify|type_text|open_folder|list_running_apps|run_command|clipboard_write|clipboard_read|remember|read_file|write_file|append_file|create_folder|list_dir|delete_file|read_web_page|web_search)\s*\((?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|[^)])*\)\s*/g;
         displayContent = finalContent.replace(toolPattern, "").replace(/\s+/g, " ").trim();
       } catch (e: any) {
         devlog("sendMessage", `Tool execution error: ${e?.message}`);

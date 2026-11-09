@@ -93,7 +93,9 @@ The system has the following tools available natively. Use them through the prov
 - open_app(name): launch a desktop app (e.g. "Brave", "Spotify", "VS Code")
 - open_url(url): open a URL in the default browser
 - play_music(query): play a song/artist via the system media player (mpv/vlc) or YouTube Music
-- search_web(query): open a Google search
+- search_web(query): open a Google search in the browser
+- web_search(query): search the web and get the top results back to you (titles + URLs)
+- read_web_page(url): fetch a page and get its readable text back to you
 - set_volume(level 0-100): set system volume
 - notify(title, body): show a desktop notification
 - type_text(text): type into the focused window
@@ -121,7 +123,13 @@ Files are read as UTF-8 text; for binary files use run_command instead.
 ## How to use:
 1. Briefly narrate what you're doing: "Opening Brave." "Playing your lofi mix."
 2. The system will call the appropriate tool. You do NOT need to manually spell out the function call — the native tool interface handles it.
-3. You can request multiple actions in one turn. Results are shown to you next turn.`
+3. You can request multiple actions in one turn. Results are shown to you next turn.
+
+## Browsing:
+When the user asks anything that needs current information, use
+web_search(query) first, then read_web_page(url) on the most promising
+result. Quote what you find. Use search_web/open_url only when the goal is
+to show the page to the user, not to read it yourself.`
     );
   } else {
     parts.push(
