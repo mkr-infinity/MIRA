@@ -2,6 +2,72 @@
 
 <br/>
 
+## 2.1.1 (2026-11-09)
+
+### ⚡ Performance
+
+- **Streaming render batching** — AI response tokens now flush to the UI once per animation frame instead of per-token, eliminating per-token array clones of the whole conversation store (the biggest source of jank on low-end machines)
+- **Memoized chat** — `MessageBubble` is `React.memo` with narrowed store selectors; a streaming patch or log entry no longer re-renders every bubble, the sidebar, or the whole chat view
+- **Code splitting** — SettingsModal (3.1k lines incl. AboutView), VoiceMode and Onboarding are lazy-loaded; vendor chunks split for framer-motion and the markdown pipeline; ES2021 build target for all desktop webviews
+
+### 🎨 Fixes
+
+- **Theme consistency** — single `applyTheme()` source of truth; pre-React theme init covers all 8 themes (previously 6 themes flashed wrong colors on startup); `anime` theme now correctly maps to the dark class in `setTheme`; storage migration no longer rewrites settings.json on every boot
+- **Graceful stop** — stopping generation no longer fakes a "Network problem" error, walks the provider fallback chain, or logs error entries; timeout aborts are labelled correctly
+- `regenerate()` preserves attachments; provider-validation failures clean up their timeout/abort-controller entries
+
+### 🔒 Security & Privacy
+
+- **Tauri CSP enabled** (was `null`) — `default-src 'self'`, `object-src`/`frame-src` locked down, connect-src restricted to self/IPC + provider endpoints
+- **Fonts self-hosted** via `@fontsource` — zero CDN requests, identical rendering fully offline
+- Desktop notification icon fixed (`/mira.svg`, was a 404ing `/favicon.ico`)
+
+### 🧹 Dependency Hygiene
+
+- Removed unused `highlight.js`, `react-router-dom`, `@tauri-apps/plugin-os`, `@tauri-apps/plugin-shell` (JS) and `tauri-plugin-shell` + `tokio features=["full"]` (Rust)
+- Added `engines` field and an npm `typecheck` script
+
+### ♿ Accessibility
+
+- `prefers-reduced-motion` support (CSS + framer-motion `MotionConfig reducedMotion="user"`)
+- `aria-label` on every icon-only button (composer, sidebar, message actions, search controls)
+
+### 📚 Documentation
+
+- README: corrected dev-server port (5173 → **1420**), Vite badge version, added `npm run typecheck`
+- Merged the missing 2.0.1 entry from the legacy `changelog.txt` into this file; `changelog.txt` retired (single source of truth)
+- Added a pull-request template
+
+<br/>
+
+## 2.0.1 (2024)
+
+### 🐛 Fixes
+
+- Fixed `isTauri()` call in SettingsModal (was missing parentheses)
+- Fixed `setTheme` parameter type (string → ThemeId)
+- Improved error handling in storage layer (log errors instead of swallowing)
+- Added null checks for `#root` element in `main.tsx`
+- Replaced non-null assertions with safe fallbacks in store
+- Added `.catch()` to fire-and-forget storage saves
+- Fixed `scheduleSave` using stale closure reference
+- Added clipboard error handling in MessageBubble
+
+### 🎨 Improvements
+
+- Made Orb and ThinkingAnimation theme-aware (use accent color from CSS)
+- Replaced hardcoded cyan colors with CSS variables across all components
+- Added complete theme overrides for neon and nordic themes
+- Removed 14 unused icon imports across 4 components
+- Removed dead ThinkingDots and ThemeButton functions
+- Added global keyboard shortcuts (Ctrl+N, Ctrl+,, Escape, Ctrl+/)
+- Added ARIA attributes to SettingsModal, Onboarding, ChatView
+- Added responsive sidebar auto-collapse on narrow viewports
+- Animated sidebar collapse/expand with CSS transitions
+- Fixed legacy 'jarvis' localStorage key to 'mira'
+
+<br/>
+
 ## 2.1.0 (2026-06-16)
 
 ### 🚀 New Features
