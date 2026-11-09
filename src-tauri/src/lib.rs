@@ -37,6 +37,7 @@ pub fn run() {
             commands::create_folder,
             commands::list_dir,
             commands::delete_file,
+            commands::http_get,
             commands::type_text,
             commands::list_running_apps,
             commands::run_command,

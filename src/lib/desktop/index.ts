@@ -11,6 +11,36 @@ async function tauriInvoke<T>(cmd: string, args?: Record<string, unknown>): Prom
   return invoke<T>(cmd, args);
 }
 
+/** Decode the common HTML entities produced by page text. */
+function decodeEntities(s: string): string {
+  return s
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&apos;/g, "'");
+}
+
+/** Strip scripts/styles/tags/comments and collapse a page to readable text. */
+function htmlToReadableText(html: string): string {
+  return decodeEntities(
+    html
+      .replace(/<script[\s\S]*?<\/script>/gi, " ")
+      .replace(/<style[\s\S]*?<\/style>/gi, " ")
+      .replace(/<noscript[\s\S]*?<\/noscript>/gi, " ")
+      .replace(/<svg[\s\S]*?<\/svg>/gi, " ")
+      .replace(/<!--[\s\S]*?-->/g, " ")
+      .replace(/<br\s*\/?>|<\/p>|<\/div>|<\/h[1-6]>|<\/li>|<\/tr>|<\/pre>/gi, "\n")
+      .replace(/<[^>]+>/g, " ")
+  )
+    .replace(/[ \t]+/g, " ")
+    .replace(/\n[ \t]+/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 export const desktop = {
   async openApp(name: string): Promise<DesktopCommandResult> {
     try {
@@ -223,6 +253,71 @@ export const desktop = {
     return { ok: false, message: "File deletion requires the desktop build" };
   },
 
+  // ---- Web access ----
+
+  /**
+   * Fetch a URL and return its readable text. Tries the webview fetch first
+   * (works for CORS-enabled sites), then falls back to the Rust `http_get`
+   * command (system curl — no CORS restrictions).
+   */
+  async readWebPage(url: string): Promise<DesktopCommandResult> {
+    if (!/^https?:\/\//i.test(url)) {
+      return { ok: false, message: "Only http(s) URLs can be fetched" };
+    }
+    let body: string | undefined;
+    const ac = new AbortController();
+    const timer = setTimeout(() => ac.abort(), 20_000);
+    try {
+      const res = await fetch(url, { signal: ac.signal, headers: { Accept: "text/html,*/*" } });
+      if (res.ok) body = await res.text();
+    } catch {
+      // CORS or network — fall through to curl
+    } finally {
+      clearTimeout(timer);
+    }
+    if (!body && isTauri()) {
+      const r = await tauriInvoke<DesktopCommandResult>("http_get", { url });
+      if (!r.ok) return r;
+      body = (r.data as any)?.body;
+    }
+    if (!body) {
+      return { ok: false, message: `Could not fetch ${url} (blocked by CORS and curl unavailable)` };
+    }
+    const titleMatch = /<title[^>]*>([\s\S]*?)<\/title>/i.exec(body);
+    const title = titleMatch ? decodeEntities(titleMatch[1]).trim() : "";
+    let text = htmlToReadableText(body);
+    if (text.length > 8000) text = text.slice(0, 8000) + "\n… (truncated)";
+    const header = title ? `# ${title}\n\n` : "";
+    return { ok: true, message: `${url}\n\n${header}${text}`.trim(), data: { url, title } };
+  },
+
+  /**
+   * Search the web and return the top results (title + URL) as text, so the
+   * model can read them and decide which page to fetch with read_web_page.
+   * Uses DuckDuckGo's HTML endpoint through the same fetch/curl pipeline.
+   */
+  async webSearch(query: string): Promise<DesktopCommandResult> {
+    const url = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
+    const page = await this.readWebPage(url);
+    if (!page.ok) return page;
+    const raw = page.message;
+    const results: string[] = [];
+    const re = /<a[^>]*class="[^"]*result__a[^"]*"[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/gi;
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(raw)) !== null && results.length < 8) {
+      const title = decodeEntities(m[2].replace(/<[^>]+>/g, "")).trim();
+      let link = decodeEntities(m[1]);
+      // DDG wraps outbound links in //duckduckgo.com/l/?uddg=<encoded>
+      const uddg = /[?&]uddg=([^&]+)/.exec(link);
+      if (uddg) link = decodeURIComponent(uddg[1]);
+      if (title && link) results.push(`${title}\n  ${link}`);
+    }
+    if (!results.length) {
+      return { ok: false, message: `No search results parsed for "${query}" — try search_web to open a browser instead` };
+    }
+    return { ok: true, message: `Search results for "${query}":\n\n${results.join("\n\n")}` };
+  },
+
   async clipboardWrite(text: string): Promise<DesktopCommandResult> {
     try {
       if (isTauri()) {
@@ -313,6 +408,14 @@ export async function parseAndExecuteToolCalls(text: string): Promise<string[]> 
     },
   },
   { pattern: `delete_file\(["']([^"']+)["']\)`, fn: (p) => desktop.deleteFile(p) },
+  {
+    pattern: `read_web_page\(["']([^"']+)["']\)`,
+    fn: (u) => desktop.readWebPage(u),
+  },
+  {
+    pattern: `web_search\(["']([^"']+)["']\)`,
+    fn: (q) => desktop.webSearch(q),
+  },
   { pattern: `remember\(["']([^"']+)["']\)`, fn: async (content) => {
         try {
           const { useStore } = await import("../../store");
@@ -524,6 +627,26 @@ export const DESKTOP_TOOL_DEFS = [
       type: "object" as const,
       properties: { path: { type: "string" } },
       required: ["path"],
+    },
+  },
+  {
+    name: "read_web_page",
+    description:
+      "Fetch a web page and return its readable text to you. Use whenever you need to actually READ content (docs, articles, search results) rather than just opening it in the browser.",
+    parameters: {
+      type: "object" as const,
+      properties: { url: { type: "string", description: "Full http(s) URL to fetch" } },
+      required: ["url"],
+    },
+  },
+  {
+    name: "web_search",
+    description:
+      "Search the web and get the top results as text (titles + URLs). Follow up with read_web_page(url) to read the most promising result.",
+    parameters: {
+      type: "object" as const,
+      properties: { query: { type: "string", description: "Search query" } },
+      required: ["query"],
     },
   },
   {

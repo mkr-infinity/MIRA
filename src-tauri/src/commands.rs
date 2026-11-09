@@ -558,3 +558,40 @@ pub async fn delete_file(path: String) -> CommandResult {
         Err(e) => CommandResult::err(format!("Could not delete {}: {}", p.display(), e)),
     }
 }
+
+/// Fetch a URL's raw body using the system `curl`. Lets MIRA read web pages
+/// even where the webview's CORS policy would block a direct fetch.
+/// Scheme-restricted to http/https by design.
+#[tauri::command]
+pub async fn http_get(url: String) -> CommandResult {
+    if !url.starts_with("http://") && !url.starts_with("https://") {
+        return CommandResult::err("Only http:// and https:// URLs are supported");
+    }
+    let output = std::process::Command::new("curl")
+        .args([
+            "-sL",
+            "--max-time",
+            "20",
+            "-A",
+            "Mozilla/5.0 (MIRA desktop assistant)",
+            &url,
+        ])
+        .output();
+    match output {
+        Ok(out) => {
+            if !out.status.success() {
+                return CommandResult::err(format!(
+                    "curl exited with {} (is it installed?)",
+                    out.status.code().unwrap_or(-1)
+                ));
+            }
+            let body = String::from_utf8_lossy(&out.stdout).to_string();
+            if body.is_empty() {
+                return CommandResult::err("Empty response");
+            }
+            CommandResult::ok(format!("Fetched {} ({} chars)", url, body.len()))
+                .with_data(serde_json::json!({ "body": body }))
+        }
+        Err(e) => CommandResult::err(format!("Could not run curl: {}", e)),
+    }
+}

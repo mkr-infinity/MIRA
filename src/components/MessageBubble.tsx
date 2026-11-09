@@ -47,7 +47,7 @@ function InlineCode({ children }: { children?: React.ReactNode }) {
 }
 
 function ToolCallBlock({ text }: { text: string }) {
-  const toolPattern = /\b(open_app|open_url|play_music|search_web|set_volume|notify|type_text|open_folder|list_running_apps|run_command|clipboard_read|clipboard_write|remember|read_file|write_file|append_file|create_folder|list_dir|delete_file)\s*\((?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|[^)])*\)/g;
+  const toolPattern = /\b(open_app|open_url|play_music|search_web|set_volume|notify|type_text|open_folder|list_running_apps|run_command|clipboard_read|clipboard_write|remember|read_file|write_file|append_file|create_folder|list_dir|delete_file|read_web_page|web_search)\s*\((?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|[^)])*\)/g;
   const calls: string[] = [];
   let m;
   while ((m = toolPattern.exec(text)) !== null) calls.push(m[0]);
